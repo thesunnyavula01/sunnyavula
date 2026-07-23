@@ -115,7 +115,7 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 
 | Variable                    | Purpose                                            |
 | --------------------------- | -------------------------------------------------- |
-| `NEXT_PUBLIC_SITE_URL`      | Canonical URL for metadata/OG/sitemap              |
+| `NEXT_PUBLIC_SITE_URL`      | **No longer read** — the canonical origin (`https://sunnyavula.com`) is hardcoded as `SITE.url` in `content/sections.ts` so sitemap/canonicals/OG can never emit the workers.dev host |
 | `NEXT_PUBLIC_SITE_NAME`     | Display name in hero + `<title>`                   |
 | `NEXT_PUBLIC_CONTACT_EMAIL` | `mailto:` link target                              |
 | `NEXT_PUBLIC_GITHUB_URL`    | GitHub profile link in footer (`divcollective01`)  |

@@ -24,6 +24,10 @@ export const metadata: Metadata = {
     template: `%s — ${SITE.name}`,
   },
   description,
+  // "./" resolves against metadataBase *per route*, so every page emits a
+  // self-referencing canonical on the production domain regardless of the
+  // host it was served from (workers.dev vs sunnyavula.com).
+  alternates: { canonical: "./" },
   openGraph: {
     type: "website",
     siteName: SITE.name,

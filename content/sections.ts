@@ -29,7 +29,10 @@ export const SITE = {
   name: process.env.NEXT_PUBLIC_SITE_NAME ?? "Sunny Avula",
   email: process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "abhiram.avula01@gmail.com",
   github: process.env.NEXT_PUBLIC_GITHUB_URL ?? "https://github.com/divcollective01",
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+  // Canonical production origin — hardcoded on purpose. Metadata, sitemap,
+  // robots, and canonical tags must always emit this domain, never the
+  // *.workers.dev origin (duplicate content) or a stale env value.
+  url: "https://sunnyavula.com",
 } as const;
 
 export const sections: Section[] = [
