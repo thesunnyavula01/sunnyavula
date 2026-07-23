@@ -104,8 +104,10 @@ open-next.config.ts     # OpenNext (@opennextjs/cloudflare) adapter config
 
 ## Environment variables
 
-Kept in `.env.local` (gitignored). `NEXT_PUBLIC_*` are inlined into the client bundle at build
-time — never put a secret behind that prefix. Server-only runtime secrets on Cloudflare are set
+Kept in `.env.local` (gitignored). A committed, non-secret `.env` carries the four
+`NEXT_PUBLIC_*` defaults so CI builds (which have no `.env.local`) inline the real site URL;
+`.env.local` overrides it locally. `NEXT_PUBLIC_*` are inlined into the client bundle at build
+time — never put a secret behind that prefix (in `.env.local` or `.env`). Server-only runtime secrets on Cloudflare are set
 with `wrangler secret put` (not shipped in the bundle). Cloudflare resource bindings (D1, KV, R2)
 live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no values) after git init.
 
@@ -143,6 +145,16 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 
 ## Build phases
 
+> **Status (2026-07-23): Workers Builds CI deploy fixed.** The Cloudflare dashboard CI runs
+> `npm run build` then `npx wrangler deploy`; deploys failed with "Could not find compiled Open
+> Next config" because `npm run build` was only `next build` and never produced `.open-next/`.
+> `npm run build` is now the full `opennextjs-cloudflare build` — with
+> `buildCommand: "npx next build"` set in `open-next.config.ts` so open-next doesn't default to
+> `npm run build` and recurse — and `npm run build:next` keeps the plain Next-only build. Also
+> committed a non-secret `.env` (the four `NEXT_PUBLIC_*` defaults, gitignore exception added):
+> CI has no `.env.local`, so without it builds inlined the `localhost:3000` fallback into
+> metadata/OG/sitemap. `.env.local` still overrides locally.
+>
 > **Status (2026-07-22, later): landing redesign — sarastotey-style stepped deck.** The home page
 > is now a full-viewport tour, not a tall scroll region: wheel/touch/arrow-keys advance exactly one
 > stop per gesture through 5 camera stops (aerial overview + one per section) along a catmull-rom
@@ -220,7 +232,8 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 
 ```bash
 npm run dev        # local Next.js dev server
-npm run build      # Next.js production build
+npm run build      # full OpenNext build: `next build` + .open-next/ Worker bundle (what CI runs)
+npm run build:next # plain Next.js production build only (no Worker bundle)
 npm run lint       # eslint
 npm run preview    # OpenNext build + run the Worker locally (wrangler dev)
 npm run deploy     # OpenNext build + deploy to Cloudflare Workers (wrangler deploy)
