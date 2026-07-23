@@ -143,7 +143,17 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 
 ## Build phases
 
-> **Status (2026-07-22): Phase 1 complete.** The landing page is now the interactive R3F
+> **Status (2026-07-22): Phase 2 complete.** All four section subpages are now full pages
+> rendered by `components/ui/SectionPage.tsx` (client, framer-motion entrances with
+> `reducedMotion="user"`) composing `SectionHero` + `StatBlock` + narrative blocks + honors grid +
+> outbound buttons + back-to-desk links. Copy lives in `content/sections.ts` as `narrative:
+> NarrativeBlock[]` (kicker/heading/body/bullets) per section — all figures trace to Content facts.
+> `SectionStub` is deleted; each route adds `description: tagline` metadata. Build/lint pass;
+> all four pages verified in the live preview (content, stats, honors, links; zero console
+> errors). Subpages are ~147 kB First Load (no three.js). **Next: Phase 3 — polish** (visual
+> review of the desk, SEO/OG, mobile fallback image, deploy).
+>
+> **Phase 1 (also complete):** The landing page is the interactive R3F
 > **aerial desk** (`components/desk/`): a scroll-driven `CameraRig` pans from an aerial overview to
 > each of four `Hotspot` objects — papers→Research, laptop→ATT, ticker→Markets, gavel+mic→Leadership
 > — with synced framer-motion captions, subtle mouse parallax, and reduced-motion + no-WebGL
@@ -156,7 +166,6 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 > Wrangler 4. Deferred to deploy time: (1) approve npm install scripts for `workerd`/`esbuild`/
 > `sharp` before `npm run preview`/`deploy`; (2) `initOpenNextCloudflareForDev()` is omitted from
 > `next.config.ts` until bindings are added; (3) Google Fonts fall back to system fonts offline.
-> **Next: Phase 2 — full section subpages** (or tune the desk visuals first).
 
 - **Phase 0 — Scaffold:** `create-next-app` (TS + Tailwind), install R3F/drei/framer-motion,
   add the OpenNext adapter (`@opennextjs/cloudflare`) + `wrangler.jsonc` + `open-next.config.ts`,
