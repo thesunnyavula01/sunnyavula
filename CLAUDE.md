@@ -143,6 +143,23 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 
 ## Build phases
 
+> **Status (2026-07-22, later): landing redesign — sarastotey-style stepped deck.** The home page
+> is now a full-viewport tour, not a tall scroll region: wheel/touch/arrow-keys advance exactly one
+> stop per gesture through 5 camera stops (aerial overview + one per section) along a catmull-rom
+> path (`CameraRig.tsx` — its `KEYS` must stay in sync with `POSITIONS` in `DeskCanvas.tsx`); a left
+> copy card (counter, kicker, title, tagline, stats, CTA) animates per stop; vertical accent dots on
+> the right jump between stops. The pill nav is now **fixed + top-centered** on every page (berry
+> active pill); the footer is hidden on `/` (links live in the deck's bottom-right corner) and
+> subpages carry `pt-28` to clear the fixed nav. Scene quality pass: PCSS `SoftShadows`, local
+> `Lightformer` environment (no network HDRs), floating desk slab over a shadow-catcher plane, a
+> shared clay palette (`components/desk/palette.ts`), and detailed props — instanced keyboard keys +
+> a website mock on the laptop screen, candlestick monitor, printed pages + pen + sticky notes,
+> gavel + mic, mug, plant, books, pencil cup, phone — with hover rings, floating `Html` labels, and
+> route prefetch on the hotspots. Build + lint pass; stepping (wheel/dots/keyboard) and all subpages
+> verified via DOM/console in the sandbox browser. **First-frame visual review still needs a human**
+> — the sandbox pane can't composite (rAF frozen), so camera framing/lighting are untuned-by-eye.
+> The live Workers deploy predates this redesign; run `npm run deploy` to refresh it.
+>
 > **Status (2026-07-22): Phase 3 complete — SITE IS LIVE** at
 > **https://sunnyavula.black-pine-e5ad.workers.dev** (deployed via `npm run deploy`; workers.dev
 > URL until the custom domain is wired in the Cloudflare dashboard — that step is manual and

@@ -1,6 +1,14 @@
+"use client";
+
+import { usePathname } from "next/navigation";
 import { SITE } from "@/content/sections";
 
+// Hidden on the landing page — the full-viewport desk deck carries its own
+// GitHub/email links in the bottom-right corner.
 export function Footer() {
+  const pathname = usePathname();
+  if (pathname === "/") return null;
+
   return (
     <footer className="border-t border-black/10 dark:border-white/10">
       <div className="mx-auto flex max-w-5xl flex-col gap-2 px-4 py-8 text-sm text-black/60 dark:text-white/60 sm:flex-row sm:items-center sm:justify-between">

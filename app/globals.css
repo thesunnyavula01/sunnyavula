@@ -24,3 +24,30 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
 }
+
+::selection {
+  background: #b3265c;
+  color: #fff;
+}
+
+/* hover label above desk hotspots (rendered via drei <Html>) */
+.desk-label {
+  animation: desk-label-in 240ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+@keyframes desk-label-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .desk-label {
+    animation: none;
+  }
+}

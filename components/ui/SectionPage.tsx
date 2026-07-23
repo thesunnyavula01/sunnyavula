@@ -29,7 +29,7 @@ function BackToDesk({ className = "" }: { className?: string }) {
 export function SectionPage({ section }: { section: Section }) {
   return (
     <MotionConfig reducedMotion="user">
-      <article className="mx-auto max-w-3xl px-4 py-12">
+      <article className="mx-auto max-w-3xl px-4 pb-12 pt-28">
         <motion.div variants={rise} initial="hidden" animate="show">
           <BackToDesk />
           <SectionHero section={section} />
