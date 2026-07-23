@@ -39,7 +39,7 @@ export const sections: Section[] = [
     deskObject: "Stack of papers / notebook",
     tagline: "Econometrics on tax policy and the political economy of peacekeeping.",
     blurb:
-      "I led a Northeastern study of the socioeconomic legacy of the 1981 Economic Recovery Tax Act (ERTA) on U.S. income disparity, under Prof. Omar Robles — applying five econometric specifications across 65 years of U.S. data and an 812-observation OECD panel. In a separate CU Boulder study under Prof. Shannon, I analyzed why autocracies contribute to UN peacekeeping, finding that deployments track strategic self-interest over humanitarian need.",
+      "As team lead at Northeastern, under Prof. Omar Robles, I directed a study of the socioeconomic legacy of the 1981 Economic Recovery Tax Act (ERTA) on U.S. income disparity, running five econometric specifications across 65 years of U.S. data and an 812-observation OECD panel, then turning the findings into a corrective policy proposal. In a separate CU Boulder internship under Prof. Megan Shannon, I examined why autocracies contribute to UN peacekeeping and found that deployments track strategic self-interest over humanitarian need.",
     stats: [
       { value: "65 yrs", label: "of U.S. tax & income data" },
       { value: "812", label: "OECD panel observations" },
@@ -54,15 +54,21 @@ export const sections: Section[] = [
         bullets: [
           "Specifications: Welch t-tests, Chow and Quandt-Andrews structural-break tests, a six-country OECD placebo test, and a first-differences regression with Newey-West errors.",
           "The placebo test showed the 1981 structural break was global, not U.S.-specific.",
-          "The first-difference estimate attributes ~12% of the rise in income disparity directly to ERTA's rate cuts.",
-          "Presented to Prof. Robles; currently under faculty review.",
+          "The first-difference estimate attributes roughly 12% of the rise in income disparity directly to ERTA's rate cuts.",
+          "Presented to Prof. Robles with strongly positive feedback; currently under faculty review.",
         ],
       },
       {
-        kicker: "CU Boulder · Research intern · Prof. Shannon",
+        kicker: "Team leadership · From findings to policy",
+        heading: "Leading the team, and a pivot to policy",
+        body:
+          "I led the team the way Satya Nadella leads: set a clear shared vision, then give people the freedom to decide how to reach it. Balancing full course loads, we produced roughly twenty pages of research in about two months. As the evidence came in, we pivoted the argument from reforming welfare toward implementing a negative income tax, a substantive reframing that the team's creative freedom made possible.",
+      },
+      {
+        kicker: "CU Boulder · Research intern · Prof. Megan Shannon",
         heading: "Why autocracies join UN peacekeeping",
         body:
-          "I studied the economic incentives behind autocracies' contributions to UN peacekeeping, synthesizing ten years of scholarship with mission-level evidence. The pattern is consistent: China's and Russia's deployments track strategic self-interest, not humanitarian need.",
+          "Selected for a research internship under political science professor Megan Shannon, I synthesized ten years of scholarship and mission-level evidence to explain why non-democratic states contribute troops to UN peacekeeping. The stories point one way: China's and Russia's deployments track strategic self-interest, not humanitarian need.",
       },
     ],
     links: [
@@ -77,7 +83,7 @@ export const sections: Section[] = [
     deskObject: "Laptop / monitor",
     tagline: "A dev studio modernizing Colorado small businesses.",
     blurb:
-      "I co-founded ATT Agency to help Colorado small businesses hurt by the digital divide modernize their digital infrastructure. As lead business executive I run clients, taxes, development, and deployment — we've shipped four sites plus a Thriftly paid-ad campaign.",
+      "I co-founded ATT Agency to help Colorado small businesses hurt by the digital divide modernize their digital infrastructure. I own the business and accounting side, so when you reach out I am your first point of contact: I handle client calls, scoping, and scheduling, and I make sure every project ships on time. So far we have shipped four sites plus a paid-ad campaign for Thriftly.",
     stats: [
       { value: "4", label: "client sites shipped" },
       { value: "~$10k", label: "projected ARR (FY27)" },
@@ -88,11 +94,18 @@ export const sections: Section[] = [
         kicker: "Co-founder & lead business executive",
         heading: "Closing the digital divide, one storefront at a time",
         body:
-          "ATT Agency exists for the Colorado small businesses the digital divide left behind — the shops whose web presence doesn't match the quality of what they sell. We modernize their digital infrastructure end to end, and as lead business executive I manage clients, taxes, development, and deployment.",
+          "ATT Agency exists for the Colorado small businesses the digital divide left behind, the shops whose web presence does not match the quality of what they sell. We modernize their digital infrastructure end to end. As lead business executive I run the business and accounting side: client calls, scoping, scheduling, taxes, development, and deployment, and I keep every engagement on schedule.",
         bullets: [
+          "First point of contact for every prospective and active client.",
           "Shipped four client sites, plus a paid-ad campaign for Thriftly.",
           "On track for roughly $10k ARR in FY27.",
         ],
+      },
+      {
+        kicker: "Performance marketing",
+        heading: "Certified for the ad side of the work",
+        body:
+          "The agency's growth work leans on paid media, so I earned two Google Skillshop certifications to back it: Measurement and Analytics, and AI-Powered Performance Ads. That foundation is what sits behind campaigns like the paid-ad push we ran for Thriftly.",
       },
     ],
     links: [{ label: "Visit attagency.co", href: "https://attagency.co" }],
@@ -104,7 +117,7 @@ export const sections: Section[] = [
     deskObject: "Ticker / trading screen",
     tagline: "A value-investing model that beat the S&P 500.",
     blurb:
-      "At VSD Investments I built a value-investing predictive formula that screens for supply bottlenecks in emerging trends, weights entries against Federal Reserve rate cycles, and scores company fundamentals into a composite trustworthiness index — compounding at roughly 27% and outpacing the S&P 500.",
+      "At VSD Investments I built a value-investing predictive formula that screens for supply bottlenecks in emerging trends, weights entries against Federal Reserve rate cycles, and scores company fundamentals into a composite trustworthiness index. It has compounded at roughly 27% and outpaced the S&P 500, and I carry the same focus on markets into competition and financial-literacy work.",
     stats: [
       { value: "~27.0%", label: "CAGR" },
       { value: "$35k → $91k", label: "portfolio growth" },
@@ -115,23 +128,29 @@ export const sections: Section[] = [
         kicker: "VSD Investments LLC",
         heading: "A formula built on supply bottlenecks",
         body:
-          "The formula starts where demand outruns supply: it screens for supply bottlenecks inside emerging trends — nuclear power constraining the AI data-center buildout, for example — then weights entry timing against Federal Reserve rate cycles and scores company fundamentals into a composite trustworthiness index.",
+          "The formula starts where demand outruns supply. It screens for supply bottlenecks inside emerging trends, for example nuclear power constraining the AI data-center buildout, then weights entry timing against Federal Reserve rate cycles and scores company fundamentals into a composite trustworthiness index.",
         bullets: [
-          "~27.0% CAGR, beating the S&P 500 over the same period.",
+          "Roughly 27.0% CAGR, beating the S&P 500 over the same period.",
           "Grew the portfolio from $35k to $91k.",
           "Top 8% finish as an Investopedia competitor.",
         ],
       },
       {
         kicker: "Peak to Peak Finance Club",
-        heading: "Member to president",
+        heading: "From member to president",
         body:
-          "I joined the club as a freshman, served as Secretary junior year, and now lead it as President — growing membership to 85 students. Competing in the CEE National Personal Finance Challenge, our team won the state championship and reached the national semifinals.",
+          "I joined as a freshman, was elected Secretary junior year, and now lead the club as President, growing membership to 85 students. Competing in the Council for Economic Education's National Personal Finance Challenge, our team was the best in the state and advanced to the national semifinals, and I have competed at the international level in high-school economics and finance competitions.",
         bullets: [
-          "Member (9th, 10th) → Secretary (11th) → President (12th).",
+          "Member (9th, 10th), Secretary (11th), President (12th).",
           "Grew the club to 85 members.",
-          "CEE National Personal Finance Challenge: State Champion & National Semifinalist.",
+          "CEE National Personal Finance Challenge: Colorado State Champion and National Semifinalist.",
         ],
+      },
+      {
+        kicker: "Financial literacy",
+        heading: "Making the market legible",
+        body:
+          "Beyond my own portfolio, I work to close the financial-literacy gap. Through SEWA International USA my current focus is the shortage of practical money education in the United States, and my academic grounding runs through AP Microeconomics, AP Macroeconomics, and a college-level Personal Finance course I finished with an A.",
       },
     ],
     links: [],
@@ -143,7 +162,7 @@ export const sections: Section[] = [
     deskObject: "Gavel + microphone",
     tagline: "Debate, civics, and youth entrepreneurship.",
     blurb:
-      "I'm a varsity NSDA debater and school co-captain — a 2× World Schools National Qualifier with 960+ points. As Senior Director on the iStartValley Youth Committee I launched the iStart Insider podcast and pitched a $300k startup concept, and I've served across the American Legion Colorado Boys State senate and courts, Economics For Leaders, and Sewa's Design to Lead.",
+      "I am a varsity NSDA debater and school co-captain, a 2x World Schools National Qualifier with 960+ career points. As Senior Director on the iStartValley Youth Committee I launched the iStart Insider podcast and pitched a $300k startup concept, and I have led on the floor and in the courts of American Legion Colorado Boys State, in Economics For Leaders, and through Sewa's Design to Lead, where research turned into real lobbying.",
     stats: [
       { value: "2×", label: "NSDA National Qualifier" },
       { value: "960+", label: "NSDA points" },
@@ -154,7 +173,7 @@ export const sections: Section[] = [
         kicker: "iStartValley · Intern → Sr. Director, Youth Committee Board",
         heading: "iStart Insider and startup strategy",
         body:
-          "On the iStartValley Youth Committee Board I launched the iStart Insider podcast — now past 2.3k streams and in Spotify's top 25% — ran product-market-fit analysis, and pitched a $300k startup concept.",
+          "On the iStartValley Youth Committee Board I saw that the cohort was missing a shared why, so I opened a discussion and helped the team commit to one: equitable, easy-to-access resources for young entrepreneurs. We scrapped an inaccessible blog for the iStart Insider podcast, now past 2.3k streams and in Spotify's top 25%, with episodes featuring multiple six-figure founders. Alongside it I ran product-market-fit analysis and pitched a $300k startup concept.",
         bullets: [
           "iStartValley Innovator Award & International Semifinalist (won $300).",
           "Conrad Innovator.",
@@ -162,21 +181,27 @@ export const sections: Section[] = [
       },
       {
         kicker: "NSDA Debate · Varsity, School Co-Captain",
-        heading: "Debate",
+        heading: "Debate, and widening the door to it",
         body:
-          "As varsity co-captain I've earned 960+ NSDA points, qualified for Nationals twice in World Schools, reached the Public Forum state final, and was named an Academic All-American.",
+          "As varsity co-captain I have earned 960+ NSDA points across Public Forum, Congressional, and World Schools, qualified for Nationals twice in World Schools, reached the Public Forum state final, and was named an Academic All-American. As Secretary of the Colorado chapter of Equality in Forensics, a student-led nonprofit that makes debate more accessible, I helped grow the chapter from 5 members to more than 40.",
       },
       {
         kicker: "American Legion Colorado Boys State",
         heading: "Senate floor and courtroom",
         body:
-          "Serving as Senator and committee chair, Director of Economic Relations, and Attorney/Judge, I chaired a Senate committee, sponsored small-business bills, managed financial-literacy grants, and litigated First and Sixth Amendment cases.",
+          "Serving as Senator and committee chair, Director of Economic Relations, and Attorney and Judge, I chaired a Senate committee, sponsored small-business bills, managed financial-literacy grants, and litigated First and Sixth Amendment cases.",
       },
       {
-        kicker: "Economics For Leaders · Sewa Design to Lead",
-        heading: "Policy programs",
+        kicker: "Sewa Design to Lead · Economics For Leaders",
+        heading: "From research to the statehouse",
         body:
-          "I was selected for the Economics For Leaders cohort, serving as a simulation executive, and through Sewa's Design to Lead applied the Stanford Biodesign process to lobbying for Colorado healthcare visa policy.",
+          "Through Sewa's Design to Lead I took the Stanford Biodesign process from analysis to advocacy, leading a team to lobby for healthcare-workforce visa policy in Colorado, including expanding H-1B access and restoring the H-1C visa for healthcare workers and certified nursing assistants, in work with Representative Megan Lukes. Earlier service ranged from a resume-building workshop and job connections to fundraising for homeless residents. I was also selected for the Economics For Leaders cohort, where I served as a simulation executive.",
+      },
+      {
+        kicker: "Philosophy",
+        heading: "How I lead",
+        body:
+          "I treat leadership as the pursuit of systemic, tangible impact: not just a what, but a foundational why and a strategic how. In practice that means leading from the front and only asking of others what I have done myself, leading with empathy for people's different strengths and needs, and staying accountable by owning my mistakes and treating them as room to grow. Improvement over perfection.",
       },
     ],
     links: [
@@ -187,9 +212,12 @@ export const sections: Section[] = [
     ],
     honors: [
       "Congressional Award Silver Medalist & STEM Star",
-      "President's Volunteer Service Award — Gold",
-      "AP Scholar · Dean's List",
+      "Academic All-American, NSDA (fewer than 2% of 141,000+ members)",
+      "President's Volunteer Service Award, Gold (100+ hours)",
+      "Speech & Debate National Qualifier, World Schools (2025 and 2026)",
+      "Public Forum State Finalist and 4A State Quarterfinalist",
       "iStartValley Innovator Award & International Semifinalist",
+      "AP Scholar · Dean's List",
     ],
   },
 ];
