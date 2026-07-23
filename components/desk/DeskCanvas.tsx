@@ -1,11 +1,16 @@
 "use client";
 
 import { Canvas, useFrame } from "@react-three/fiber";
-import { ContactShadows, Environment, Lightformer } from "@react-three/drei";
+import {
+  ContactShadows,
+  Environment,
+  Lightformer,
+  Preload,
+} from "@react-three/drei";
 import { useRef, type ComponentType, type ReactNode, type RefObject } from "react";
 import * as THREE from "three";
 import { sections } from "@/content/sections";
-import { ACCENTS } from "./palette";
+import { ACCENTS, PALETTE } from "./palette";
 import { CameraRig, type OrbitState } from "./CameraRig";
 import { Desk } from "./Desk";
 import { Hotspot } from "./Hotspot";
@@ -71,26 +76,27 @@ export default function DeskCanvas({
   return (
     <Canvas
       shadows
-      dpr={[1, 1.75]}
+      dpr={[1, 2]}
       frameloop={paused ? "never" : "always"}
-      gl={{ alpha: true, antialias: true }}
+      gl={{ alpha: true, antialias: true, powerPreference: "high-performance" }}
       camera={{ fov: 35, position: [0.6, 8.6, 10.2], near: 0.1, far: 80 }}
       onCreated={(state) => {
         // debug handle: lets headless checks force a render + read pixels back
         (window as unknown as Record<string, unknown>).__deskState = state;
       }}
     >
-      <fog attach="fog" args={["#f4ede1", 18, 42]} />
+      <fog attach="fog" args={[PALETTE.bg, 16, 40]} />
       <CameraRig stop={stop} orbit={orbit} reduced={reduced} />
 
-      <ambientLight intensity={0.6} color="#fff4e4" />
-      <hemisphereLight intensity={0.45} color="#fffaf0" groundColor="#d8c2a4" />
+      {/* night study: cool moon ambience, warm key from the lamp side, cool rim */}
+      <ambientLight intensity={0.3} color="#c9d2ff" />
+      <hemisphereLight intensity={0.35} color="#aebaff" groundColor="#1d1409" />
       <directionalLight
         castShadow
         position={[6, 12, 7]}
-        intensity={1.8}
-        color="#fff3df"
-        shadow-mapSize={[2048, 2048]}
+        intensity={2.1}
+        color="#ffe0b0"
+        shadow-mapSize={[1024, 1024]}
         shadow-camera-left={-10}
         shadow-camera-right={10}
         shadow-camera-top={10}
@@ -100,30 +106,30 @@ export default function DeskCanvas({
         shadow-bias={-0.0001}
         shadow-normalBias={0.03}
       />
-      <directionalLight position={[-7, 5, -4]} intensity={0.5} color="#ffd9a8" />
+      <directionalLight position={[-7, 5, -4]} intensity={0.7} color="#7f8dff" />
 
       {/* local studio environment — no network HDRs */}
       <Environment resolution={64}>
         <Lightformer
-          intensity={1.1}
+          intensity={0.6}
           rotation-x={Math.PI / 2}
           position={[0, 5, 0]}
           scale={[10, 10, 1]}
-          color="#fffdf8"
+          color="#fff3dd"
         />
         <Lightformer
-          intensity={0.5}
+          intensity={0.4}
           position={[-6, 2, -1]}
           rotation-y={Math.PI / 2}
           scale={[4, 6, 1]}
-          color="#ffe3c2"
+          color="#ffcf94"
         />
         <Lightformer
           intensity={0.35}
           position={[6, 3, 2]}
           rotation-y={-Math.PI / 2}
           scale={[4, 6, 1]}
-          color="#dbe4ff"
+          color="#8fa2ff"
         />
       </Environment>
 
@@ -147,16 +153,22 @@ export default function DeskCanvas({
         })}
       </FloatGroup>
 
-      {/* soft blob the island floats over */}
+      {/* soft blob the island floats over — baked once (frames=1), the bob is
+          too small to warrant re-rendering the depth pass every frame */}
       <ContactShadows
         position={[0, -2.3, 0]}
         scale={30}
         far={6}
         blur={2.4}
-        opacity={0.38}
+        opacity={0.6}
         resolution={512}
-        color="#4a3620"
+        frames={1}
+        color="#000000"
       />
+
+      {/* compile every material up front so camera swings never hit a
+          first-use shader stall */}
+      <Preload all />
     </Canvas>
   );
 }

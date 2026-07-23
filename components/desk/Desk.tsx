@@ -22,23 +22,44 @@ function useWoodTexture() {
     c.height = 512;
     const ctx = c.getContext("2d")!;
 
+    // deep walnut base — reads rich under the warm lamp key light
     const grad = ctx.createLinearGradient(0, 0, 1024, 0);
-    grad.addColorStop(0, "#c08a55");
-    grad.addColorStop(0.5, "#cb965f");
-    grad.addColorStop(1, "#bd8450");
+    grad.addColorStop(0, "#8a5a34");
+    grad.addColorStop(0.5, "#9a683c");
+    grad.addColorStop(1, "#855430");
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, 1024, 512);
 
-    // long grain streaks
-    for (let i = 0; i < 150; i++) {
+    // plank seams (four boards across the depth)
+    for (let i = 1; i < 4; i++) {
+      const y = i * 128 + (Math.random() * 8 - 4);
+      ctx.strokeStyle = "rgba(38,22,10,0.55)";
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(1024, y);
+      ctx.stroke();
+      ctx.strokeStyle = "rgba(214,164,110,0.18)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, y + 2);
+      ctx.lineTo(1024, y + 2);
+      ctx.stroke();
+    }
+
+    // long grain streaks — denser and higher-contrast than the old pass
+    for (let i = 0; i < 260; i++) {
       const y = Math.random() * 512;
       const x = Math.random() * 1024 - 200;
       const len = 160 + Math.random() * 600;
-      const r = 90 + Math.floor(Math.random() * 45);
-      const g = 55 + Math.floor(Math.random() * 30);
-      const b = 28 + Math.floor(Math.random() * 18);
-      ctx.strokeStyle = `rgba(${r},${g},${b},${0.05 + Math.random() * 0.08})`;
-      ctx.lineWidth = 0.8 + Math.random() * 2.2;
+      const dark = Math.random() > 0.35;
+      const r = dark ? 55 + Math.random() * 35 : 175 + Math.random() * 40;
+      const g = dark ? 32 + Math.random() * 22 : 125 + Math.random() * 30;
+      const b = dark ? 14 + Math.random() * 12 : 80 + Math.random() * 22;
+      ctx.strokeStyle = `rgba(${r | 0},${g | 0},${b | 0},${
+        0.06 + Math.random() * 0.12
+      })`;
+      ctx.lineWidth = 0.6 + Math.random() * 2.4;
       ctx.beginPath();
       ctx.moveTo(x, y);
       ctx.bezierCurveTo(
@@ -52,22 +73,26 @@ function useWoodTexture() {
       ctx.stroke();
     }
 
-    // a few knots
-    for (let i = 0; i < 4; i++) {
+    // knots with grain flowing around them
+    for (let i = 0; i < 6; i++) {
       const kx = 100 + Math.random() * 824;
       const ky = 60 + Math.random() * 392;
-      for (let ring = 4; ring > 0; ring--) {
-        ctx.strokeStyle = `rgba(96,60,30,${0.05 + ring * 0.02})`;
+      for (let ring = 6; ring > 0; ring--) {
+        ctx.strokeStyle = `rgba(52,30,14,${0.06 + ring * 0.03})`;
         ctx.lineWidth = 1.4;
         ctx.beginPath();
         ctx.ellipse(kx, ky, ring * 7, ring * 3.4, 0.2, 0, Math.PI * 2);
         ctx.stroke();
       }
+      ctx.fillStyle = "rgba(40,22,10,0.5)";
+      ctx.beginPath();
+      ctx.ellipse(kx, ky, 4.5, 2.6, 0.2, 0, Math.PI * 2);
+      ctx.fill();
     }
 
     const tex = new THREE.CanvasTexture(c);
     tex.colorSpace = THREE.SRGBColorSpace;
-    tex.anisotropy = 8;
+    tex.anisotropy = 16;
     tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
     return tex;
   }, []);
@@ -165,7 +190,7 @@ function Rug() {
     <group position={[0.7, FLOOR_TOP, 1.7]}>
       <mesh receiveShadow position={[0, 0.018, 0]}>
         <cylinderGeometry args={[2.35, 2.35, 0.036, 56]} />
-        <meshStandardMaterial color={P.sage} roughness={0.95} />
+        <meshStandardMaterial color={P.moss} roughness={0.95} />
       </mesh>
       <mesh receiveShadow position={[0, 0.02, 0]} scale={[1, 0.5, 1]}>
         <torusGeometry args={[2.32, 0.05, 8, 64]} />
@@ -266,7 +291,7 @@ function MiniKeyboard({ position }: { position: [number, number, number] }) {
       <RoundedBox castShadow args={[1.12, 0.05, 0.44]} radius={0.02} position={[0, 0.025, 0.02]}>
         <meshStandardMaterial color={P.silver} roughness={0.55} metalness={0.25} />
       </RoundedBox>
-      <Instances limit={52} castShadow>
+      <Instances limit={52} castShadow frustumCulled={false}>
         <boxGeometry args={[0.064, 0.018, 0.064]} />
         <meshStandardMaterial color={P.slate} roughness={0.85} />
         {keys.map((p, i) => (
@@ -394,7 +419,13 @@ function Phone({ position }: { position: [number, number, number] }) {
       </RoundedBox>
       <mesh position={[0, 0.037, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[0.27, 0.58]} />
-        <meshStandardMaterial color="#1a1d26" roughness={0.2} metalness={0.4} />
+        <meshStandardMaterial
+          color="#1a1d26"
+          emissive="#2a3350"
+          emissiveIntensity={0.5}
+          roughness={0.2}
+          metalness={0.4}
+        />
       </mesh>
     </group>
   );
@@ -444,7 +475,7 @@ export function Desk() {
         smoothness={6}
         position={[0, FLOOR_TOP - 0.275, 0]}
       >
-        <meshStandardMaterial color="#e9d8ba" roughness={0.85} />
+        <meshStandardMaterial color={P.floor} roughness={0.85} />
       </RoundedBox>
 
       <Rug />

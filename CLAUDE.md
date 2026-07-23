@@ -145,6 +145,23 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 
 ## Build phases
 
+> **Status (2026-07-23, latest): dark-mode desk + detail/perf pass — VERIFIED pixel-for-pixel
+> at all five stops.** The scene is now a lamp-lit night study: dark navy world (`PALETTE.bg
+> #10131c`, dark fog/gradient/copy-card/dots/fallback hero), deep-walnut wood texture with plank
+> seams + denser grain, darker floor slab + moss rug, cool ambient + warm key + cool rim lights,
+> brightened `ACCENTS` for dark backgrounds. Detail pass on all four hotspot objects: papers
+> (manila folder, title + berry rule, two-column text, axes + trend line, paperclip, scribbled
+> sticky), laptop (bezel + webcam, hinge, full website mock with chrome/hero/cards/footer),
+> ticker (vertical grid, price ticks, volume bars, moving-average polyline, power LED), gavel +
+> mic (brass bands/rim/collar, grill rings, on-air LED). Perf: `ContactShadows frames={1}`,
+> shadow maps 2048→1024, drei `<Preload all/>`, `powerPreference: "high-performance"`; dpr cap
+> raised to 2 for sharpness. **Bug fixed:** drei `<Instances>` keyboards culled against a tiny
+> origin bounding sphere and vanished at close camera stops — both now set
+> `frustumCulled={false}`. Verified via the rafshim headless-render procedure below (shim added
+> temporarily, removed before commit): 304 draw calls, 37 programs, ~119k tris, zero console/
+> shader errors. `.claude/launch.json` now has `autoPort: true`. Live deploy predates this —
+> run `npm run deploy`.
+>
 > **Status (2026-07-23, later): desk-island overhaul — scene VERIFIED pixel-for-pixel.** The first
 > deck shipped invisible: drei's `<SoftShadows/>` (PCSS) patches global shader chunks and broke
 > EVERY `meshStandardMaterial` under three 0.185 — only unlit `meshBasicMaterial` planes drew.

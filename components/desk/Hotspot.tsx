@@ -78,7 +78,7 @@ export function Hotspot({
 
       {hovered && (
         <Html center position={[0, 1.45, 0]} zIndexRange={[40, 0]}>
-          <div className="desk-label pointer-events-none whitespace-nowrap rounded-full bg-white/95 px-4 py-1.5 text-xs font-semibold tracking-wide text-neutral-800 shadow-lg ring-1 ring-black/10">
+          <div className="desk-label pointer-events-none whitespace-nowrap rounded-full bg-[#141824]/95 px-4 py-1.5 text-xs font-semibold tracking-wide text-neutral-100 shadow-lg ring-1 ring-white/10">
             <span style={{ color: accent }}>●</span>
             <span className="ml-2">{label} ↗</span>
           </div>

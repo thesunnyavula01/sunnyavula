@@ -27,15 +27,15 @@ const pad = (n: number) => String(n).padStart(2, "0");
 
 function FallbackHero() {
   return (
-    <div className="flex min-h-[100svh] flex-col items-center justify-center gap-8 bg-[#f4ede1] px-6 pb-16 pt-28 text-center">
+    <div className="flex min-h-[100svh] flex-col items-center justify-center gap-8 bg-[#10131c] px-6 pb-16 pt-28 text-center">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#b3265c]">
+        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#e8548a]">
           Longmont, Colorado
         </p>
-        <h1 className="mt-3 text-4xl font-bold tracking-tight text-neutral-900 sm:text-6xl">
+        <h1 className="mt-3 text-4xl font-bold tracking-tight text-neutral-50 sm:text-6xl">
           My name is {SITE.name}.
         </h1>
-        <p className="mx-auto mt-4 max-w-md text-lg text-neutral-700">
+        <p className="mx-auto mt-4 max-w-md text-lg text-neutral-300">
           I&apos;m {SITE.fullName} — economics researcher, ATT Agency co-founder,
           investor, and debate co-captain. Research, a dev agency, markets, and
           leadership — all on one desk.
@@ -48,7 +48,7 @@ function FallbackHero() {
         height={1000}
         priority
         unoptimized
-        className="w-full max-w-xl rounded-3xl shadow-[0_24px_60px_-24px_rgba(80,50,20,0.35)] ring-1 ring-black/5"
+        className="w-full max-w-xl rounded-3xl shadow-[0_24px_60px_-24px_rgba(0,0,0,0.8)] ring-1 ring-white/10"
       />
       <nav aria-label="Sections" className="flex flex-wrap justify-center gap-2">
         {sections.map((s, i) => (
@@ -246,7 +246,7 @@ export function DeskScene() {
   if (fallback) return <FallbackHero />;
 
   const section = stop > 0 ? sections[stop - 1] : null;
-  const accent = stop > 0 ? ACCENTS[stop - 1] : PALETTE.berry;
+  const accent = stop > 0 ? ACCENTS[stop - 1] : PALETTE.berryLight;
 
   return (
     <section
@@ -254,7 +254,7 @@ export function DeskScene() {
       role="region"
       aria-roledescription="carousel"
       aria-label="Portfolio tour — scroll, use arrow keys, or the dots to move between stops"
-      className="relative h-[100svh] select-none overflow-hidden overscroll-none bg-[radial-gradient(120%_120%_at_50%_0%,#f8f2e7_0%,#f4ede1_55%,#ebe1cf_100%)]"
+      className="relative h-[100svh] select-none overflow-hidden overscroll-none bg-[radial-gradient(120%_120%_at_50%_0%,#1a1f2e_0%,#10131c_55%,#0a0c12_100%)]"
       style={{ touchAction: "none" }}
     >
       <div
@@ -292,9 +292,9 @@ export function DeskScene() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -18, scale: 0.99 }}
               transition={{ duration: 0.45, ease: [0.22, 0.61, 0.36, 1] }}
-              className="rounded-3xl bg-[#fdf6ec]/85 p-8 shadow-[0_28px_70px_-28px_rgba(80,50,20,0.4)] ring-1 ring-black/5 backdrop-blur-md sm:p-9"
+              className="rounded-3xl bg-[#141824]/85 p-8 shadow-[0_28px_70px_-28px_rgba(0,0,0,0.85)] ring-1 ring-white/10 backdrop-blur-md sm:p-9"
             >
-              <p className="font-mono text-[11px] tracking-[0.3em] text-neutral-400">
+              <p className="font-mono text-[11px] tracking-[0.3em] text-neutral-500">
                 {pad(stop + 1)} / {pad(STOPS)}
               </p>
 
@@ -306,16 +306,16 @@ export function DeskScene() {
                   >
                     Longmont, Colorado
                   </p>
-                  <h1 className="mt-3 text-4xl font-bold leading-[1.05] tracking-tight text-neutral-900 sm:text-5xl">
+                  <h1 className="mt-3 text-4xl font-bold leading-[1.05] tracking-tight text-neutral-50 sm:text-5xl">
                     My name is {SITE.name}.
                   </h1>
-                  <p className="mt-4 text-base leading-relaxed text-neutral-700 sm:text-lg">
+                  <p className="mt-4 text-base leading-relaxed text-neutral-300 sm:text-lg">
                     I&apos;m {SITE.fullName} — economics researcher, ATT Agency
                     co-founder, investor, and debate co-captain. Research, a dev
                     agency, markets, and leadership — all on one desk. Every
                     object opens a chapter.
                   </p>
-                  <p className="mt-4 font-mono text-[11px] tracking-wide text-neutral-400">
+                  <p className="mt-4 font-mono text-[11px] tracking-wide text-neutral-500">
                     scroll to travel · drag to look around · click an object to
                     dive in
                   </p>
@@ -328,17 +328,17 @@ export function DeskScene() {
                   >
                     {section.nav}
                   </p>
-                  <h2 className="mt-3 text-3xl font-bold leading-[1.08] tracking-tight text-neutral-900 sm:text-4xl">
+                  <h2 className="mt-3 text-3xl font-bold leading-[1.08] tracking-tight text-neutral-50 sm:text-4xl">
                     {section.title}
                   </h2>
-                  <p className="mt-3 text-base leading-relaxed text-neutral-700">
+                  <p className="mt-3 text-base leading-relaxed text-neutral-300">
                     {section.tagline}
                   </p>
                   <dl className="mt-5 flex flex-wrap gap-x-6 gap-y-3">
                     {section.stats.map((st) => (
                       <div key={st.label}>
                         <dt className="sr-only">{st.label}</dt>
-                        <dd className="text-sm font-bold text-neutral-900">
+                        <dd className="text-sm font-bold text-neutral-100">
                           {st.value}
                         </dd>
                         <dd className="text-[11px] text-neutral-500">{st.label}</dd>
@@ -363,7 +363,7 @@ export function DeskScene() {
           <ul className="flex flex-col items-center gap-2.5">
             {["Home", ...sections.map((s) => s.nav)].map((label, i) => {
               const isActive = stop === i;
-              const dotAccent = i === 0 ? PALETTE.berry : ACCENTS[i - 1];
+              const dotAccent = i === 0 ? PALETTE.berryLight : ACCENTS[i - 1];
               return (
                 <li key={label}>
                   <button
@@ -377,7 +377,7 @@ export function DeskScene() {
                       className={`block w-1.5 rounded-full transition-all duration-300 ${
                         isActive
                           ? "h-7"
-                          : "h-1.5 bg-neutral-400/50 group-hover:bg-neutral-500/70"
+                          : "h-1.5 bg-white/30 group-hover:bg-white/50"
                       }`}
                       style={isActive ? { backgroundColor: dotAccent } : undefined}
                     />
@@ -392,24 +392,24 @@ export function DeskScene() {
         <div className="pointer-events-none absolute inset-x-5 bottom-5 flex items-end justify-between sm:inset-x-10 sm:bottom-7">
           <p
             aria-hidden="true"
-            className={`font-mono text-[11px] uppercase tracking-[0.3em] text-neutral-500 transition-opacity duration-500 motion-safe:animate-pulse ${
+            className={`font-mono text-[11px] uppercase tracking-[0.3em] text-neutral-400 transition-opacity duration-500 motion-safe:animate-pulse ${
               stop === 0 ? "opacity-100" : "opacity-0"
             }`}
           >
             Scroll to explore ↓
           </p>
-          <div className="pointer-events-auto flex items-center gap-4 font-mono text-[11px] tracking-wide text-neutral-500">
+          <div className="pointer-events-auto flex items-center gap-4 font-mono text-[11px] tracking-wide text-neutral-400">
             <a
               href={SITE.github}
               target="_blank"
               rel="noopener noreferrer"
-              className="transition hover:text-neutral-800"
+              className="transition hover:text-neutral-100"
             >
               GitHub
             </a>
             <a
               href={`mailto:${SITE.email}`}
-              className="transition hover:text-neutral-800"
+              className="transition hover:text-neutral-100"
             >
               Email
             </a>
