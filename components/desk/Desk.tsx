@@ -486,7 +486,10 @@ export function Desk() {
 
       {/* on the desk */}
       <Lamp />
-      <MiniKeyboard position={[1.5, 0, 0.35]} />
+      {/* y-lift clears the blotter slab (top ~0.007); at y=0 the base plate
+          sank into the mat and z-fought it. x pulled in so it stays on the
+          blotter (right edge ~2.0) instead of overhanging onto bare wood. */}
+      <MiniKeyboard position={[1.42, 0.072, 0.35]} />
       <Mouse position={[2.4, 0, 0.45]} />
       <LooseSheets />
       <Mug position={[-2.0, 0, 1.55]} />
