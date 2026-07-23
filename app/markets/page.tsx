@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import { sections } from "@/content/sections";
-import { SectionStub } from "@/components/ui/SectionStub";
+import { SectionPage } from "@/components/ui/SectionPage";
 
 const section = sections.find((s) => s.slug === "markets")!;
 
-export const metadata: Metadata = { title: section.nav };
+export const metadata: Metadata = {
+  title: section.nav,
+  description: section.tagline,
+};
 
 export default function Page() {
-  return <SectionStub section={section} />;
+  return <SectionPage section={section} />;
 }
