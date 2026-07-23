@@ -1,17 +1,20 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, MotionConfig, motion } from "framer-motion";
 import { sections, SITE } from "@/content/sections";
 import { ACCENTS, PALETTE } from "./palette";
 import type { OrbitState } from "./CameraRig";
+import DeskCanvas from "./DeskCanvas";
 
-// Canvas is client-only (WebGL) — never server-render it. Kept behind a dynamic
-// import so three.js stays code-split off the shared bundle.
-const DeskCanvas = dynamic(() => import("./DeskCanvas"), { ssr: false });
+// DeskCanvas holds all the three.js/WebGL. It is imported statically (not via
+// next/dynamic) so its code ships in the home page bundle and is preloaded with
+// the page, instead of only being fetched after hydration. That late fetch was
+// what made the desk take seconds to appear. It still renders client-only,
+// gated behind `mounted`, so WebGL never runs on the server, and three.js stays
+// out of the subpage bundles because only the home page imports DeskScene.
 
 // Stops: 0 = aerial overview / intro, 1..4 = one per section (must stay in sync
 // with the camera keyframes in CameraRig.tsx).
@@ -80,6 +83,9 @@ export function DeskScene() {
   const [webgl, setWebgl] = useState(true);
   const [small, setSmall] = useState(false);
   const [hidden, setHidden] = useState(false);
+  // Gate WebGL to client-only (mirrors the old dynamic ssr:false). The canvas
+  // code is now preloaded with the page; it just mounts after hydration.
+  const [mounted, setMounted] = useState(false);
 
   const fallback = !webgl || small;
 
@@ -97,6 +103,7 @@ export function DeskScene() {
 
   // Capability + preference detection.
   useEffect(() => {
+    setMounted(true);
     try {
       const c = document.createElement("canvas");
       setWebgl(!!(c.getContext("webgl2") || c.getContext("webgl")));
@@ -259,13 +266,15 @@ export function DeskScene() {
           setGrabbing(true);
         }}
       >
-        <DeskCanvas
-          stop={stopRef}
-          orbit={orbit}
-          active={stop - 1}
-          reduced={reduced}
-          paused={hidden}
-        />
+        {mounted && (
+          <DeskCanvas
+            stop={stopRef}
+            orbit={orbit}
+            active={stop - 1}
+            reduced={reduced}
+            paused={hidden}
+          />
+        )}
       </div>
 
       <MotionConfig reducedMotion="user">
