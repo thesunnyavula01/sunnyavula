@@ -143,13 +143,20 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 
 ## Build phases
 
-> **Status (2026-07-22): Phase 0 complete.** Stack: Next 15.5 · React 19 · Tailwind v4 ·
-> react-three-fiber 9 / drei 10 / three 0.185 · OpenNext 1.20 + Wrangler 4. `npm run build` and
-> `npm run lint` pass; dev server serves the landing page, all four routes, and the hosted PDFs.
-> Deferred to deploy time: (1) approve the npm install scripts for `workerd`/`esbuild`/`sharp`
-> before `npm run preview`/`deploy`; (2) `initOpenNextCloudflareForDev()` is intentionally omitted
-> from `next.config.ts` until bindings are added; (3) Google Fonts fall back to system fonts in
-> offline sandboxes (fine on a real Cloudflare build). **Next: Phase 1 — the R3F desk.**
+> **Status (2026-07-22): Phase 1 complete.** The landing page is now the interactive R3F
+> **aerial desk** (`components/desk/`): a scroll-driven `CameraRig` pans from an aerial overview to
+> each of four `Hotspot` objects — papers→Research, laptop→ATT, ticker→Markets, gavel+mic→Leadership
+> — with synced framer-motion captions, subtle mouse parallax, and reduced-motion + no-WebGL
+> fallbacks. Canvas is `dynamic(ssr:false)`; the three/R3F bundle is code-split onto `/` only
+> (~151 kB First Load). `npm run build`/`lint` pass; SSR + all routes return 200 with no console/
+> server errors. **Not yet eyeballed in a live browser** (sandbox can't display the pane) — desk
+> geometry, camera framing, and palette are first-pass and await visual review.
+>
+> Stack: Next 15.5 · React 19 · Tailwind v4 · r3f 9 / drei 10 / three 0.185 · OpenNext 1.20 +
+> Wrangler 4. Deferred to deploy time: (1) approve npm install scripts for `workerd`/`esbuild`/
+> `sharp` before `npm run preview`/`deploy`; (2) `initOpenNextCloudflareForDev()` is omitted from
+> `next.config.ts` until bindings are added; (3) Google Fonts fall back to system fonts offline.
+> **Next: Phase 2 — full section subpages** (or tune the desk visuals first).
 
 - **Phase 0 — Scaffold:** `create-next-app` (TS + Tailwind), install R3F/drei/framer-motion,
   add the OpenNext adapter (`@opennextjs/cloudflare`) + `wrangler.jsonc` + `open-next.config.ts`,
