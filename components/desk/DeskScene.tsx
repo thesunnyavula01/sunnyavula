@@ -7,6 +7,7 @@ import Link from "next/link";
 import { AnimatePresence, MotionConfig, motion } from "framer-motion";
 import { sections, SITE } from "@/content/sections";
 import { ACCENTS, PALETTE } from "./palette";
+import type { OrbitState } from "./CameraRig";
 
 // Canvas is client-only (WebGL) — never server-render it. Kept behind a dynamic
 // import so three.js stays code-split off the shared bundle.
@@ -26,7 +27,7 @@ function FallbackHero() {
     <div className="flex min-h-[100svh] flex-col items-center justify-center gap-8 bg-[#f4ede1] px-6 pb-16 pt-28 text-center">
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#b3265c]">
-          Boulder, Colorado
+          Longmont, Colorado
         </p>
         <h1 className="mt-3 text-4xl font-bold tracking-tight text-neutral-900 sm:text-6xl">
           My name is {SITE.name}.
@@ -65,6 +66,9 @@ function FallbackHero() {
 export function DeskScene() {
   const [stop, setStop] = useState(0);
   const stopRef = useRef(0); // target stop, read every frame by the camera rig
+  const orbit = useRef<OrbitState>({ angle: 0, pitch: 0, dragging: false });
+  const dragLast = useRef<{ x: number; y: number } | null>(null);
+  const [grabbing, setGrabbing] = useState(false);
   const lockUntil = useRef(0);
   const wheelAcc = useRef(0);
   const lastWheel = useRef(0);
@@ -166,6 +170,33 @@ export function DeskScene() {
     };
   }, [fallback, step]);
 
+  // Drag-to-look-around (mouse/pen; touch keeps swipe-to-step).
+  useEffect(() => {
+    if (fallback) return;
+    const onMove = (e: PointerEvent) => {
+      const last = dragLast.current;
+      if (!last) return;
+      const o = orbit.current;
+      o.angle = clamp(o.angle - (e.clientX - last.x) * 0.005, -0.75, 0.75);
+      o.pitch = clamp(o.pitch + (e.clientY - last.y) * 0.003, -0.1, 0.24);
+      dragLast.current = { x: e.clientX, y: e.clientY };
+    };
+    const onUp = () => {
+      if (!dragLast.current) return;
+      dragLast.current = null;
+      orbit.current.dragging = false;
+      setGrabbing(false);
+    };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
+    };
+  }, [fallback]);
+
   // Keyboard stepping.
   useEffect(() => {
     if (fallback) return;
@@ -218,12 +249,19 @@ export function DeskScene() {
       style={{ touchAction: "none" }}
     >
       <div
-        className="absolute inset-0"
+        className={`absolute inset-0 ${grabbing ? "cursor-grabbing" : "cursor-grab"}`}
         role="img"
-        aria-label="Interactive 3D desk — each object opens a section: papers for Research, laptop for ATT Agency, trading monitor for Markets, gavel and microphone for Leadership"
+        aria-label="Interactive 3D desk in a study corner — each object opens a section: papers for Research, laptop for ATT Agency, trading monitor for Markets, gavel and microphone for Leadership. Drag to look around."
+        onPointerDown={(e) => {
+          if (e.pointerType === "touch") return;
+          dragLast.current = { x: e.clientX, y: e.clientY };
+          orbit.current.dragging = true;
+          setGrabbing(true);
+        }}
       >
         <DeskCanvas
           stop={stopRef}
+          orbit={orbit}
           active={stop - 1}
           reduced={reduced}
           paused={hidden}
@@ -255,7 +293,7 @@ export function DeskScene() {
                     className="mt-4 text-xs font-bold uppercase tracking-[0.25em]"
                     style={{ color: accent }}
                   >
-                    Boulder, Colorado
+                    Longmont, Colorado
                   </p>
                   <h1 className="mt-3 text-4xl font-bold leading-[1.05] tracking-tight text-neutral-900 sm:text-5xl">
                     My name is {SITE.name}.
@@ -265,7 +303,8 @@ export function DeskScene() {
                     desk. Every object opens a chapter.
                   </p>
                   <p className="mt-4 font-mono text-[11px] tracking-wide text-neutral-400">
-                    scroll to travel · hover an object · click to dive in
+                    scroll to travel · drag to look around · click an object to
+                    dive in
                   </p>
                 </>
               ) : (

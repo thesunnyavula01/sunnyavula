@@ -31,7 +31,7 @@ export default function OpengraphImage() {
             color: "#8a8377",
           }}
         >
-          Boulder, Colorado
+          Longmont, Colorado
         </div>
 
         <div style={{ display: "flex", flexDirection: "column" }}>

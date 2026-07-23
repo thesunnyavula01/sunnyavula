@@ -1,15 +1,19 @@
 "use client";
 
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Environment, Lightformer, SoftShadows } from "@react-three/drei";
+import { ContactShadows, Environment, Lightformer } from "@react-three/drei";
 import { useRef, type ComponentType, type ReactNode, type RefObject } from "react";
 import * as THREE from "three";
 import { sections } from "@/content/sections";
 import { ACCENTS } from "./palette";
-import { CameraRig } from "./CameraRig";
+import { CameraRig, type OrbitState } from "./CameraRig";
 import { Desk } from "./Desk";
 import { Hotspot } from "./Hotspot";
 import { Papers, Laptop, Ticker, GavelMic } from "./objects";
+
+// IMPORTANT: core-three shadow features only (PCFSoft + ContactShadows).
+// drei's <SoftShadows/> (PCSS) patches global shader chunks and broke EVERY
+// meshStandardMaterial with three 0.185 — the whole desk rendered invisible.
 
 // Same order as `sections`: research, att-agency, markets, leadership.
 const OBJECTS: ComponentType<{ hovered: boolean }>[] = [
@@ -26,7 +30,7 @@ const POSITIONS: [number, number, number][] = [
 ];
 const RING_RADII = [1.0, 1.15, 1.05, 1.05];
 
-// Gentle idle bob so the floating desk feels alive; disabled for reduced motion.
+// Gentle idle bob so the floating island feels alive; off for reduced motion.
 function FloatGroup({
   reduced,
   children,
@@ -53,11 +57,13 @@ function FloatGroup({
 
 export default function DeskCanvas({
   stop,
+  orbit,
   active,
   reduced,
   paused = false,
 }: {
   stop: RefObject<number>; // target stop index, 0..4
+  orbit: RefObject<OrbitState>; // drag-to-look-around state
   active: number; // -1 = overview, 0..3 = focused section
   reduced: boolean;
   paused?: boolean;
@@ -68,27 +74,31 @@ export default function DeskCanvas({
       dpr={[1, 1.75]}
       frameloop={paused ? "never" : "always"}
       gl={{ alpha: true, antialias: true }}
-      camera={{ fov: 35, position: [0.4, 8.4, 8.6], near: 0.1, far: 60 }}
+      camera={{ fov: 35, position: [0.6, 8.6, 10.2], near: 0.1, far: 80 }}
+      onCreated={(state) => {
+        // debug handle: lets headless checks force a render + read pixels back
+        (window as unknown as Record<string, unknown>).__deskState = state;
+      }}
     >
-      <SoftShadows size={24} samples={12} focus={0.6} />
-      <CameraRig stop={stop} reduced={reduced} />
+      <fog attach="fog" args={["#f4ede1", 18, 42]} />
+      <CameraRig stop={stop} orbit={orbit} reduced={reduced} />
 
-      <ambientLight intensity={0.55} color="#fff4e4" />
-      <hemisphereLight intensity={0.4} color="#fffaf0" groundColor="#d8c2a4" />
+      <ambientLight intensity={0.6} color="#fff4e4" />
+      <hemisphereLight intensity={0.45} color="#fffaf0" groundColor="#d8c2a4" />
       <directionalLight
         castShadow
-        position={[5, 11, 6]}
-        intensity={1.9}
+        position={[6, 12, 7]}
+        intensity={1.8}
         color="#fff3df"
         shadow-mapSize={[2048, 2048]}
-        shadow-camera-left={-9}
-        shadow-camera-right={9}
-        shadow-camera-top={9}
-        shadow-camera-bottom={-9}
+        shadow-camera-left={-10}
+        shadow-camera-right={10}
+        shadow-camera-top={10}
+        shadow-camera-bottom={-10}
         shadow-camera-near={1}
-        shadow-camera-far={30}
+        shadow-camera-far={40}
         shadow-bias={-0.0001}
-        shadow-normalBias={0.02}
+        shadow-normalBias={0.03}
       />
       <directionalLight position={[-7, 5, -4]} intensity={0.5} color="#ffd9a8" />
 
@@ -137,11 +147,16 @@ export default function DeskCanvas({
         })}
       </FloatGroup>
 
-      {/* shadow catcher — the soft blob the floating desk hovers over */}
-      <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.7, 0]}>
-        <planeGeometry args={[40, 40]} />
-        <shadowMaterial transparent opacity={0.16} color="#6b5138" />
-      </mesh>
+      {/* soft blob the island floats over */}
+      <ContactShadows
+        position={[0, -2.3, 0]}
+        scale={30}
+        far={6}
+        blur={2.4}
+        opacity={0.38}
+        resolution={512}
+        color="#4a3620"
+      />
     </Canvas>
   );
 }

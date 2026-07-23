@@ -295,12 +295,13 @@ export function GavelMic({ hovered }: { hovered: boolean }) {
             <meshStandardMaterial color="#5e3a1c" roughness={0.5} />
           </mesh>
         ))}
-        <mesh castShadow position={[0, -0.32, 0.02]} rotation={[0.1, 0, 0]}>
-          <cylinderGeometry args={[0.034, 0.04, 0.6, 16]} />
+        {/* handle: perpendicular to the head, angled slightly down to the desk */}
+        <mesh castShadow position={[0, -0.04, 0.36]} rotation={[Math.PI / 2 + 0.12, 0, 0]}>
+          <cylinderGeometry args={[0.034, 0.042, 0.62, 16]} />
           <meshStandardMaterial color={P.walnutLight} roughness={0.55} />
         </mesh>
-        <mesh position={[0, -0.62, 0.05]}>
-          <sphereGeometry args={[0.052, 16, 16]} />
+        <mesh castShadow position={[0, -0.08, 0.68]}>
+          <sphereGeometry args={[0.055, 16, 16]} />
           <meshStandardMaterial color={P.walnutLight} roughness={0.55} />
         </mesh>
       </group>

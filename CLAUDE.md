@@ -145,6 +145,25 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 
 ## Build phases
 
+> **Status (2026-07-23, later): desk-island overhaul — scene VERIFIED pixel-for-pixel.** The first
+> deck shipped invisible: drei's `<SoftShadows/>` (PCSS) patches global shader chunks and broke
+> EVERY `meshStandardMaterial` under three 0.185 — only unlit `meshBasicMaterial` planes drew.
+> **Never reintroduce PCSS/shader-chunk patching; use core PCFSoft + drei `ContactShadows` only.**
+> The scene is now a floating **island** (sarastotey-style): rounded floor slab + rug + legged desk
+> (procedural canvas wood-grain texture) + berry office chair + floor plant + lamp (warm pointlight)
+> + keyboard/mouse/bin/clutter; camera stops swing AROUND the island (overview → left → front →
+> front-right → right) and mouse/pen **drag orbits** the view (azimuth+pitch, eases home on
+> release); hero kicker is **Longmont, Colorado** (also fixed in `opengraph-image.tsx`).
+> **Headless render verification (how the bug was caught):** the sandbox pane never composites, so
+> rAF and ResizeObserver callbacks never fire and R3F never initializes — shader errors stay
+> invisible. Fix: temporarily add a `beforeInteractive` Script in `app/layout.tsx` (gated on
+> `?rafshim=1`) that shims `requestAnimationFrame` with setTimeout AND polyfills `ResizeObserver`
+> with a getBoundingClientRect poller BEFORE bundles load; `DeskCanvas` keeps a permanent
+> `onCreated` handle at `window.__deskState`. Then from browser JS: `st.gl.render(st.scene,
+> st.camera)` + drawImage to a 2D canvas + `toDataURL` + POST to a throwaway local Node receiver,
+> and Read the JPEG. Renders were verified this way at all five stops (228 draw calls, 21 programs,
+> zero shader errors).
+>
 > **Status (2026-07-23): Workers Builds CI deploy fixed.** The Cloudflare dashboard CI runs
 > `npm run build` then `npx wrangler deploy`; deploys failed with "Could not find compiled Open
 > Next config" because `npm run build` was only `next build` and never produced `.open-next/`.
