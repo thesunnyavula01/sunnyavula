@@ -71,6 +71,21 @@ export function SectionPage({ section }: { section: Section }) {
                   ))}
                 </ul>
               )}
+              {block.links && block.links.length > 0 && (
+                <div className="mt-5 flex flex-wrap gap-3">
+                  {block.links.map((l) => (
+                    <a
+                      key={l.href}
+                      href={l.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-full bg-foreground px-5 py-2 text-sm font-medium text-background transition hover:opacity-90"
+                    >
+                      {l.label} ↗
+                    </a>
+                  ))}
+                </div>
+              )}
             </motion.section>
           ))}
         </div>

@@ -9,6 +9,7 @@ export type NarrativeBlock = {
   heading: string;
   body: string;
   bullets?: string[];
+  links?: OutboundLink[]; // outbound buttons rendered under this block
 };
 
 export type Section = {
@@ -47,18 +48,6 @@ export const sections: Section[] = [
     ],
     narrative: [
       {
-        kicker: "Northeastern University · Team lead · Prof. Omar Robles",
-        heading: "ERTA and the U.S. income gap",
-        body:
-          "As team lead, I directed a study of the socioeconomic legacy of the 1981 Economic Recovery Tax Act on U.S. income disparity, running five econometric specifications over 65 years of U.S. tax and income data and an 812-observation panel of 17 OECD economies.",
-        bullets: [
-          "Specifications: Welch t-tests, Chow and Quandt-Andrews structural-break tests, a six-country OECD placebo test, and a first-differences regression with Newey-West errors.",
-          "The placebo test showed the 1981 structural break was global, not U.S.-specific.",
-          "The first-difference estimate attributes roughly 12% of the rise in income disparity directly to ERTA's rate cuts.",
-          "Presented to Prof. Robles with strongly positive feedback; currently under faculty review.",
-        ],
-      },
-      {
         kicker: "Team leadership · From findings to policy",
         heading: "Leading the team, and a pivot to policy",
         body:
@@ -70,11 +59,24 @@ export const sections: Section[] = [
         body:
           "Selected for a research internship under political science professor Megan Shannon, I synthesized ten years of scholarship and mission-level evidence to explain why non-democratic states contribute troops to UN peacekeeping. The stories point one way: China's and Russia's deployments track strategic self-interest, not humanitarian need.",
       },
+      {
+        kicker: "Northeastern University · Team lead · Prof. Omar Robles",
+        heading: "ERTA and the U.S. income gap",
+        body:
+          "As team lead, I directed a study of the socioeconomic legacy of the 1981 Economic Recovery Tax Act on U.S. income disparity, running five econometric specifications over 65 years of U.S. tax and income data and an 812-observation panel of 17 OECD economies.",
+        bullets: [
+          "Specifications: Welch t-tests, Chow and Quandt-Andrews structural-break tests, a six-country OECD placebo test, and a first-differences regression with Newey-West errors.",
+          "The placebo test showed the 1981 structural break was global, not U.S.-specific.",
+          "The first-difference estimate attributes roughly 12% of the rise in income disparity directly to ERTA's rate cuts.",
+          "Presented to Prof. Robles with strongly positive feedback; currently under faculty review.",
+        ],
+        links: [
+          { label: "Read the paper", href: "/papers/erta-paper.pdf" },
+          { label: "Methodology", href: "/papers/erta-methodology.pdf" },
+        ],
+      },
     ],
-    links: [
-      { label: "Read the paper", href: "/papers/erta-paper.pdf" },
-      { label: "Methodology", href: "/papers/erta-methodology.pdf" },
-    ],
+    links: [],
   },
   {
     slug: "att-agency",
@@ -178,24 +180,45 @@ export const sections: Section[] = [
           "iStartValley Innovator Award & International Semifinalist (won $300).",
           "Conrad Innovator.",
         ],
+        links: [
+          {
+            label: "iStart Insider on Spotify",
+            href: "https://open.spotify.com/show/4vbP7cvc3Qyb1N96vZN8Me",
+          },
+        ],
       },
       {
         kicker: "NSDA Debate · Varsity, School Co-Captain",
         heading: "Debate, and widening the door to it",
         body:
-          "As varsity co-captain I have earned 960+ NSDA points across Public Forum, Congressional, and World Schools, qualified for Nationals twice in World Schools, reached the Public Forum state final, and was named an Academic All-American. As Secretary of the Colorado chapter of Equality in Forensics, a student-led nonprofit that makes debate more accessible, I helped grow the chapter from 5 members to more than 40.",
+          "As varsity co-captain I have earned 960+ NSDA points across Public Forum, Congressional, and World Schools, qualified for Nationals twice in World Schools, reached the Public Forum state final, and was named an Academic All-American. As Secretary of the Colorado Chapter of Equality in Forensics, a student-led nonprofit that makes debate more accessible, I helped grow the chapter from 5 members to more than 40.",
+        links: [
+          {
+            label: "Join Equality in Forensics",
+            href: "https://discord.com/invite/equality-in-forensics-843216532744962118",
+          },
+        ],
       },
       {
         kicker: "American Legion Colorado Boys State",
         heading: "Senate floor and courtroom",
         body:
-          "Serving as Senator and committee chair, Director of Economic Relations, and Attorney and Judge, I chaired a Senate committee, sponsored small-business bills, managed financial-literacy grants, and litigated First and Sixth Amendment cases.",
+          "Served as Senator and committee chair, Director of Economic Relations, and Attorney and Judge. I chaired a Senate committee, sponsored small-business bills, managed financial-literacy grants, and litigated First and Sixth Amendment cases.",
+        links: [
+          {
+            label: "Colorado Boys State",
+            href: "https://colegionboysstate.org/previous-boys-state/",
+          },
+        ],
       },
       {
         kicker: "Sewa Design to Lead · Economics For Leaders",
         heading: "From research to the statehouse",
         body:
           "Through Sewa's Design to Lead I took the Stanford Biodesign process from analysis to advocacy, leading a team to lobby for healthcare-workforce visa policy in Colorado, including expanding H-1B access and restoring the H-1C visa for healthcare workers and certified nursing assistants, in work with Representative Megan Lukes. Earlier service ranged from a resume-building workshop and job connections to fundraising for homeless residents. I was also selected for the Economics For Leaders cohort, where I served as a simulation executive.",
+        links: [
+          { label: "Design to Lead", href: "https://sewausa.org/DTL" },
+        ],
       },
       {
         kicker: "Philosophy",
@@ -204,12 +227,7 @@ export const sections: Section[] = [
           "I treat leadership as the pursuit of systemic, tangible impact: not just a what, but a foundational why and a strategic how. In practice that means leading from the front and only asking of others what I have done myself, leading with empathy for people's different strengths and needs, and staying accountable by owning my mistakes and treating them as room to grow. Improvement over perfection.",
       },
     ],
-    links: [
-      {
-        label: "iStart Insider on Spotify",
-        href: "https://open.spotify.com/show/4vbP7cvc3Qyb1N96vZN8Me",
-      },
-    ],
+    links: [],
     honors: [
       "Congressional Award Silver Medalist & STEM Star",
       "Academic All-American, NSDA (fewer than 2% of 141,000+ members)",
@@ -217,7 +235,8 @@ export const sections: Section[] = [
       "Speech & Debate National Qualifier, World Schools (2025 and 2026)",
       "Public Forum State Finalist and 4A State Quarterfinalist",
       "iStartValley Innovator Award & International Semifinalist",
-      "AP Scholar · Dean's List",
+      "AP Scholar",
+      "4× Dean's List",
     ],
   },
 ];
