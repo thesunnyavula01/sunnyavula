@@ -42,13 +42,13 @@ function FallbackHero() {
         </p>
       </div>
       <Image
-        src="/hero-fallback.svg"
+        src="/desk-poster.webp"
         alt="Aerial view of a desk with a stack of papers, a laptop, a trading monitor, and a gavel with a microphone"
-        width={1600}
-        height={1000}
+        width={2560}
+        height={1080}
         priority
         unoptimized
-        className="w-full max-w-xl rounded-3xl shadow-[0_24px_60px_-24px_rgba(0,0,0,0.8)] ring-1 ring-white/10"
+        className="w-full max-w-xl rounded-3xl bg-[radial-gradient(120%_120%_at_50%_0%,#1a1f2e_0%,#10131c_55%,#0a0c12_100%)] shadow-[0_24px_60px_-24px_rgba(0,0,0,0.8)] ring-1 ring-white/10"
       />
       <nav aria-label="Sections" className="flex flex-wrap justify-center gap-2">
         {sections.map((s, i) => (
@@ -88,6 +88,11 @@ export function DeskScene() {
   // Gate WebGL to client-only (mirrors the old dynamic ssr:false). The canvas
   // code is now preloaded with the page; it just mounts after hydration.
   const [mounted, setMounted] = useState(false);
+  // True once the canvas has drawn its first frame. Until then a static
+  // screenshot of this exact camera stop (the poster) covers the canvas, so
+  // the desk is visible from the server-rendered first paint instead of
+  // appearing seconds later when hydration + shader compilation finish.
+  const [live, setLive] = useState(false);
 
   const fallback = !webgl || small;
 
@@ -275,8 +280,30 @@ export function DeskScene() {
             active={stop - 1}
             reduced={reduced}
             paused={hidden}
+            onFirstFrame={() => setLive(true)}
           />
         )}
+        {/* Poster: a real screenshot of the scene at the overview stop. It is
+            plain server-rendered HTML, so it paints with the page — then
+            crossfades away once the live canvas draws. Wide 2.37:1 capture +
+            object-cover matches the WebGL framing at any narrower aspect
+            (same vertical fov, sides crop identically). */}
+        <div
+          aria-hidden="true"
+          className={`pointer-events-none absolute inset-0 transition-opacity duration-700 ease-out ${
+            live ? "opacity-0" : "opacity-100"
+          }`}
+        >
+          <Image
+            src="/desk-poster.webp"
+            alt=""
+            fill
+            priority
+            unoptimized
+            sizes="100vw"
+            className="object-cover"
+          />
+        </div>
       </div>
 
       <MotionConfig reducedMotion="user">

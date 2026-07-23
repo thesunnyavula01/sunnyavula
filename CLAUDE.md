@@ -145,7 +145,20 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 
 ## Build phases
 
-> **Status (2026-07-23, latest): dark-mode desk + detail/perf pass — VERIFIED pixel-for-pixel
+> **Status (2026-07-23, latest+1): instant-desk poster.** The deployed desk appeared seconds
+> after the copy card (canvas waits on JS download + hydration + ~37 shader compiles). Fix:
+> `public/desk-poster.webp` — a REAL 2560×1080 alpha-transparent capture of the WebGL scene at
+> the overview stop (camera at `KEYS[0]`, float-bob zeroed, so it matches the live first frame)
+> — is painted as SSR HTML over the canvas (`next/image` fill+priority, object-cover; wide
+> capture crops sides identically to the camera's vertical-fov framing at narrower aspects) and
+> crossfades out 700ms after `DeskCanvas`'s new `onFirstFrame` fires (a `useFrame`-once +
+> one-rAF-later signal). `FallbackHero` (≤640px / no-WebGL) now uses the same poster instead of
+> the stale light-palette `hero-fallback.svg`. Recapture the poster after any scene change (the
+> rafshim procedure below + `__deskState`: setSize 2560×1080 dpr 1, zero the ≥5-child root
+> group, render, `toDataURL('image/webp', 0.92)`). Verified in-pane: poster paints in SSR HTML,
+> wrapper flips to `opacity-0` after first frame, corner pixels alpha-0 over the page gradient.
+>
+> **Status (2026-07-23, earlier): dark-mode desk + detail/perf pass — VERIFIED pixel-for-pixel
 > at all five stops.** The scene is now a lamp-lit night study: dark navy world (`PALETTE.bg
 > #10131c`, dark fog/gradient/copy-card/dots/fallback hero), deep-walnut wood texture with plank
 > seams + denser grain, darker floor slab + moss rug, cool ambient + warm key + cool rim lights,

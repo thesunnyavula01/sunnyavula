@@ -35,6 +35,19 @@ const POSITIONS: [number, number, number][] = [
 ];
 const RING_RADII = [1.0, 1.15, 1.05, 1.05];
 
+// Fires `onFirstFrame` one rAF after the first rendered frame, i.e. once the
+// scene is actually on screen — DeskScene uses it to fade out the static
+// poster that covers the canvas while shaders compile.
+function FirstFrame({ onFirstFrame }: { onFirstFrame?: () => void }) {
+  const done = useRef(false);
+  useFrame(() => {
+    if (done.current) return;
+    done.current = true;
+    if (onFirstFrame) requestAnimationFrame(() => onFirstFrame());
+  });
+  return null;
+}
+
 // Gentle idle bob so the floating island feels alive; off for reduced motion.
 function FloatGroup({
   reduced,
@@ -66,12 +79,14 @@ export default function DeskCanvas({
   active,
   reduced,
   paused = false,
+  onFirstFrame,
 }: {
   stop: RefObject<number>; // target stop index, 0..4
   orbit: RefObject<OrbitState>; // drag-to-look-around state
   active: number; // -1 = overview, 0..3 = focused section
   reduced: boolean;
   paused?: boolean;
+  onFirstFrame?: () => void; // first frame is on screen — safe to drop the poster
 }) {
   return (
     <Canvas
@@ -169,6 +184,7 @@ export default function DeskCanvas({
       {/* compile every material up front so camera swings never hit a
           first-use shader stall */}
       <Preload all />
+      <FirstFrame onFirstFrame={onFirstFrame} />
     </Canvas>
   );
 }
