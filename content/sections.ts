@@ -27,6 +27,14 @@ export type Section = {
 
 export const SITE = {
   name: process.env.NEXT_PUBLIC_SITE_NAME ?? "Sunny Avula",
+  // Full/legal name variants — used in visible copy, metadata, and the Person
+  // JSON-LD so searches for "Abhiram Avula" match the site, not just "Sunny".
+  legalName: "Abhiram Avula",
+  fullName: 'Abhiram "Sunny" Avula',
+  location: "Longmont, Colorado",
+  linkedin: "https://www.linkedin.com/in/abhiramavula01/",
+  podcast: "https://open.spotify.com/show/4vbP7cvc3Qyb1N96vZN8Me",
+  attAgency: "https://attagency.co",
   email: process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "abhiram.avula01@gmail.com",
   github: process.env.NEXT_PUBLIC_GITHUB_URL ?? "https://github.com/divcollective01",
   // Canonical production origin — hardcoded on purpose. Metadata, sitemap,

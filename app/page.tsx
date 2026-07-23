@@ -6,10 +6,30 @@ import { SITE } from "@/content/sections";
 const personJsonLd = {
   "@context": "https://schema.org",
   "@type": "Person",
-  name: "Abhiram Avula",
-  alternateName: ["Sunny Avula", 'Abhiram "Sunny" Avula'],
+  name: SITE.legalName,
+  alternateName: ["Sunny Avula", SITE.fullName],
   url: SITE.url,
-  sameAs: [SITE.github, "https://www.linkedin.com/in/abhiramavula01/"],
+  email: `mailto:${SITE.email}`,
+  jobTitle: "Co-founder & Lead Business Executive",
+  worksFor: {
+    "@type": "Organization",
+    name: "ATT Agency",
+    url: SITE.attAgency,
+  },
+  homeLocation: {
+    "@type": "Place",
+    name: SITE.location,
+  },
+  knowsAbout: [
+    "Economics research",
+    "Econometrics",
+    "Tax policy",
+    "Web development",
+    "Value investing",
+    "Public policy",
+    "Debate",
+  ],
+  sameAs: [SITE.github, SITE.linkedin, SITE.podcast],
 };
 
 // The landing page IS the desk: a full-viewport, stepped tour. The centered

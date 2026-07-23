@@ -36,7 +36,9 @@ function FallbackHero() {
           My name is {SITE.name}.
         </h1>
         <p className="mx-auto mt-4 max-w-md text-lg text-neutral-700">
-          Research, a dev agency, markets, and leadership — all on one desk.
+          I&apos;m {SITE.fullName} — economics researcher, ATT Agency co-founder,
+          investor, and debate co-captain. Research, a dev agency, markets, and
+          leadership — all on one desk.
         </p>
       </div>
       <Image
@@ -308,8 +310,10 @@ export function DeskScene() {
                     My name is {SITE.name}.
                   </h1>
                   <p className="mt-4 text-base leading-relaxed text-neutral-700 sm:text-lg">
-                    Research, a dev agency, markets, and leadership — all on one
-                    desk. Every object opens a chapter.
+                    I&apos;m {SITE.fullName} — economics researcher, ATT Agency
+                    co-founder, investor, and debate co-captain. Research, a dev
+                    agency, markets, and leadership — all on one desk. Every
+                    object opens a chapter.
                   </p>
                   <p className="mt-4 font-mono text-[11px] tracking-wide text-neutral-400">
                     scroll to travel · drag to look around · click an object to

@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const description = `${SITE.name} — research, ATT Agency, markets, and leadership.`;
+const description = `${SITE.fullName} — research, ATT Agency, markets, and leadership in ${SITE.location}.`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
