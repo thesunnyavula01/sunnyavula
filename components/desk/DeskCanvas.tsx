@@ -26,13 +26,16 @@ const POSITIONS: [number, number, number][] = [
 export default function DeskCanvas({
   progress,
   reduced,
+  paused = false,
 }: {
   progress: RefObject<number>;
   reduced: boolean;
+  paused?: boolean;
 }) {
   return (
     <Canvas
       dpr={[1, 2]}
+      frameloop={paused ? "never" : "always"}
       gl={{ alpha: true, antialias: true }}
       camera={{ fov: 40, position: [0, 9, 7.5], near: 0.1, far: 100 }}
     >

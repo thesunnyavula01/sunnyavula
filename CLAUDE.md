@@ -94,7 +94,7 @@ content/
   sections.ts           # single source of truth: titles, blurbs, stats, outbound links
 public/
   models/               # .glb assets (desk + objects), draco-compressed
-  hero-fallback.webp    # static desk image for no-WebGL / mobile
+  hero-fallback.svg     # static desk illustration for no-WebGL / small viewports
   papers/               # hosted research PDFs, linked from /research
 wrangler.jsonc          # Cloudflare Workers config (name, compat_date, nodejs_compat, assets)
 open-next.config.ts     # OpenNext (@opennextjs/cloudflare) adapter config
@@ -143,7 +143,24 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 
 ## Build phases
 
-> **Status (2026-07-22): Phase 2 complete.** All four section subpages are now full pages
+> **Status (2026-07-22): Phase 3 complete — SITE IS LIVE** at
+> **https://sunnyavula.black-pine-e5ad.workers.dev** (deployed via `npm run deploy`; workers.dev
+> URL until the custom domain is wired in the Cloudflare dashboard — that step is manual and
+> still open, as is a human visual review of the desk scene, which the sandbox still can't
+> render). Phase 3 shipped: (1) small-viewport (≤640px) + no-WebGL static fallback hero —
+> `public/hero-fallback.svg` (hand-authored aerial desk illustration matching the scene palette)
+> plus a text section nav; (2) WebGL frameloop pauses (`frameloop="never"`) when the hero is
+> scrolled off-screen (IntersectionObserver); (3) SEO: `app/opengraph-image.tsx` (static
+> next/og card), `app/sitemap.ts`, `app/robots.ts`, OG/Twitter metadata, themeColor viewport;
+> (4) a11y: skip-to-content link, `role="img"` + label on the canvas wrapper, captions wrapped
+> in `MotionConfig reducedMotion="user"`, live media-query listeners for viewport/reduced-motion;
+> (5) `.env.example` added (keys only). `NEXT_PUBLIC_SITE_URL` in `.env.local` now points at the
+> workers.dev origin — change it when the custom domain lands (and note: stale `NEXT_PUBLIC_*`
+> values stick in the webpack cache; `rm -rf .next .open-next node_modules/.cache` before
+> rebuilding after env changes). Gotcha: never run `npm run build` while `next dev` is running —
+> they share `.next` and the dev server's cache gets corrupted (delete `.next` and restart).
+>
+> **Phase 2 (also complete):** All four section subpages are now full pages
 > rendered by `components/ui/SectionPage.tsx` (client, framer-motion entrances with
 > `reducedMotion="user"`) composing `SectionHero` + `StatBlock` + narrative blocks + honors grid +
 > outbound buttons + back-to-desk links. Copy lives in `content/sections.ts` as `narrative:

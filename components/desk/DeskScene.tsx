@@ -2,8 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import Link from "next/link";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, MotionConfig, motion } from "framer-motion";
 import { sections, SITE } from "@/content/sections";
 
 // Canvas is client-only (WebGL) — never server-render it.
@@ -11,25 +12,91 @@ const DeskCanvas = dynamic(() => import("./DeskCanvas"), { ssr: false });
 
 const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
 
+// Static hero for small viewports / no WebGL: fallback desk image + text nav.
+function FallbackHero() {
+  return (
+    <div className="flex min-h-[100svh] flex-col items-center justify-center gap-8 bg-[#f3ede2] px-6 py-16 text-center">
+      <div>
+        <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">
+          Boulder, Colorado
+        </p>
+        <h1 className="mt-3 text-4xl font-bold tracking-tight text-neutral-900 sm:text-6xl">
+          {SITE.name}
+        </h1>
+        <p className="mt-4 text-lg text-neutral-700">
+          Research, a dev agency, markets, and leadership — all on one desk.
+        </p>
+      </div>
+      <Image
+        src="/hero-fallback.svg"
+        alt="Aerial view of a desk with a stack of papers, a laptop, a trading monitor, and a gavel with a microphone"
+        width={1600}
+        height={1000}
+        priority
+        unoptimized
+        className="w-full max-w-xl rounded-2xl"
+      />
+      <nav aria-label="Sections" className="flex flex-wrap justify-center gap-2">
+        {sections.map((s) => (
+          <Link
+            key={s.slug}
+            href={`/${s.slug}`}
+            className="rounded-full bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-neutral-700"
+          >
+            {s.nav}
+          </Link>
+        ))}
+      </nav>
+    </div>
+  );
+}
+
 export function DeskScene() {
-  const heroRef = useRef<HTMLDivElement>(null);
+  const heroRef = useRef<HTMLElement>(null);
   const progress = useRef(0);
   const [active, setActive] = useState(-1); // -1 = intro / overview
   const [reduced, setReduced] = useState(false);
   const [webgl, setWebgl] = useState(true);
+  const [small, setSmall] = useState(false);
+  const [onScreen, setOnScreen] = useState(true);
+
+  const fallback = !webgl || small;
 
   useEffect(() => {
-    setReduced(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
     try {
       const c = document.createElement("canvas");
       setWebgl(!!(c.getContext("webgl2") || c.getContext("webgl")));
     } catch {
       setWebgl(false);
     }
+
+    const mqSmall = window.matchMedia("(max-width: 640px)");
+    const mqReduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const onSmall = () => setSmall(mqSmall.matches);
+    const onReduced = () => setReduced(mqReduced.matches);
+    onSmall();
+    onReduced();
+    mqSmall.addEventListener("change", onSmall);
+    mqReduced.addEventListener("change", onReduced);
+    return () => {
+      mqSmall.removeEventListener("change", onSmall);
+      mqReduced.removeEventListener("change", onReduced);
+    };
   }, []);
+
+  // Pause the WebGL render loop whenever the hero is scrolled out of view.
+  useEffect(() => {
+    if (fallback) return;
+    const el = heroRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => setOnScreen(e.isIntersecting));
+    io.observe(el);
+    return () => io.disconnect();
+  }, [fallback]);
 
   // Drive the scroll progress (0..1) across the tall hero from the page scroll.
   useEffect(() => {
+    if (fallback) return;
     const el = heroRef.current;
     if (!el) return;
     let raf = 0;
@@ -53,32 +120,28 @@ export function DeskScene() {
       window.removeEventListener("resize", onScroll);
       if (raf) cancelAnimationFrame(raf);
     };
-  }, []);
+  }, [fallback]);
+
+  if (fallback) {
+    return (
+      <section ref={heroRef}>
+        <FallbackHero />
+      </section>
+    );
+  }
 
   return (
     <section ref={heroRef} className="relative h-[420vh]">
       <div className="sticky top-0 h-[100svh] overflow-hidden bg-[#f3ede2]">
-        {webgl ? (
-          <div className="absolute inset-0">
-            <DeskCanvas progress={progress} reduced={reduced} />
-          </div>
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center px-6 text-center">
-            <div>
-              <h1 className="text-4xl font-bold text-neutral-900 sm:text-6xl">
-                {SITE.name}
-              </h1>
-              <p className="mt-3 text-neutral-700">
-                Research, a dev agency, markets, and leadership.
-              </p>
-              <p className="mt-6 text-sm text-neutral-500">
-                Explore the sections below.
-              </p>
-            </div>
-          </div>
-        )}
+        <div
+          className="absolute inset-0"
+          role="img"
+          aria-label="Interactive 3D desk — scroll to tour Research, ATT Agency, Markets, and Leadership, or use the navigation links"
+        >
+          <DeskCanvas progress={progress} reduced={reduced} paused={!onScreen} />
+        </div>
 
-        {webgl && (
+        <MotionConfig reducedMotion="user">
           <div className="pointer-events-none absolute inset-0 mx-auto flex max-w-5xl flex-col justify-between px-6 py-24 sm:px-10">
             <div className="max-w-md">
               <AnimatePresence mode="wait">
@@ -140,7 +203,7 @@ export function DeskScene() {
               </span>
             </div>
           </div>
-        )}
+        </MotionConfig>
       </div>
     </section>
   );
