@@ -1,24 +1,37 @@
 "use client";
 
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { ContactShadows } from "@react-three/drei";
 import {
-  ContactShadows,
-  Environment,
-  Lightformer,
-  Preload,
-} from "@react-three/drei";
-import { useRef, type ComponentType, type ReactNode, type RefObject } from "react";
+  useRef,
+  useState,
+  type ComponentType,
+  type ReactNode,
+  type RefObject,
+} from "react";
 import * as THREE from "three";
 import { sections } from "@/content/sections";
 import { ACCENTS, PALETTE } from "./palette";
 import { CameraRig, type OrbitState } from "./CameraRig";
 import { Desk } from "./Desk";
 import { Hotspot } from "./Hotspot";
+import { makeStudioEnv } from "./env";
+import { shadowsDirty } from "./shadowBus";
 import { Papers, Laptop, Ticker, GavelMic } from "./objects";
 
 // IMPORTANT: core-three shadow features only (PCFSoft + ContactShadows).
 // drei's <SoftShadows/> (PCSS) patches global shader chunks and broke EVERY
 // meshStandardMaterial with three 0.185 — the whole desk rendered invisible.
+//
+// Also gone on purpose, both for time-to-first-frame:
+//   * drei <Environment>/<Lightformer> — replaced by makeStudioEnv() (see
+//     env.ts); it cost ~25 kB gzip of unused loaders plus a six-face cube
+//     render at startup.
+//   * drei <Preload all/> — it called gl.compile() AND drove a CubeCamera over
+//     the whole scene, i.e. six extra full-scene renders synchronously in a
+//     layout effect before the first frame could paint. Every object is
+//     visible at the overview stop anyway, so frame 1 compiles the same
+//     programs; the cube pass was pure latency.
 
 // Same order as `sections`: research, att-agency, markets, leadership.
 const OBJECTS: ComponentType<{ hovered: boolean }>[] = [
@@ -44,6 +57,39 @@ function FirstFrame({ onFirstFrame }: { onFirstFrame?: () => void }) {
     if (done.current) return;
     done.current = true;
     if (onFirstFrame) requestAnimationFrame(() => onFirstFrame());
+  });
+  return null;
+}
+
+// The first frame is the one the user is waiting on, so it renders at dpr 1 —
+// on a 2× display that is a quarter of the pixels, and it is the frame that
+// also pays for every shader compile. The real dpr is restored a frame later,
+// under cover of the poster's 700ms crossfade.
+function ProgressiveDpr({ onReady }: { onReady: (dpr: number) => void }) {
+  const done = useRef(false);
+  useFrame(() => {
+    if (done.current) return;
+    done.current = true;
+    const want = Math.min(2, window.devicePixelRatio || 1);
+    if (want > 1) requestAnimationFrame(() => onReady(want));
+  });
+  return null;
+}
+
+// Bakes the directional shadow map over the first few frames, then freezes it.
+// The island only bobs (±0.05) and lifts objects on hover, so re-running a
+// full depth pass every frame doubled the draw calls to no visible end;
+// <Hotspot> pokes it back on while a lift animates.
+function ShadowScheduler() {
+  const gl = useThree((s) => s.gl);
+  const frames = useRef(0);
+  useFrame(() => {
+    if (frames.current < 3) {
+      frames.current += 1;
+      if (frames.current === 3) gl.shadowMap.autoUpdate = false;
+      return;
+    }
+    gl.shadowMap.needsUpdate = shadowsDirty();
   });
   return null;
 }
@@ -88,14 +134,20 @@ export default function DeskCanvas({
   paused?: boolean;
   onFirstFrame?: () => void; // first frame is on screen — safe to drop the poster
 }) {
+  const [dpr, setDpr] = useState(1);
   return (
     <Canvas
       shadows
-      dpr={[1, 2]}
+      dpr={dpr}
       frameloop={paused ? "never" : "always"}
       gl={{ alpha: true, antialias: true, powerPreference: "high-performance" }}
       camera={{ fov: 35, position: [0.6, 8.6, 10.2], near: 0.1, far: 80 }}
       onCreated={(state) => {
+        // Set before the first render: `environment` is part of the material
+        // program key, so attaching it later would recompile every lit
+        // material in the scene.
+        state.scene.environment = makeStudioEnv();
+        state.scene.environmentIntensity = 0.85;
         // debug handle: lets headless checks force a render + read pixels back
         (window as unknown as Record<string, unknown>).__deskState = state;
       }}
@@ -122,31 +174,6 @@ export default function DeskCanvas({
         shadow-normalBias={0.03}
       />
       <directionalLight position={[-7, 5, -4]} intensity={0.7} color="#7f8dff" />
-
-      {/* local studio environment — no network HDRs */}
-      <Environment resolution={64}>
-        <Lightformer
-          intensity={0.6}
-          rotation-x={Math.PI / 2}
-          position={[0, 5, 0]}
-          scale={[10, 10, 1]}
-          color="#fff3dd"
-        />
-        <Lightformer
-          intensity={0.4}
-          position={[-6, 2, -1]}
-          rotation-y={Math.PI / 2}
-          scale={[4, 6, 1]}
-          color="#ffcf94"
-        />
-        <Lightformer
-          intensity={0.35}
-          position={[6, 3, 2]}
-          rotation-y={-Math.PI / 2}
-          scale={[4, 6, 1]}
-          color="#8fa2ff"
-        />
-      </Environment>
 
       <FloatGroup reduced={reduced}>
         <Desk />
@@ -181,10 +208,9 @@ export default function DeskCanvas({
         color="#000000"
       />
 
-      {/* compile every material up front so camera swings never hit a
-          first-use shader stall */}
-      <Preload all />
+      <ShadowScheduler />
       <FirstFrame onFirstFrame={onFirstFrame} />
+      <ProgressiveDpr onReady={setDpr} />
     </Canvas>
   );
 }

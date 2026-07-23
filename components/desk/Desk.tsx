@@ -1,9 +1,10 @@
 "use client";
 
 import { useMemo } from "react";
-import { Instance, Instances, RoundedBox } from "@react-three/drei";
+import { Instance, Instances } from "@react-three/drei";
 import * as THREE from "three";
 import { PALETTE as P } from "./palette";
+import { SoftBox } from "./SoftBox";
 
 // The desk ISLAND — a floating chunk of study, sarastotey-style: a rounded
 // floor slab carrying a legged desk, a chair, a rug, a floor plant, a lamp and
@@ -17,41 +18,47 @@ export const FLOOR_TOP = -1.42;
 
 function useWoodTexture() {
   return useMemo(() => {
+    // 512×256 rather than 1024×512: the desk top is never seen closer than
+    // ~2 units, so the extra 3/4 of a megapixel only cost fill time, upload
+    // time and mipmap generation on the critical path.
+    const W = 512;
+    const H = 256;
     const c = document.createElement("canvas");
-    c.width = 1024;
-    c.height = 512;
+    c.width = W;
+    c.height = H;
     const ctx = c.getContext("2d")!;
 
     // deep walnut base — reads rich under the warm lamp key light
-    const grad = ctx.createLinearGradient(0, 0, 1024, 0);
+    const grad = ctx.createLinearGradient(0, 0, W, 0);
     grad.addColorStop(0, "#8a5a34");
     grad.addColorStop(0.5, "#9a683c");
     grad.addColorStop(1, "#855430");
     ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, 1024, 512);
+    ctx.fillRect(0, 0, W, H);
 
     // plank seams (four boards across the depth)
     for (let i = 1; i < 4; i++) {
-      const y = i * 128 + (Math.random() * 8 - 4);
+      const y = i * (H / 4) + (Math.random() * 4 - 2);
       ctx.strokeStyle = "rgba(38,22,10,0.55)";
-      ctx.lineWidth = 2.2;
+      ctx.lineWidth = 1.1;
       ctx.beginPath();
       ctx.moveTo(0, y);
-      ctx.lineTo(1024, y);
+      ctx.lineTo(W, y);
       ctx.stroke();
       ctx.strokeStyle = "rgba(214,164,110,0.18)";
-      ctx.lineWidth = 1;
+      ctx.lineWidth = 0.5;
       ctx.beginPath();
-      ctx.moveTo(0, y + 2);
-      ctx.lineTo(1024, y + 2);
+      ctx.moveTo(0, y + 1);
+      ctx.lineTo(W, y + 1);
       ctx.stroke();
     }
 
-    // long grain streaks — denser and higher-contrast than the old pass
-    for (let i = 0; i < 260; i++) {
-      const y = Math.random() * 512;
-      const x = Math.random() * 1024 - 200;
-      const len = 160 + Math.random() * 600;
+    // long grain streaks — same density per pixel as before, half the count
+    // because the canvas is a quarter of the area
+    for (let i = 0; i < 130; i++) {
+      const y = Math.random() * H;
+      const x = Math.random() * W - 100;
+      const len = 80 + Math.random() * 300;
       const dark = Math.random() > 0.35;
       const r = dark ? 55 + Math.random() * 35 : 175 + Math.random() * 40;
       const g = dark ? 32 + Math.random() * 22 : 125 + Math.random() * 30;
@@ -59,40 +66,40 @@ function useWoodTexture() {
       ctx.strokeStyle = `rgba(${r | 0},${g | 0},${b | 0},${
         0.06 + Math.random() * 0.12
       })`;
-      ctx.lineWidth = 0.6 + Math.random() * 2.4;
+      ctx.lineWidth = 0.3 + Math.random() * 1.2;
       ctx.beginPath();
       ctx.moveTo(x, y);
       ctx.bezierCurveTo(
         x + len * 0.35,
-        y + (Math.random() * 10 - 5),
+        y + (Math.random() * 5 - 2.5),
         x + len * 0.7,
-        y + (Math.random() * 10 - 5),
+        y + (Math.random() * 5 - 2.5),
         x + len,
-        y + (Math.random() * 14 - 7)
+        y + (Math.random() * 7 - 3.5)
       );
       ctx.stroke();
     }
 
     // knots with grain flowing around them
-    for (let i = 0; i < 6; i++) {
-      const kx = 100 + Math.random() * 824;
-      const ky = 60 + Math.random() * 392;
+    for (let i = 0; i < 5; i++) {
+      const kx = 50 + Math.random() * (W - 100);
+      const ky = 30 + Math.random() * (H - 60);
       for (let ring = 6; ring > 0; ring--) {
         ctx.strokeStyle = `rgba(52,30,14,${0.06 + ring * 0.03})`;
-        ctx.lineWidth = 1.4;
+        ctx.lineWidth = 0.7;
         ctx.beginPath();
-        ctx.ellipse(kx, ky, ring * 7, ring * 3.4, 0.2, 0, Math.PI * 2);
+        ctx.ellipse(kx, ky, ring * 3.5, ring * 1.7, 0.2, 0, Math.PI * 2);
         ctx.stroke();
       }
       ctx.fillStyle = "rgba(40,22,10,0.5)";
       ctx.beginPath();
-      ctx.ellipse(kx, ky, 4.5, 2.6, 0.2, 0, Math.PI * 2);
+      ctx.ellipse(kx, ky, 2.2, 1.3, 0.2, 0, Math.PI * 2);
       ctx.fill();
     }
 
     const tex = new THREE.CanvasTexture(c);
     tex.colorSpace = THREE.SRGBColorSpace;
-    tex.anisotropy = 16;
+    tex.anisotropy = 8;
     tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
     return tex;
   }, []);
@@ -104,16 +111,16 @@ function DeskTable() {
   const wood = useWoodTexture();
   return (
     <group>
-      <RoundedBox
+      <SoftBox
         castShadow
         receiveShadow
         args={[9.4, 0.42, 5.2]}
         radius={0.1}
-        smoothness={6}
+        smoothness={3}
         position={[0, -0.21, 0]}
       >
         <meshStandardMaterial map={wood} roughness={0.62} metalness={0.02} />
-      </RoundedBox>
+      </SoftBox>
 
       {/* legs down to the floor slab */}
       {(
@@ -124,7 +131,7 @@ function DeskTable() {
           [4.35, 2.25],
         ] as const
       ).map(([x, z]) => (
-        <RoundedBox
+        <SoftBox
           key={`${x}${z}`}
           castShadow
           args={[0.26, 1.04, 0.26]}
@@ -132,18 +139,15 @@ function DeskTable() {
           position={[x, -0.92, z]}
         >
           <meshStandardMaterial color={P.woodEdge} roughness={0.7} />
-        </RoundedBox>
+        </SoftBox>
       ))}
 
-      {/* indigo blotter under the laptop area */}
-      <RoundedBox
-        receiveShadow
-        args={[4.4, 0.05, 2.85]}
-        radius={0.025}
-        position={[-0.2, 0.025, 0.3]}
-      >
+      {/* indigo blotter under the laptop area — seen flat from above, so its
+          2.5cm corner radius never reads; a plain box saves an extrude */}
+      <mesh receiveShadow position={[-0.2, 0.025, 0.3]}>
+        <boxGeometry args={[4.4, 0.05, 2.85]} />
         <meshStandardMaterial color={P.blotter} roughness={0.9} />
-      </RoundedBox>
+      </mesh>
     </group>
   );
 }
@@ -155,32 +159,33 @@ function Chair() {
       {/* star base + casters */}
       {armAngles.map((a) => (
         <group key={a} rotation={[0, a, 0]}>
-          <RoundedBox castShadow args={[0.1, 0.07, 0.6]} radius={0.03} position={[0, 0.08, 0.28]}>
+          <SoftBox castShadow args={[0.1, 0.07, 0.6]} radius={0.03} position={[0, 0.08, 0.28]}>
             <meshStandardMaterial color={P.charcoal} roughness={0.5} />
-          </RoundedBox>
+          </SoftBox>
           <mesh castShadow position={[0, 0.06, 0.54]}>
-            <sphereGeometry args={[0.06, 14, 14]} />
+            <sphereGeometry args={[0.06, 10, 8]} />
             <meshStandardMaterial color={P.slate} roughness={0.4} />
           </mesh>
         </group>
       ))}
       <mesh castShadow position={[0, 0.36, 0]}>
-        <cylinderGeometry args={[0.05, 0.06, 0.55, 16]} />
+        <cylinderGeometry args={[0.05, 0.06, 0.55, 12]} />
         <meshStandardMaterial color={P.charcoal} roughness={0.45} metalness={0.4} />
       </mesh>
       {/* seat + backrest */}
-      <RoundedBox castShadow args={[0.88, 0.14, 0.82]} radius={0.06} position={[0, 0.68, 0.02]}>
+      <SoftBox castShadow args={[0.88, 0.14, 0.82]} radius={0.06} smoothness={3} position={[0, 0.68, 0.02]}>
         <meshStandardMaterial color={P.berry} roughness={0.75} />
-      </RoundedBox>
-      <RoundedBox
+      </SoftBox>
+      <SoftBox
         castShadow
         args={[0.82, 1.0, 0.13]}
         radius={0.06}
+        smoothness={3}
         position={[0, 1.28, 0.42]}
         rotation={[0.1, 0, 0]}
       >
         <meshStandardMaterial color={P.berry} roughness={0.75} />
-      </RoundedBox>
+      </SoftBox>
     </group>
   );
 }
@@ -189,11 +194,11 @@ function Rug() {
   return (
     <group position={[0.7, FLOOR_TOP, 1.7]}>
       <mesh receiveShadow position={[0, 0.018, 0]}>
-        <cylinderGeometry args={[2.35, 2.35, 0.036, 56]} />
+        <cylinderGeometry args={[2.35, 2.35, 0.036, 36]} />
         <meshStandardMaterial color={P.moss} roughness={0.95} />
       </mesh>
       <mesh receiveShadow position={[0, 0.02, 0]} scale={[1, 0.5, 1]}>
-        <torusGeometry args={[2.32, 0.05, 8, 64]} />
+        <torusGeometry args={[2.32, 0.05, 6, 40]} />
         <meshStandardMaterial color={P.berry} roughness={0.9} />
       </mesh>
     </group>
@@ -212,20 +217,20 @@ function FloorPlant() {
   return (
     <group position={[-5.0, FLOOR_TOP, 0.9]}>
       <mesh castShadow position={[0, 0.42, 0]}>
-        <cylinderGeometry args={[0.5, 0.38, 0.84, 32]} />
+        <cylinderGeometry args={[0.5, 0.38, 0.84, 20]} />
         <meshStandardMaterial color={P.terracotta} roughness={0.75} />
       </mesh>
       <mesh position={[0, 0.84, 0]}>
-        <torusGeometry args={[0.49, 0.05, 12, 32]} />
+        <torusGeometry args={[0.49, 0.05, 8, 24]} />
         <meshStandardMaterial color={P.terracotta} roughness={0.75} />
       </mesh>
       <mesh castShadow position={[0, 1.0, 0]}>
-        <cylinderGeometry args={[0.05, 0.07, 0.5, 10]} />
+        <cylinderGeometry args={[0.05, 0.07, 0.5, 8]} />
         <meshStandardMaterial color="#6b4a2c" roughness={0.8} />
       </mesh>
       {leaves.map((l, i) => (
         <mesh key={i} castShadow position={l.p}>
-          <sphereGeometry args={[l.r, 20, 20]} />
+          <sphereGeometry args={[l.r, 14, 10]} />
           <meshStandardMaterial color={i % 2 ? P.sageDark : P.sage} roughness={0.9} />
         </mesh>
       ))}
@@ -237,29 +242,29 @@ function Lamp() {
   return (
     <group position={[-4.0, 0, -1.75]}>
       <mesh castShadow position={[0, 0.04, 0]}>
-        <cylinderGeometry args={[0.3, 0.34, 0.08, 28]} />
+        <cylinderGeometry args={[0.3, 0.34, 0.08, 18]} />
         <meshStandardMaterial color={P.charcoal} roughness={0.5} />
       </mesh>
       <mesh castShadow position={[0.18, 0.5, 0.1]} rotation={[0.06, 0, -0.42]}>
-        <cylinderGeometry args={[0.035, 0.035, 0.95, 12]} />
+        <cylinderGeometry args={[0.035, 0.035, 0.95, 8]} />
         <meshStandardMaterial color={P.charcoal} roughness={0.5} />
       </mesh>
       <mesh position={[0.38, 0.93, 0.14]}>
-        <sphereGeometry args={[0.055, 12, 12]} />
+        <sphereGeometry args={[0.055, 10, 8]} />
         <meshStandardMaterial color={P.slate} roughness={0.4} />
       </mesh>
       <mesh castShadow position={[0.68, 0.86, 0.26]} rotation={[0.15, 0, 1.05]}>
-        <cylinderGeometry args={[0.035, 0.035, 0.72, 12]} />
+        <cylinderGeometry args={[0.035, 0.035, 0.72, 8]} />
         <meshStandardMaterial color={P.charcoal} roughness={0.5} />
       </mesh>
       {/* shade, pointing down over the desk */}
       <group position={[1.02, 0.72, 0.34]} rotation={[0.2, 0, 0.5]}>
         <mesh castShadow>
-          <cylinderGeometry args={[0.09, 0.32, 0.38, 24, 1, true]} />
+          <cylinderGeometry args={[0.09, 0.32, 0.38, 16, 1, true]} />
           <meshStandardMaterial color={P.marigold} roughness={0.6} side={THREE.DoubleSide} />
         </mesh>
         <mesh position={[0, -0.12, 0]}>
-          <sphereGeometry args={[0.1, 14, 14]} />
+          <sphereGeometry args={[0.1, 10, 8]} />
           <meshStandardMaterial
             color="#ffe9b8"
             emissive="#ffc46b"
@@ -288,9 +293,9 @@ function MiniKeyboard({ position }: { position: [number, number, number] }) {
   }
   return (
     <group position={position} rotation={[0, 0.07, 0]}>
-      <RoundedBox castShadow args={[1.12, 0.05, 0.44]} radius={0.02} position={[0, 0.025, 0.02]}>
+      <SoftBox castShadow args={[1.12, 0.05, 0.44]} radius={0.02} position={[0, 0.025, 0.02]}>
         <meshStandardMaterial color={P.silver} roughness={0.55} metalness={0.25} />
-      </RoundedBox>
+      </SoftBox>
       <Instances limit={52} castShadow frustumCulled={false}>
         <boxGeometry args={[0.064, 0.018, 0.064]} />
         <meshStandardMaterial color={P.slate} roughness={0.85} />
@@ -310,7 +315,7 @@ function Mouse({ position }: { position: [number, number, number] }) {
   return (
     <group position={position} rotation={[0, -0.25, 0]}>
       <mesh castShadow position={[0, 0.055, 0]} scale={[1, 0.62, 1.45]}>
-        <sphereGeometry args={[0.09, 20, 20]} />
+        <sphereGeometry args={[0.09, 14, 10]} />
         <meshStandardMaterial color={P.charcoal} roughness={0.4} />
       </mesh>
     </group>
@@ -323,19 +328,19 @@ function Mug({ position }: { position: [number, number, number] }) {
   return (
     <group position={position}>
       <mesh castShadow position={[0, 0.015, 0]}>
-        <cylinderGeometry args={[0.24, 0.26, 0.03, 32]} />
+        <cylinderGeometry args={[0.24, 0.26, 0.03, 20]} />
         <meshStandardMaterial color={P.paper} roughness={0.85} />
       </mesh>
       <mesh castShadow position={[0, 0.2, 0]}>
-        <cylinderGeometry args={[0.155, 0.135, 0.34, 32]} />
+        <cylinderGeometry args={[0.155, 0.135, 0.34, 20]} />
         <meshStandardMaterial color={P.berry} roughness={0.55} />
       </mesh>
       <mesh position={[0, 0.36, 0]}>
-        <cylinderGeometry args={[0.125, 0.125, 0.015, 32]} />
+        <cylinderGeometry args={[0.125, 0.125, 0.015, 20]} />
         <meshStandardMaterial color="#3d2a1e" roughness={0.35} />
       </mesh>
       <mesh castShadow position={[0.19, 0.21, 0]}>
-        <torusGeometry args={[0.085, 0.026, 14, 28]} />
+        <torusGeometry args={[0.085, 0.026, 8, 20]} />
         <meshStandardMaterial color={P.berry} roughness={0.55} />
       </mesh>
     </group>
@@ -353,16 +358,16 @@ function Succulent({ position }: { position: [number, number, number] }) {
   return (
     <group position={position}>
       <mesh castShadow position={[0, 0.16, 0]}>
-        <cylinderGeometry args={[0.22, 0.16, 0.32, 32]} />
+        <cylinderGeometry args={[0.22, 0.16, 0.32, 20]} />
         <meshStandardMaterial color={P.terracotta} roughness={0.75} />
       </mesh>
       <mesh position={[0, 0.32, 0]}>
-        <torusGeometry args={[0.215, 0.03, 12, 32]} />
+        <torusGeometry args={[0.215, 0.03, 8, 24]} />
         <meshStandardMaterial color={P.terracotta} roughness={0.75} />
       </mesh>
       {leaves.map((l, i) => (
         <mesh key={i} castShadow position={l.p}>
-          <sphereGeometry args={[l.r, 20, 20]} />
+          <sphereGeometry args={[l.r, 14, 10]} />
           <meshStandardMaterial color={i % 2 ? P.sageDark : P.sage} roughness={0.9} />
         </mesh>
       ))}
@@ -373,10 +378,10 @@ function Succulent({ position }: { position: [number, number, number] }) {
 function Books({ position }: { position: [number, number, number] }) {
   return (
     <group position={position} rotation={[0, -0.25, 0]}>
-      <RoundedBox castShadow args={[0.88, 0.13, 0.62]} radius={0.03} position={[0, 0.065, 0]}>
+      <SoftBox castShadow args={[0.88, 0.13, 0.62]} radius={0.03} position={[0, 0.065, 0]}>
         <meshStandardMaterial color={P.indigo} roughness={0.8} />
-      </RoundedBox>
-      <RoundedBox
+      </SoftBox>
+      <SoftBox
         castShadow
         args={[0.78, 0.11, 0.54]}
         radius={0.03}
@@ -384,7 +389,7 @@ function Books({ position }: { position: [number, number, number] }) {
         rotation={[0, 0.22, 0]}
       >
         <meshStandardMaterial color={P.marigold} roughness={0.8} />
-      </RoundedBox>
+      </SoftBox>
     </group>
   );
 }
@@ -398,12 +403,12 @@ function PencilCup({ position }: { position: [number, number, number] }) {
   return (
     <group position={position}>
       <mesh castShadow position={[0, 0.16, 0]}>
-        <cylinderGeometry args={[0.13, 0.11, 0.32, 28]} />
+        <cylinderGeometry args={[0.13, 0.11, 0.32, 18]} />
         <meshStandardMaterial color={P.marigold} roughness={0.7} />
       </mesh>
       {pens.map((pen, i) => (
         <mesh key={i} castShadow position={[pen.x, 0.38, 0]} rotation={pen.rot}>
-          <cylinderGeometry args={[0.018, 0.018, 0.44, 10]} />
+          <cylinderGeometry args={[0.018, 0.018, 0.44, 8]} />
           <meshStandardMaterial color={pen.color} roughness={0.6} />
         </mesh>
       ))}
@@ -414,9 +419,9 @@ function PencilCup({ position }: { position: [number, number, number] }) {
 function Phone({ position }: { position: [number, number, number] }) {
   return (
     <group position={position} rotation={[0, 0.35, 0]}>
-      <RoundedBox castShadow args={[0.32, 0.035, 0.64]} radius={0.016} position={[0, 0.018, 0]}>
+      <SoftBox castShadow args={[0.32, 0.035, 0.64]} radius={0.016} position={[0, 0.018, 0]}>
         <meshStandardMaterial color={P.charcoal} roughness={0.4} metalness={0.3} />
-      </RoundedBox>
+      </SoftBox>
       <mesh position={[0, 0.037, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[0.27, 0.58]} />
         <meshStandardMaterial
@@ -435,7 +440,7 @@ function Bin() {
   return (
     <group position={[4.9, FLOOR_TOP, 1.9]}>
       <mesh castShadow position={[0, 0.3, 0]}>
-        <cylinderGeometry args={[0.32, 0.25, 0.6, 28, 1, true]} />
+        <cylinderGeometry args={[0.32, 0.25, 0.6, 18, 1, true]} />
         <meshStandardMaterial color={P.slate} roughness={0.6} side={THREE.DoubleSide} />
       </mesh>
       <mesh castShadow position={[0.55, 0.09, 0.25]}>
@@ -467,16 +472,16 @@ export function Desk() {
   return (
     <group>
       {/* floor slab the whole study stands on */}
-      <RoundedBox
+      <SoftBox
         castShadow
         receiveShadow
         args={[12.2, 0.55, 8.2]}
         radius={0.26}
-        smoothness={6}
+        smoothness={3}
         position={[0, FLOOR_TOP - 0.275, 0]}
       >
         <meshStandardMaterial color={P.floor} roughness={0.85} />
-      </RoundedBox>
+      </SoftBox>
 
       <Rug />
       <DeskTable />

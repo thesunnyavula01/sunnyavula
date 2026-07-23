@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useFrame } from "@react-three/fiber";
 import { Html, useCursor } from "@react-three/drei";
 import * as THREE from "three";
+import { pokeShadows } from "./shadowBus";
 
 // Wraps a desk object: hover lifts + scales it, fades in an accent ring and a
 // floating label, and prefetches the route; click navigates. `focused` marks
@@ -57,9 +58,13 @@ export function Hotspot({
       onPointerOver={(e) => {
         e.stopPropagation();
         setHovered(true);
+        pokeShadows(); // the lift moves geometry — un-freeze the shadow map
         router.prefetch(href);
       }}
-      onPointerOut={() => setHovered(false)}
+      onPointerOut={() => {
+        setHovered(false);
+        pokeShadows();
+      }}
       onClick={(e) => {
         e.stopPropagation();
         router.push(href);

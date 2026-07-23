@@ -1,104 +1,77 @@
 "use client";
 
-import { Instance, Instances, RoundedBox } from "@react-three/drei";
+import { Instance, Instances } from "@react-three/drei";
 import { PALETTE as P } from "./palette";
+import { SoftBox } from "./SoftBox";
+import {
+  LAPTOP_SCREEN,
+  PAPER_SHEET,
+  TICKER_SCREEN,
+  laptopScreenTexture,
+  paperPrintTexture,
+  tickerScreenTexture,
+} from "./screens";
 
 // The four clickable desk objects, one per section. Built from primitives but
 // detailed enough to read as real props under the lamp light: a manila folder
 // + printed pages with figures, a laptop with keys + a full website mock, a
 // candlestick monitor with volume + a moving average, a banded gavel + studio
 // mic. `hovered` lets each object brighten its signature surface.
+//
+// All the FLAT artwork — the website mock, the chart, the printed page — is
+// painted into a canvas in screens.ts and applied as a single map, rather than
+// stacked out of ~95 individual planes. Only things with real depth are still
+// geometry.
 
 /* ------------------------------ Research ------------------------------ */
-
-// two-column body text on the top sheet: [x offset, width] pairs per row
-const PAGE_COLUMNS: [number, number][][] = [
-  [
-    [-0.42, 0.34],
-    [0.02, 0.36],
-  ],
-  [
-    [-0.42, 0.3],
-    [0.02, 0.32],
-  ],
-  [
-    [-0.42, 0.36],
-    [0.02, 0.28],
-  ],
-  [
-    [-0.42, 0.26],
-    [0.02, 0.34],
-  ],
-  [
-    [-0.42, 0.32],
-    [0.02, 0.2],
-  ],
-];
 
 export function Papers({ hovered }: { hovered: boolean }) {
   const stackTop = 0.02 + 5 * 0.028;
   return (
     <group>
-      {/* manila folder peeking out under the stack */}
-      <RoundedBox
+      {/* manila folder peeking out under the stack — 8mm corner radius on a
+          2cm-thick slab never reads, so it is a plain box */}
+      <mesh
         castShadow
         receiveShadow
-        args={[1.12, 0.02, 1.42]}
-        radius={0.008}
         position={[-0.06, 0.006, 0.05]}
         rotation={[0, -0.09, 0]}
       >
+        <boxGeometry args={[1.12, 0.02, 1.42]} />
         <meshStandardMaterial color="#d9b06a" roughness={0.9} />
-      </RoundedBox>
+      </mesh>
 
       {[0, 1, 2, 3, 4, 5].map((i) => (
-        <RoundedBox
+        <mesh
           key={i}
           castShadow
           receiveShadow
-          args={[0.98, 0.024, 1.3]}
-          radius={0.008}
           position={[i * 0.015, 0.012 + i * 0.028, -i * 0.012]}
           rotation={[0, (i - 2.5) * 0.045, 0]}
         >
+          <boxGeometry args={[0.98, 0.024, 1.3]} />
           <meshStandardMaterial
             color={i % 2 ? "#f4efe4" : P.paper}
             emissive={P.indigo}
             emissiveIntensity={hovered ? 0.12 : 0}
             roughness={0.95}
           />
-        </RoundedBox>
+        </mesh>
       ))}
 
-      {/* printed top sheet: title, rule, two-column body, chart with axes */}
+      {/* printed top sheet: title, rule, two-column body, chart */}
       <group position={[0.075, stackTop + 0.014, -0.06]} rotation={[0, 0.11, 0]}>
-        {/* title + berry rule */}
-        <mesh position={[-0.14, 0, -0.54]} rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[0.56, 0.036]} />
-          <meshBasicMaterial color="#2e2a22" />
+        {/* the printing itself — one transparent map over the lit sheet */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[PAPER_SHEET.w, PAPER_SHEET.d]} />
+          <meshStandardMaterial
+            map={paperPrintTexture()}
+            transparent
+            roughness={0.95}
+          />
         </mesh>
-        <mesh position={[-0.02, 0, -0.475]} rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[0.8, 0.008]} />
-          <meshBasicMaterial color={P.berry} />
-        </mesh>
-        {/* two-column body text */}
-        {PAGE_COLUMNS.map((row, r) =>
-          row.map(([x, w], c) => (
-            <mesh
-              key={`${r}-${c}`}
-              position={[x + w / 2, 0, -0.4 + r * 0.075]}
-              rotation={[-Math.PI / 2, 0, 0]}
-            >
-              <planeGeometry args={[w, 0.016]} />
-              <meshBasicMaterial color={P.ink} />
-            </mesh>
-          ))
-        )}
-        {/* figure: axes + bars + trend line */}
-        <mesh position={[0.3, 0.001, 0.31]} rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[0.34, 0.006]} />
-          <meshBasicMaterial color={P.ink} />
-        </mesh>
+
+        {/* figure: upright axis + bars + trend line all stand off the page */}
         <mesh position={[0.135, 0.11, 0.31]}>
           <boxGeometry args={[0.006, 0.22, 0.006]} />
           <meshBasicMaterial color={P.ink} />
@@ -117,13 +90,14 @@ export function Papers({ hovered }: { hovered: boolean }) {
           <planeGeometry args={[0.26, 0.008]} />
           <meshBasicMaterial color={P.marigold} />
         </mesh>
+
         {/* paperclip on the corner */}
         <mesh
           position={[-0.36, 0.004, -0.55]}
           rotation={[-Math.PI / 2, 0, 0.3]}
           scale={[1, 1.9, 1]}
         >
-          <torusGeometry args={[0.045, 0.007, 8, 24]} />
+          <torusGeometry args={[0.045, 0.007, 6, 16]} />
           <meshStandardMaterial color="#c9c9cf" roughness={0.25} metalness={0.85} />
         </mesh>
       </group>
@@ -149,15 +123,15 @@ export function Papers({ hovered }: { hovered: boolean }) {
       {/* berry pen resting across the corner */}
       <group position={[0.28, stackTop + 0.033, 0.42]} rotation={[0, 0.85, Math.PI / 2]}>
         <mesh castShadow>
-          <cylinderGeometry args={[0.024, 0.024, 0.72, 14]} />
+          <cylinderGeometry args={[0.024, 0.024, 0.72, 10]} />
           <meshStandardMaterial color={P.berry} roughness={0.4} />
         </mesh>
         <mesh position={[0, 0.39, 0]}>
-          <cylinderGeometry args={[0.025, 0.012, 0.07, 14]} />
+          <cylinderGeometry args={[0.025, 0.012, 0.07, 10]} />
           <meshStandardMaterial color={P.charcoal} roughness={0.4} />
         </mesh>
         <mesh position={[0, -0.37, 0]}>
-          <cylinderGeometry args={[0.025, 0.025, 0.05, 14]} />
+          <cylinderGeometry args={[0.025, 0.025, 0.05, 10]} />
           <meshStandardMaterial color={P.charcoal} roughness={0.4} />
         </mesh>
         {/* clip */}
@@ -175,13 +149,6 @@ export function Papers({ hovered }: { hovered: boolean }) {
 const KEY_ROWS = 4;
 const KEY_COLS = 12;
 
-// website-mock cards: [x center, image-strip color]
-const MOCK_CARDS: [number, string][] = [
-  [-0.45, P.sage],
-  [0, P.marigold],
-  [0.45, P.blush],
-];
-
 export function Laptop({ hovered }: { hovered: boolean }) {
   const keys: [number, number, number][] = [];
   for (let r = 0; r < KEY_ROWS; r++) {
@@ -192,7 +159,7 @@ export function Laptop({ hovered }: { hovered: boolean }) {
   return (
     <group rotation={[0, -0.28, 0]}>
       {/* base */}
-      <RoundedBox
+      <SoftBox
         castShadow
         receiveShadow
         args={[1.5, 0.07, 1.0]}
@@ -200,7 +167,7 @@ export function Laptop({ hovered }: { hovered: boolean }) {
         position={[0, 0.035, 0]}
       >
         <meshStandardMaterial color={P.silver} roughness={0.5} metalness={0.35} />
-      </RoundedBox>
+      </SoftBox>
 
       {/* keyboard — frustumCulled off: the culling sphere only covers the base
           key geometry at the origin, so keys vanish at close camera angles */}
@@ -216,109 +183,40 @@ export function Laptop({ hovered }: { hovered: boolean }) {
         <boxGeometry args={[0.53, 0.022, 0.088]} />
         <meshStandardMaterial color={P.slate} roughness={0.85} />
       </mesh>
-      <RoundedBox args={[0.46, 0.012, 0.28]} radius={0.006} position={[0, 0.072, 0.31]}>
+      <mesh position={[0, 0.072, 0.31]}>
+        <boxGeometry args={[0.46, 0.012, 0.28]} />
         <meshStandardMaterial color="#d9d2c5" roughness={0.55} metalness={0.2} />
-      </RoundedBox>
+      </mesh>
 
       {/* hinge */}
       <mesh position={[0, 0.055, -0.49]} rotation={[0, 0, Math.PI / 2]}>
-        <cylinderGeometry args={[0.028, 0.028, 1.32, 12]} />
+        <cylinderGeometry args={[0.028, 0.028, 1.32, 10]} />
         <meshStandardMaterial color={P.slate} roughness={0.4} metalness={0.5} />
       </mesh>
 
       {/* lid + screen, leaning back ~24° from vertical */}
       <group position={[0, 0.06, -0.485]} rotation={[-0.42, 0, 0]}>
-        <RoundedBox castShadow args={[1.5, 1.04, 0.05]} radius={0.032} position={[0, 0.52, 0]}>
+        <SoftBox castShadow args={[1.5, 1.04, 0.05]} radius={0.032} position={[0, 0.52, 0]}>
           <meshStandardMaterial color={P.slate} roughness={0.5} metalness={0.35} />
-        </RoundedBox>
+        </SoftBox>
         {/* dark bezel + webcam dot */}
         <mesh position={[0, 0.53, 0.026]}>
           <planeGeometry args={[1.44, 0.96]} />
           <meshBasicMaterial color="#14161e" />
         </mesh>
         <mesh position={[0, 0.995, 0.028]}>
-          <circleGeometry args={[0.008, 10]} />
+          <circleGeometry args={[0.008, 8]} />
           <meshBasicMaterial color="#3a3f4d" />
         </mesh>
 
-        {/* glowing screen with a full website mock (attagency-style) */}
-        <mesh position={[0, 0.53, 0.028]}>
-          <planeGeometry args={[1.38, 0.9]} />
-          <meshStandardMaterial
-            color="#fbf8f1"
-            emissive="#fff6e8"
-            emissiveIntensity={hovered ? 0.65 : 0.4}
+        {/* the whole website mock, in one map — a backlit screen, so it is
+            unlit basic; hover just brightens it */}
+        <mesh position={[0, LAPTOP_SCREEN.y, 0.028]}>
+          <planeGeometry args={[LAPTOP_SCREEN.w, LAPTOP_SCREEN.h]} />
+          <meshBasicMaterial
+            map={laptopScreenTexture()}
+            color={hovered ? "#ffffff" : "#ddd9d1"}
           />
-        </mesh>
-        {/* browser chrome: berry bar, traffic lights, URL pill */}
-        <mesh position={[0, 0.925, 0.03]}>
-          <planeGeometry args={[1.38, 0.11]} />
-          <meshBasicMaterial color={P.berry} />
-        </mesh>
-        {[-0.62, -0.57, -0.52].map((x, i) => (
-          <mesh key={i} position={[x, 0.925, 0.032]}>
-            <circleGeometry args={[0.013, 12]} />
-            <meshBasicMaterial color="#fbf8f1" />
-          </mesh>
-        ))}
-        <mesh position={[0.02, 0.925, 0.032]}>
-          <planeGeometry args={[0.52, 0.045]} />
-          <meshBasicMaterial color="#d24f80" />
-        </mesh>
-        {/* hero: headline, sub, CTA, art blob */}
-        <mesh position={[0, 0.73, 0.03]}>
-          <planeGeometry args={[1.38, 0.28]} />
-          <meshBasicMaterial color={P.indigo} />
-        </mesh>
-        <mesh position={[-0.28, 0.79, 0.032]}>
-          <planeGeometry args={[0.56, 0.032]} />
-          <meshBasicMaterial color="#fbf8f1" />
-        </mesh>
-        <mesh position={[-0.36, 0.735, 0.032]}>
-          <planeGeometry args={[0.4, 0.024]} />
-          <meshBasicMaterial color="#c9cfe6" />
-        </mesh>
-        <mesh position={[-0.47, 0.665, 0.032]}>
-          <planeGeometry args={[0.18, 0.05]} />
-          <meshBasicMaterial color={P.marigold} />
-        </mesh>
-        <mesh position={[0.44, 0.73, 0.032]}>
-          <circleGeometry args={[0.095, 24]} />
-          <meshBasicMaterial color={P.blush} />
-        </mesh>
-        <mesh position={[0.5, 0.77, 0.033]}>
-          <circleGeometry args={[0.045, 20]} />
-          <meshBasicMaterial color={P.marigold} />
-        </mesh>
-        {/* three feature cards: image strip + two text lines each */}
-        {MOCK_CARDS.map(([x, c]) => (
-          <group key={x} position={[x, 0.4, 0]}>
-            <mesh position={[0, 0, 0.03]}>
-              <planeGeometry args={[0.4, 0.32]} />
-              <meshBasicMaterial color="#f1ece0" />
-            </mesh>
-            <mesh position={[0, 0.085, 0.032]}>
-              <planeGeometry args={[0.4, 0.15]} />
-              <meshBasicMaterial color={c} />
-            </mesh>
-            <mesh position={[-0.045, -0.035, 0.032]}>
-              <planeGeometry args={[0.29, 0.02]} />
-              <meshBasicMaterial color="#7a7466" />
-            </mesh>
-            <mesh position={[-0.085, -0.085, 0.032]}>
-              <planeGeometry args={[0.21, 0.016]} />
-              <meshBasicMaterial color="#a8a191" />
-            </mesh>
-          </group>
-        ))}
-        {/* footer */}
-        <mesh position={[0, 0.135, 0.03]}>
-          <planeGeometry args={[1.38, 0.11]} />
-          <meshBasicMaterial color={P.navy} />
-        </mesh>
-        <mesh position={[-0.5, 0.135, 0.032]}>
-          <planeGeometry args={[0.3, 0.018]} />
-          <meshBasicMaterial color="#4a5470" />
         </mesh>
       </group>
     </group>
@@ -327,132 +225,38 @@ export function Laptop({ hovered }: { hovered: boolean }) {
 
 /* ------------------------------- Markets ------------------------------ */
 
-type Candle = { x: number; h: number; y: number; up: boolean };
-const CANDLES: Candle[] = [
-  { x: -0.65, h: 0.16, y: -0.22, up: true },
-  { x: -0.505, h: 0.22, y: -0.16, up: true },
-  { x: -0.36, h: 0.14, y: -0.2, up: false },
-  { x: -0.215, h: 0.26, y: -0.08, up: true },
-  { x: -0.07, h: 0.18, y: -0.12, up: false },
-  { x: 0.075, h: 0.3, y: 0.0, up: true },
-  { x: 0.22, h: 0.2, y: -0.04, up: false },
-  { x: 0.365, h: 0.34, y: 0.1, up: true },
-  { x: 0.51, h: 0.26, y: 0.16, up: true },
-  { x: 0.655, h: 0.4, y: 0.24, up: true },
-];
-
-// moving-average polyline through the candle centers (marigold, above closes)
-const MA_SEGMENTS = CANDLES.slice(1).map((c, i) => {
-  const prev = CANDLES[i];
-  const x0 = prev.x;
-  const y0 = prev.y + 0.06;
-  const x1 = c.x;
-  const y1 = c.y + 0.06;
-  return {
-    x: (x0 + x1) / 2,
-    y: (y0 + y1) / 2,
-    len: Math.hypot(x1 - x0, y1 - y0),
-    rot: Math.atan2(y1 - y0, x1 - x0),
-  };
-});
-
 export function Ticker({ hovered }: { hovered: boolean }) {
-  const glow = hovered ? 1.4 : 0.9;
   return (
     <group rotation={[0, 0.12, 0]}>
       {/* stand */}
       <mesh castShadow position={[0, 0.03, 0]}>
-        <cylinderGeometry args={[0.3, 0.34, 0.06, 32]} />
+        <cylinderGeometry args={[0.3, 0.34, 0.06, 18]} />
         <meshStandardMaterial color={P.charcoal} roughness={0.5} metalness={0.3} />
       </mesh>
-      <RoundedBox castShadow args={[0.12, 0.5, 0.09]} radius={0.02} position={[0, 0.3, 0]}>
+      <SoftBox castShadow args={[0.12, 0.5, 0.09]} radius={0.02} position={[0, 0.3, 0]}>
         <meshStandardMaterial color={P.charcoal} roughness={0.5} metalness={0.3} />
-      </RoundedBox>
+      </SoftBox>
 
       {/* head */}
       <group position={[0, 0.98, 0]}>
-        <RoundedBox castShadow args={[1.72, 1.06, 0.08]} radius={0.03}>
+        <SoftBox castShadow args={[1.72, 1.06, 0.08]} radius={0.03}>
           <meshStandardMaterial color={P.charcoal} roughness={0.45} metalness={0.3} />
-        </RoundedBox>
+        </SoftBox>
+
+        {/* grid, candles, volume, moving average — one map, tone mapping off
+            so the greens keep their neon punch */}
         <mesh position={[0, 0, 0.045]}>
-          <planeGeometry args={[1.6, 0.94]} />
-          <meshBasicMaterial color={P.navy} />
-        </mesh>
-        {/* grid: horizontals + verticals + right-edge price ticks */}
-        {[-0.26, 0, 0.26].map((y, i) => (
-          <mesh key={i} position={[0, y, 0.047]}>
-            <planeGeometry args={[1.52, 0.005]} />
-            <meshBasicMaterial color="#242c48" />
-          </mesh>
-        ))}
-        {[-0.48, -0.16, 0.16, 0.48].map((x, i) => (
-          <mesh key={i} position={[x, 0, 0.0465]}>
-            <planeGeometry args={[0.004, 0.86]} />
-            <meshBasicMaterial color="#1d2440" />
-          </mesh>
-        ))}
-        {[-0.26, 0, 0.26, 0.38].map((y, i) => (
-          <mesh key={i} position={[0.735, y, 0.048]}>
-            <planeGeometry args={[0.05, 0.01]} />
-            <meshBasicMaterial color="#3c4670" />
-          </mesh>
-        ))}
-        {/* legend chips + live price readout */}
-        <mesh position={[-0.62, 0.38, 0.048]}>
-          <planeGeometry args={[0.16, 0.05]} />
-          <meshBasicMaterial color={P.green} toneMapped={false} />
-        </mesh>
-        <mesh position={[-0.44, 0.38, 0.048]}>
-          <planeGeometry args={[0.12, 0.04]} />
-          <meshBasicMaterial color={P.marigold} toneMapped={false} />
-        </mesh>
-        <mesh position={[0.52, 0.38, 0.048]}>
-          <planeGeometry args={[0.2, 0.045]} />
-          <meshStandardMaterial
-            color={P.green}
-            emissive={P.green}
-            emissiveIntensity={glow}
+          <planeGeometry args={[TICKER_SCREEN.w, TICKER_SCREEN.h]} />
+          <meshBasicMaterial
+            map={tickerScreenTexture()}
             toneMapped={false}
+            color={hovered ? "#ffffff" : "#cdcdcd"}
           />
         </mesh>
-        {/* volume bars along the bottom */}
-        {CANDLES.map((c, i) => (
-          <mesh key={i} position={[c.x, -0.4 + (0.04 + (i % 4) * 0.02) / 2, 0.048]}>
-            <planeGeometry args={[0.05, 0.04 + (i % 4) * 0.02]} />
-            <meshBasicMaterial color={c.up ? "#1f6b52" : "#7c3a33"} />
-          </mesh>
-        ))}
-        {/* candles + wicks */}
-        {CANDLES.map((c, i) => {
-          const color = c.up ? P.green : P.red;
-          return (
-            <group key={i} position={[c.x, c.y, 0]}>
-              <mesh position={[0, 0, 0.049]}>
-                <planeGeometry args={[0.012, c.h + 0.14]} />
-                <meshBasicMaterial color={color} toneMapped={false} />
-              </mesh>
-              <mesh position={[0, 0, 0.05]}>
-                <boxGeometry args={[0.072, c.h, 0.008]} />
-                <meshStandardMaterial
-                  color={color}
-                  emissive={color}
-                  emissiveIntensity={glow}
-                  toneMapped={false}
-                />
-              </mesh>
-            </group>
-          );
-        })}
-        {/* moving-average line over the candles */}
-        {MA_SEGMENTS.map((s, i) => (
-          <mesh key={i} position={[s.x, s.y, 0.052]} rotation={[0, 0, s.rot]}>
-            <planeGeometry args={[s.len, 0.011]} />
-            <meshBasicMaterial color={P.marigold} toneMapped={false} />
-          </mesh>
-        ))}
-        {/* power LED */}
+
+        {/* power LED, on the bezel below the panel */}
         <mesh position={[0.78, -0.49, 0.046]}>
-          <circleGeometry args={[0.012, 10]} />
+          <circleGeometry args={[0.012, 8]} />
           <meshStandardMaterial
             color={P.green}
             emissive={P.green}
@@ -473,22 +277,22 @@ export function GavelMic({ hovered }: { hovered: boolean }) {
     <group>
       {/* sound block with a brass rim */}
       <mesh castShadow receiveShadow position={[0.35, 0.045, 0.25]}>
-        <cylinderGeometry args={[0.3, 0.33, 0.09, 32]} />
+        <cylinderGeometry args={[0.3, 0.33, 0.09, 20]} />
         <meshStandardMaterial color={P.walnut} roughness={0.6} />
       </mesh>
       <mesh castShadow position={[0.35, 0.115, 0.25]}>
-        <cylinderGeometry args={[0.235, 0.235, 0.05, 32]} />
+        <cylinderGeometry args={[0.235, 0.235, 0.05, 20]} />
         <meshStandardMaterial color="#8f5a30" roughness={0.55} />
       </mesh>
       <mesh position={[0.35, 0.14, 0.25]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.235, 0.011, 10, 40]} />
+        <torusGeometry args={[0.235, 0.011, 6, 24]} />
         <meshStandardMaterial color={P.brass} roughness={0.3} metalness={0.75} />
       </mesh>
 
       {/* gavel resting across the block */}
       <group position={[0.32, 0.28, 0.18]} rotation={[0.06, 0.55, 0.16]}>
         <mesh castShadow rotation={[0, 0, Math.PI / 2]}>
-          <cylinderGeometry args={[0.125, 0.125, 0.4, 24]} />
+          <cylinderGeometry args={[0.125, 0.125, 0.4, 16]} />
           <meshStandardMaterial
             color="#8a5a33"
             emissive={P.marigold}
@@ -499,33 +303,33 @@ export function GavelMic({ hovered }: { hovered: boolean }) {
         {/* brass bands around the head */}
         {[-0.09, 0.09].map((x, i) => (
           <mesh key={i} position={[x, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
-            <cylinderGeometry args={[0.128, 0.128, 0.024, 24]} />
+            <cylinderGeometry args={[0.128, 0.128, 0.024, 16]} />
             <meshStandardMaterial color={P.brass} roughness={0.3} metalness={0.75} />
           </mesh>
         ))}
         {[-0.15, 0.15].map((x, i) => (
           <mesh key={i} castShadow position={[x, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
-            <cylinderGeometry args={[0.138, 0.138, 0.05, 24]} />
+            <cylinderGeometry args={[0.138, 0.138, 0.05, 16]} />
             <meshStandardMaterial color="#5e3a1c" roughness={0.5} />
           </mesh>
         ))}
         {[-0.215, 0.215].map((x, i) => (
           <mesh key={i} position={[x, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
-            <cylinderGeometry args={[0.095, 0.095, 0.035, 24]} />
+            <cylinderGeometry args={[0.095, 0.095, 0.035, 16]} />
             <meshStandardMaterial color="#5e3a1c" roughness={0.5} />
           </mesh>
         ))}
         {/* handle: perpendicular to the head, angled slightly down to the desk */}
         <mesh castShadow position={[0, -0.04, 0.36]} rotation={[Math.PI / 2 + 0.12, 0, 0]}>
-          <cylinderGeometry args={[0.034, 0.042, 0.62, 16]} />
+          <cylinderGeometry args={[0.034, 0.042, 0.62, 12]} />
           <meshStandardMaterial color={P.walnutLight} roughness={0.55} />
         </mesh>
         <mesh position={[0, -0.016, 0.13]} rotation={[Math.PI / 2 + 0.12, 0, 0]}>
-          <cylinderGeometry args={[0.038, 0.038, 0.02, 16]} />
+          <cylinderGeometry args={[0.038, 0.038, 0.02, 12]} />
           <meshStandardMaterial color={P.brass} roughness={0.3} metalness={0.75} />
         </mesh>
         <mesh castShadow position={[0, -0.08, 0.68]}>
-          <sphereGeometry args={[0.055, 16, 16]} />
+          <sphereGeometry args={[0.055, 12, 8]} />
           <meshStandardMaterial color={P.walnutLight} roughness={0.55} />
         </mesh>
       </group>
@@ -533,12 +337,12 @@ export function GavelMic({ hovered }: { hovered: boolean }) {
       {/* studio microphone */}
       <group position={[-0.52, 0, -0.12]}>
         <mesh castShadow position={[0, 0.035, 0]}>
-          <cylinderGeometry args={[0.19, 0.22, 0.07, 32]} />
+          <cylinderGeometry args={[0.19, 0.22, 0.07, 20]} />
           <meshStandardMaterial color={P.charcoal} roughness={0.45} metalness={0.35} />
         </mesh>
         {/* on-air LED + mute button on the base */}
         <mesh position={[0.13, 0.072, 0.1]} rotation={[-Math.PI / 2, 0, 0]}>
-          <circleGeometry args={[0.016, 12]} />
+          <circleGeometry args={[0.016, 10]} />
           <meshStandardMaterial
             color={P.red}
             emissive={P.red}
@@ -547,21 +351,21 @@ export function GavelMic({ hovered }: { hovered: boolean }) {
           />
         </mesh>
         <mesh position={[0.06, 0.072, 0.135]}>
-          <cylinderGeometry args={[0.02, 0.02, 0.012, 14]} />
+          <cylinderGeometry args={[0.02, 0.02, 0.012, 10]} />
           <meshStandardMaterial color={P.slate} roughness={0.4} />
         </mesh>
         {/* stem + joint collar */}
         <mesh castShadow position={[0.045, 0.42, 0]} rotation={[0, 0, -0.12]}>
-          <cylinderGeometry args={[0.022, 0.022, 0.72, 14]} />
+          <cylinderGeometry args={[0.022, 0.022, 0.72, 10]} />
           <meshStandardMaterial color={P.slate} roughness={0.4} metalness={0.5} />
         </mesh>
         <mesh position={[0.088, 0.755, 0]} rotation={[0, 0, -0.12]}>
-          <cylinderGeometry args={[0.032, 0.032, 0.045, 12]} />
+          <cylinderGeometry args={[0.032, 0.032, 0.045, 10]} />
           <meshStandardMaterial color={P.brass} roughness={0.35} metalness={0.7} />
         </mesh>
         {/* capsule with grill rings */}
         <mesh castShadow position={[0.095, 0.82, 0]}>
-          <sphereGeometry args={[0.115, 24, 24]} />
+          <sphereGeometry args={[0.115, 16, 12]} />
           <meshStandardMaterial
             color="#23252c"
             emissive={P.marigold}
@@ -573,13 +377,13 @@ export function GavelMic({ hovered }: { hovered: boolean }) {
         {[-0.03, 0.02, 0.07].map((y, i) => (
           <mesh key={i} position={[0.095, 0.82 + y, 0]} rotation={[Math.PI / 2, 0, 0]}>
             <torusGeometry
-              args={[Math.sqrt(Math.max(0.115 ** 2 - y ** 2, 0.001)) + 0.004, 0.004, 8, 28]}
+              args={[Math.sqrt(Math.max(0.115 ** 2 - y ** 2, 0.001)) + 0.004, 0.004, 5, 16]}
             />
             <meshStandardMaterial color="#4a4e5a" roughness={0.35} metalness={0.6} />
           </mesh>
         ))}
         <mesh position={[0.095, 0.82, 0]} rotation={[Math.PI / 2.4, 0, 0]}>
-          <torusGeometry args={[0.118, 0.014, 10, 28]} />
+          <torusGeometry args={[0.118, 0.014, 6, 20]} />
           <meshStandardMaterial color={P.berry} roughness={0.5} />
         </mesh>
       </group>

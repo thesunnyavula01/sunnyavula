@@ -145,6 +145,47 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 
 ## Build phases
 
+> **Status (2026-07-23, latest+2): desk load-time pass — bundle + first-frame cost.**
+> Audited why the WebGL desk took seconds to appear. Four causes, all fixed:
+> **(1) drei `<Environment>`/`<Lightformer>`** pulled `three-stdlib`'s RGBE/EXR loaders and
+> `@monogrid/gainmap-js` into the home bundle — never called, since the lightformers were
+> local — and rendered a six-face cube target at startup. Replaced by `components/desk/env.ts`,
+> a 64×32 equirect canvas that three PMREM-filters automatically for the metals. drei chunk
+> 99 kB raw / 35 kB gz → 48 kB / 17 kB.
+> **(2) drei `<Preload all/>`** did `gl.compile()` *and* drove a `CubeCamera` over the whole
+> scene — six extra full-scene renders synchronously in a layout effect before the first frame
+> could paint. Removed; every object is visible at stop 0, so frame 1 compiles the same
+> programs. **Do not reintroduce `<Preload all/>` here.**
+> **(3) ~95 flat meshes** drew 2D artwork (laptop website mock, ticker chart, printed page),
+> each its own geometry + material + draw call, all built on the main thread. Now painted once
+> into canvases in `components/desk/screens.ts` and applied as one map each; the painters reuse
+> the *same local coordinates* as the old meshes, so the layout maps 1:1 against the old markup.
+> Only things with real depth (chart bars, paperclip, power LED, webcam) are still geometry.
+> **(4) 29 drei `<RoundedBox>`** — each one is a `Shape` + `ExtrudeGeometry` (it doubles
+> `bevelSegments` internally) + `toCreasedNormals`, per instance, at mount.
+> `components/desk/SoftBox.tsx` halves that profile; props whose rounding cannot be read
+> (paper sheets, blotter, trackpad) are plain `<boxGeometry>`. Segment counts cut throughout
+> (spheres 20→14, cylinders 32→18, torus 64→24).
+> Also: the first frame renders at **dpr 1** and the real dpr is restored one frame later under
+> the poster's 700ms crossfade (`ProgressiveDpr`); the directional shadow map bakes over 3
+> frames then **freezes** (`shadowBus.ts` lets `<Hotspot>` poke it back on while a hover lift
+> animates); wood texture 1024×512 → 512×256, anisotropy 16→8.
+> Measured in-pane via the rafshim procedure below: **draw calls 304 → 214 (133 in the
+> frozen-shadow steady state), triangles ~119k → 37k, shader programs 37 → 26**, zero console
+> errors, all five stops captured and verified.
+> **Poster:** 155 kB → **43 kB** (1920×810, q76) with a 363-byte blur data-URI inlined into the
+> SSR HTML via `placeholder="blur"`, plus an explicit hoisted
+> `<link rel="preload" as="image" fetchPriority="high">` in `app/page.tsx` — next/image's
+> `priority` does **not** emit one, so the poster was queueing behind ~400 kB of scene JS.
+> `desk-poster.webp` also joins `/_next/static/*` in skipping `run_worker_first`.
+> Home-page First Load JS 421 kB gz → 404 kB gz. **three.js itself (183 kB gz) is a hard floor:
+> `@react-three/fiber` calls `extend(THREE)` on the entire namespace at module scope, so the
+> library can never be tree-shaken while R3F's JSX element names are used.** The poster is
+> therefore what makes the desk feel instant on a slow link; the live scene takes over as soon
+> as three.js lands. `DeskCanvas` stays a *static* import on purpose — going back to
+> `next/dynamic` would serialize the three.js fetch after hydration. Live deploy predates this —
+> run `npm run deploy`.
+>
 > **Status (2026-07-23, latest+1): instant-desk poster.** The deployed desk appeared seconds
 > after the copy card (canvas waits on JS download + hydration + ~37 shader compiles). Fix:
 > `public/desk-poster.webp` — a REAL 2560×1080 alpha-transparent capture of the WebGL scene at
