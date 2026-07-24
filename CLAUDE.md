@@ -152,7 +152,11 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 > `app/page.tsx`. `ProgressiveDpr` stays (first frame at dpr 1, real dpr one frame later) since
 > it now purely accelerates the real first frame. `public/desk-poster.webp` is kept — the
 > ≤640px / no-WebGL `FallbackHero` still uses it (with the inlined blur), so recapture it after
-> scene changes per the procedure below.
+> scene changes per the procedure below. Follow-up: a **loading label** replaces it — a berry
+> pulsing dot + "Building the desk…" in the mono/uppercase deck style, server-rendered inside
+> the canvas wrapper so it paints with the page, fading out over 300ms when the canvas draws
+> (`FirstFrame`/`onFirstFrame` re-added for that signal). The copy card, dots and bottom links
+> stay visible the whole time; the label only occupies the empty canvas area.
 >
 > **Status (2026-07-23, latest+2): desk load-time pass — bundle + first-frame cost.**
 > Audited why the WebGL desk took seconds to appear. Four causes, all fixed:

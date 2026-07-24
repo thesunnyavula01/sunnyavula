@@ -102,6 +102,10 @@ export function DeskScene() {
   // Gate WebGL to client-only (mirrors the old dynamic ssr:false). The canvas
   // code is now preloaded with the page; it just mounts after hydration.
   const [mounted, setMounted] = useState(false);
+  // True once the canvas has drawn its first frame. Until then the loading
+  // label below sits in the empty canvas area so the wait reads as "the desk
+  // is coming" rather than as a blank gradient.
+  const [live, setLive] = useState(false);
 
   const fallback = !webgl || small;
 
@@ -289,8 +293,31 @@ export function DeskScene() {
             active={stop - 1}
             reduced={reduced}
             paused={hidden}
+            onFirstFrame={() => setLive(true)}
           />
         )}
+        {/* Loading label. Plain server-rendered HTML, so it is on screen with
+            the first paint — long before three.js has downloaded, hydrated and
+            compiled its shaders — and fades out the moment the canvas draws.
+            It only covers the empty canvas area; the copy card, dots and
+            bottom links stay readable throughout. */}
+        <div
+          className={`pointer-events-none absolute inset-0 flex items-center justify-center transition-opacity duration-300 ease-out ${
+            live ? "opacity-0" : "opacity-100"
+          }`}
+        >
+          <p
+            role="status"
+            className="flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.3em] text-neutral-400"
+          >
+            <span
+              aria-hidden="true"
+              className="block h-1.5 w-1.5 rounded-full motion-safe:animate-pulse"
+              style={{ backgroundColor: PALETTE.berryLight }}
+            />
+            Building the desk…
+          </p>
+        </div>
       </div>
 
       <MotionConfig reducedMotion="user">

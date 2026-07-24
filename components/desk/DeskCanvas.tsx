@@ -48,6 +48,19 @@ const POSITIONS: [number, number, number][] = [
 ];
 const RING_RADII = [1.0, 1.15, 1.05, 1.05];
 
+// Fires `onFirstFrame` one rAF after the first rendered frame, i.e. once the
+// scene is actually on screen — DeskScene uses it to fade out the loading
+// label that stands in while three.js downloads and the shaders compile.
+function FirstFrame({ onFirstFrame }: { onFirstFrame?: () => void }) {
+  const done = useRef(false);
+  useFrame(() => {
+    if (done.current) return;
+    done.current = true;
+    if (onFirstFrame) requestAnimationFrame(() => onFirstFrame());
+  });
+  return null;
+}
+
 // The first frame is the one the user is waiting on, so it renders at dpr 1 —
 // on a 2× display that is a quarter of the pixels, and it is the frame that
 // also pays for every shader compile. The real dpr is restored a frame later,
@@ -112,12 +125,14 @@ export default function DeskCanvas({
   active,
   reduced,
   paused = false,
+  onFirstFrame,
 }: {
   stop: RefObject<number>; // target stop index, 0..4
   orbit: RefObject<OrbitState>; // drag-to-look-around state
   active: number; // -1 = overview, 0..3 = focused section
   reduced: boolean;
   paused?: boolean;
+  onFirstFrame?: () => void; // desk is on screen — safe to drop the loader
 }) {
   const [dpr, setDpr] = useState(1);
   return (
@@ -194,6 +209,7 @@ export default function DeskCanvas({
       />
 
       <ShadowScheduler />
+      <FirstFrame onFirstFrame={onFirstFrame} />
       <ProgressiveDpr onReady={setDpr} />
     </Canvas>
   );
