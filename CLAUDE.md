@@ -406,7 +406,7 @@ Verified from the résumé docs. Use these exact figures.
   (**2.3k+ streams, top 25%**) — https://open.spotify.com/show/4vbP7cvc3Qyb1N96vZN8Me; PMF
   analysis; pitched a **$300k** startup concept. iStartValley Innovator Award & International
   Semifinalist (won $300); Conrad Innovator.
-- NSDA debate (Varsity, School Co-Captain): **960+ NSDA points**; **2x National Qualifier** (World
+- NSDA debate (Varsity, School Co-Captain): **1000+ NSDA points**; **2x National Qualifier** (World
   Schools); Public Forum State Finalist; Academic All-American.
 - American Legion CO Boys State (Senator/Chair, Dir. Econ Relations, Attorney/Judge): chaired a
   Senate committee, sponsored small-biz bills, managed financial-literacy grants, litigated 1st &
@@ -416,7 +416,7 @@ Verified from the résumé docs. Use these exact figures.
 
 **Honors** (rendered inside the Leadership & Policy page)
 - Congressional Award **Silver Medalist** & STEM Star; President's Volunteer Service **Gold**;
-  AP Scholar; Dean's List.
+  AP Scholar; 6× Dean's List.
 
 **Links**
 - GitHub: https://github.com/divcollective01
