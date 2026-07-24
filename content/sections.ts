@@ -33,10 +33,16 @@ export const SITE = {
   fullName: 'Abhiram "Sunny" Avula',
   location: "Longmont, Colorado",
   linkedin: "https://www.linkedin.com/in/abhiramavula01/",
+  instagram: "https://www.instagram.com/sunny.avula01/",
   podcast: "https://open.spotify.com/show/4vbP7cvc3Qyb1N96vZN8Me",
   attAgency: "https://attagency.co",
   email: process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "abhiram.avula01@gmail.com",
   github: process.env.NEXT_PUBLIC_GITHUB_URL ?? "https://github.com/divcollective01",
+  // Shown on the deck's closing contact stop (the phone on the desk). `phone`
+  // is the display form; `phoneHref` is the E.164 tel: target.
+  discord: "avavula01",
+  phone: "720-400-8337",
+  phoneHref: "tel:+17204008337",
   // Canonical production origin — hardcoded on purpose. Metadata, sitemap,
   // robots, and canonical tags must always emit this domain, never the
   // *.workers.dev origin (duplicate content) or a stale env value.

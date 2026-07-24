@@ -29,7 +29,7 @@ const personJsonLd = {
     "Public policy",
     "Debate",
   ],
-  sameAs: [SITE.github, SITE.linkedin, SITE.podcast],
+  sameAs: [SITE.github, SITE.linkedin, SITE.instagram, SITE.podcast],
 };
 
 // The landing page IS the desk: a full-viewport, stepped tour. The centered

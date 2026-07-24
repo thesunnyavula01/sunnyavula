@@ -145,6 +145,19 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 
 ## Build phases
 
+> **Status (2026-07-23, latest+4): contact slide — the deck is now SIX stops.** After
+> Leadership the tour pans to the **phone** lying at the near-right corner of the desk
+> (`<Phone position={[2.65, 0, 1.5]} />` in `Desk.tsx`) and the copy card becomes a
+> sarastotey-style **"Contact me."** slide: email, phone, Discord handle, then LinkedIn /
+> GitHub / Instagram links. The phone is deliberately **not** a `<Hotspot>` — contact is a slide
+> on the landing page, not a route, so there is no `/contact` page and nothing to click on the
+> object. `KEYS` in `CameraRig.tsx` gained a 6th keyframe and `STOPS` in `DeskScene.tsx` is now
+> `sections.length + 2` (`CONTACT = STOPS - 1`); the stop dots gained a "Contact" dot (berry, like
+> Home). New `SITE` fields in `content/sections.ts`: `instagram`, `discord`, `phone`,
+> `phoneHref`; `instagram` also joins the Person JSON-LD `sameAs`. The ≤640px / no-WebGL
+> `FallbackHero` carries the same contact block, since it has no deck and `/` hides the footer.
+> Camera framing for the phone stop is untested by eye — nudge `KEYS[5]` if it sits wrong.
+>
 > **Status (2026-07-23, latest+3): poster crossfade removed.** The home page no longer paints
 > `desk-poster.webp` over the canvas and crossfades it out — the WebGL desk renders directly on
 > mount. Gone: the poster overlay + `live` state in `DeskScene.tsx`, `DeskCanvas`'s `FirstFrame`

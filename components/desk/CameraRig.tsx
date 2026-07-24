@@ -4,11 +4,14 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useRef, type RefObject } from "react";
 import * as THREE from "three";
 
-// Camera path through the five stops. Stop 0 is the aerial overview of the
+// Camera path through the six stops. Stop 0 is the aerial overview of the
 // whole island; 1..4 park on each desk object (same order as `sections`),
 // swinging AROUND the desk — left end, front, front-right, right end — so the
-// tour travels around the island. Targets sit slightly LEFT of each object so
-// the object renders right-of-center, clear of the copy card.
+// tour travels around the island. Stop 5 closes on the phone lying at the near
+// right corner of the desk (Desk.tsx: `<Phone position={[2.65, 0, 1.5]} />`)
+// and carries the contact card; the phone is deliberately NOT a hotspot, since
+// contact is a slide on this page, not a route. Targets sit slightly LEFT of
+// each object so the object renders right-of-center, clear of the copy card.
 type Key = { pos: [number, number, number]; target: [number, number, number] };
 
 export const KEYS: Key[] = [
@@ -17,6 +20,7 @@ export const KEYS: Key[] = [
   { pos: [-0.5, 2.3, 3.6], target: [-1.65, 0.4, 0.3] }, // laptop, from the front
   { pos: [2.9, 2.7, 2.7], target: [0.85, 0.8, -0.8] }, // monitor, front-right
   { pos: [4.7, 2.2, 2.9], target: [2.55, 0.3, 0.3] }, // gavel + mic, right end
+  { pos: [3.15, 1.55, 3.4], target: [2.1, 0.1, 1.4] }, // phone, near corner — contact
 ];
 
 export const STOP_COUNT = KEYS.length;
@@ -39,7 +43,7 @@ const tgtCurve = new THREE.CatmullRomCurve3(
 
 const UP = new THREE.Vector3(0, 1, 0);
 
-// `stop` holds the TARGET stop index (0..4); the rig glides toward it along a
+// `stop` holds the TARGET stop index (0..5); the rig glides toward it along a
 // catmull-rom path with damped easing, then applies the user's drag-orbit
 // (azimuth + pitch around the current target) and a soft pointer parallax.
 export function CameraRig({

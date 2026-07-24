@@ -16,9 +16,10 @@ import DeskCanvas from "./DeskCanvas";
 // gated behind `mounted`, so WebGL never runs on the server, and three.js stays
 // out of the subpage bundles because only the home page imports DeskScene.
 
-// Stops: 0 = aerial overview / intro, 1..4 = one per section (must stay in sync
-// with the camera keyframes in CameraRig.tsx).
-const STOPS = sections.length + 1;
+// Stops: 0 = aerial overview / intro, 1..4 = one per section, 5 = the contact
+// slide on the phone (must stay in sync with KEYS in CameraRig.tsx).
+const STOPS = sections.length + 2;
+const CONTACT = STOPS - 1;
 
 const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -76,6 +77,42 @@ function FallbackHero() {
           </Link>
         ))}
       </nav>
+      {/* The deck's closing contact stop has no equivalent here (and the global
+          footer is hidden on "/"), so the same details ride along with the
+          fallback hero. */}
+      <div className="space-y-3">
+        <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-neutral-500">
+          Contact
+        </p>
+        <p className="text-sm text-neutral-300">
+          <a href={`mailto:${SITE.email}`} className="underline underline-offset-4">
+            {SITE.email}
+          </a>
+          <span className="mx-2 text-neutral-600">·</span>
+          <a href={SITE.phoneHref} className="underline underline-offset-4">
+            {SITE.phone}
+          </a>
+          <span className="mx-2 text-neutral-600">·</span>
+          Discord: {SITE.discord}
+        </p>
+        <p className="flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm font-semibold text-[#e8548a]">
+          {[
+            { label: "LinkedIn", href: SITE.linkedin },
+            { label: "GitHub", href: SITE.github },
+            { label: "Instagram", href: SITE.instagram },
+          ].map((l) => (
+            <a
+              key={l.label}
+              href={l.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline decoration-2 underline-offset-4"
+            >
+              {l.label}
+            </a>
+          ))}
+        </p>
+      </div>
     </div>
   );
 }
@@ -263,8 +300,10 @@ export function DeskScene() {
 
   if (fallback) return <FallbackHero />;
 
-  const section = stop > 0 ? sections[stop - 1] : null;
-  const accent = stop > 0 ? ACCENTS[stop - 1] : PALETTE.berryLight;
+  const isContact = stop === CONTACT;
+  const section = stop > 0 && !isContact ? sections[stop - 1] : null;
+  const accent =
+    section === null ? PALETTE.berryLight : ACCENTS[stop - 1];
 
   return (
     <section
@@ -278,7 +317,7 @@ export function DeskScene() {
       <div
         className={`absolute inset-0 ${grabbing ? "cursor-grabbing" : "cursor-grab"}`}
         role="img"
-        aria-label="Interactive 3D desk in a study corner — each object opens a section: papers for Research, laptop for ATT Agency, trading monitor for Markets, gavel and microphone for Leadership. Drag to look around."
+        aria-label="Interactive 3D desk in a study corner — each object opens a section: papers for Research, laptop for ATT Agency, trading monitor for Markets, gavel and microphone for Leadership, and the phone closes the tour on contact details. Drag to look around."
         onPointerDown={(e) => {
           if (e.pointerType === "touch") return;
           dragLast.current = { x: e.clientX, y: e.clientY };
@@ -290,7 +329,7 @@ export function DeskScene() {
           <DeskCanvas
             stop={stopRef}
             orbit={orbit}
-            active={stop - 1}
+            active={isContact ? -1 : stop - 1}
             reduced={reduced}
             paused={hidden}
             onFirstFrame={() => setLive(true)}
@@ -339,7 +378,71 @@ export function DeskScene() {
                 {pad(stop + 1)} / {pad(STOPS)}
               </p>
 
-              {section === null ? (
+              {isContact ? (
+                <>
+                  <p
+                    className="mt-4 text-xs font-bold uppercase tracking-[0.25em]"
+                    style={{ color: accent }}
+                  >
+                    {SITE.location} to anywhere
+                  </p>
+                  <h2 className="mt-3 text-4xl font-bold leading-[1.05] tracking-tight text-neutral-50 sm:text-5xl">
+                    Contact me.
+                  </h2>
+                  <dl className="mt-5 space-y-2.5 text-sm">
+                    <div className="flex gap-3">
+                      <dt className="w-16 shrink-0 font-mono text-[11px] uppercase tracking-[0.2em] text-neutral-500">
+                        Email
+                      </dt>
+                      <dd>
+                        <a
+                          href={`mailto:${SITE.email}`}
+                          className="pointer-events-auto text-neutral-200 underline decoration-white/25 underline-offset-4 transition hover:text-white hover:decoration-white/60"
+                        >
+                          {SITE.email}
+                        </a>
+                      </dd>
+                    </div>
+                    <div className="flex gap-3">
+                      <dt className="w-16 shrink-0 font-mono text-[11px] uppercase tracking-[0.2em] text-neutral-500">
+                        Phone
+                      </dt>
+                      <dd>
+                        <a
+                          href={SITE.phoneHref}
+                          className="pointer-events-auto text-neutral-200 underline decoration-white/25 underline-offset-4 transition hover:text-white hover:decoration-white/60"
+                        >
+                          {SITE.phone}
+                        </a>
+                      </dd>
+                    </div>
+                    <div className="flex gap-3">
+                      <dt className="w-16 shrink-0 font-mono text-[11px] uppercase tracking-[0.2em] text-neutral-500">
+                        Discord
+                      </dt>
+                      <dd className="text-neutral-200">{SITE.discord}</dd>
+                    </div>
+                  </dl>
+                  <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-semibold">
+                    {[
+                      { label: "LinkedIn", href: SITE.linkedin },
+                      { label: "GitHub", href: SITE.github },
+                      { label: "Instagram", href: SITE.instagram },
+                    ].map((l) => (
+                      <a
+                        key={l.label}
+                        href={l.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="pointer-events-auto underline decoration-2 underline-offset-4 transition hover:opacity-80"
+                        style={{ color: accent }}
+                      >
+                        {l.label}
+                      </a>
+                    ))}
+                  </div>
+                </>
+              ) : section === null ? (
                 <>
                   <p
                     className="mt-4 text-xs font-bold uppercase tracking-[0.25em]"
@@ -402,9 +505,10 @@ export function DeskScene() {
         {/* vertical stop dots, right edge */}
         <div className="absolute right-4 top-1/2 -translate-y-1/2 sm:right-7">
           <ul className="flex flex-col items-center gap-2.5">
-            {["Home", ...sections.map((s) => s.nav)].map((label, i) => {
+            {["Home", ...sections.map((s) => s.nav), "Contact"].map((label, i) => {
               const isActive = stop === i;
-              const dotAccent = i === 0 ? PALETTE.berryLight : ACCENTS[i - 1];
+              const dotAccent =
+                i === 0 || i === CONTACT ? PALETTE.berryLight : ACCENTS[i - 1];
               return (
                 <li key={label}>
                   <button

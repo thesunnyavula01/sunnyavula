@@ -127,7 +127,7 @@ export default function DeskCanvas({
   paused = false,
   onFirstFrame,
 }: {
-  stop: RefObject<number>; // target stop index, 0..4
+  stop: RefObject<number>; // target stop index, 0..5
   orbit: RefObject<OrbitState>; // drag-to-look-around state
   active: number; // -1 = overview, 0..3 = focused section
   reduced: boolean;
