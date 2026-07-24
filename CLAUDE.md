@@ -145,6 +145,15 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 
 ## Build phases
 
+> **Status (2026-07-23, latest+3): poster crossfade removed.** The home page no longer paints
+> `desk-poster.webp` over the canvas and crossfades it out — the WebGL desk renders directly on
+> mount. Gone: the poster overlay + `live` state in `DeskScene.tsx`, `DeskCanvas`'s `FirstFrame`
+> helper and `onFirstFrame` prop, and the hoisted `<link rel="preload" as="image">` in
+> `app/page.tsx`. `ProgressiveDpr` stays (first frame at dpr 1, real dpr one frame later) since
+> it now purely accelerates the real first frame. `public/desk-poster.webp` is kept — the
+> ≤640px / no-WebGL `FallbackHero` still uses it (with the inlined blur), so recapture it after
+> scene changes per the procedure below.
+>
 > **Status (2026-07-23, latest+2): desk load-time pass — bundle + first-frame cost.**
 > Audited why the WebGL desk took seconds to appear. Four causes, all fixed:
 > **(1) drei `<Environment>`/`<Lightformer>`** pulled `three-stdlib`'s RGBE/EXR loaders and

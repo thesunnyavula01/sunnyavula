@@ -37,19 +37,6 @@ const personJsonLd = {
 export default function Home() {
   return (
     <>
-      {/* The desk poster is the first thing anyone sees on this page — it
-          stands in for the WebGL scene until three.js has downloaded and drawn
-          a frame. next/image's `priority` does not emit a preload link for it,
-          so the browser would only discover it when it reached the <img>, by
-          which point it is queueing behind ~400 kB of scene JavaScript. React
-          hoists this into <head>, so the 43 kB poster starts immediately and
-          at high priority. */}
-      <link
-        rel="preload"
-        as="image"
-        href="/desk-poster.webp"
-        fetchPriority="high"
-      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}

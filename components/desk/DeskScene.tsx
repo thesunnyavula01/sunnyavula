@@ -23,17 +23,15 @@ const STOPS = sections.length + 1;
 const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
 const pad = (n: number) => String(n).padStart(2, "0");
 
-// A 24px-wide encode of the poster, inlined so a desk-shaped blur is present
-// in the server-rendered HTML itself — zero requests, so on a slow link the
-// page is never a flat empty gradient while desk-poster.webp (43 kB) is still
-// in flight. next/image swaps it for the real poster on load, which in turn
-// crossfades to the live canvas.
+// A 24px-wide encode of the hero image, inlined so a desk-shaped blur is
+// present in the server-rendered HTML itself — zero requests, so on a slow link
+// the fallback hero is never a flat empty gradient while desk-poster.webp
+// (43 kB) is still in flight.
 const POSTER_BLUR =
   "data:image/webp;base64,UklGRvYAAABXRUJQVlA4WAoAAAAQAAAAFwAACQAAQUxQSGAAAAARb6C4bSQ1tW+mY4iIgKhWT6dfxt/hprZtJ7pkWupsIHcIoMwgAQO0qMnBBAamTN1/aiY7iOj/BOCvc5804quCEdEZv7jSS/7p8UoC4LBXKoCBXusAussrF4AWtQcjohRWUDggcAAAABAEAJ0BKhgACgA+6WirTqkmJCIwCAEgHQljAABan9lMTRvDPQ+rUMQAAP7uhartqL2DqMhffkkEHRF1lea81RvcYRSqfgAQ5UeQC1rMrXT4HVxxoLjlm1EUUpu54nlsW8sPsIvqIgI7ohsaiP/AAAA=";
 
-// Matches the re-encoded public/desk-poster.webp. The capture is deliberately
-// wide (2.37:1) so object-cover crops the sides exactly the way the camera's
-// vertical fov does at narrower aspects.
+// A real capture of the WebGL scene, used only by the small-viewport /
+// no-WebGL fallback hero below. The live deck renders the 3D desk directly.
 const POSTER = { src: "/desk-poster.webp", width: 1920, height: 810 } as const;
 
 /* ------------------------- fallback (small / no-WebGL) ------------------------- */
@@ -104,11 +102,6 @@ export function DeskScene() {
   // Gate WebGL to client-only (mirrors the old dynamic ssr:false). The canvas
   // code is now preloaded with the page; it just mounts after hydration.
   const [mounted, setMounted] = useState(false);
-  // True once the canvas has drawn its first frame. Until then a static
-  // screenshot of this exact camera stop (the poster) covers the canvas, so
-  // the desk is visible from the server-rendered first paint instead of
-  // appearing seconds later when hydration + shader compilation finish.
-  const [live, setLive] = useState(false);
 
   const fallback = !webgl || small;
 
@@ -296,31 +289,8 @@ export function DeskScene() {
             active={stop - 1}
             reduced={reduced}
             paused={hidden}
-            onFirstFrame={() => setLive(true)}
           />
         )}
-        {/* Poster: a real screenshot of the scene at the overview stop. It is
-            plain server-rendered HTML, so it paints with the page — then
-            crossfades away once the live canvas draws. The inlined blur under
-            it means even the poster's own 43 kB is never a blank wait. */}
-        <div
-          aria-hidden="true"
-          className={`pointer-events-none absolute inset-0 transition-opacity duration-700 ease-out ${
-            live ? "opacity-0" : "opacity-100"
-          }`}
-        >
-          <Image
-            src={POSTER.src}
-            alt=""
-            fill
-            priority
-            unoptimized
-            placeholder="blur"
-            blurDataURL={POSTER_BLUR}
-            sizes="100vw"
-            className="object-cover"
-          />
-        </div>
       </div>
 
       <MotionConfig reducedMotion="user">
