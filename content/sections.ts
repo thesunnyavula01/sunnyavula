@@ -181,10 +181,10 @@ export const sections: Section[] = [
     deskObject: "Gavel + microphone",
     tagline: "Debate, civics, and youth entrepreneurship.",
     blurb:
-      "I am a varsity NSDA debater and school co-captain, a 2x World Schools National Qualifier with 960+ career points. As Senior Director on the iStartValley Youth Committee I launched the iStart Insider podcast and pitched a $300k startup concept, and I have led on the floor and in the courts of American Legion Colorado Boys State, in Economics For Leaders, and through Sewa's Design to Lead, where research turned into real lobbying.",
+      "I am a varsity NSDA debater and school co-captain, a 2x World Schools National Qualifier with 1000+ career points. As Senior Director on the iStartValley Youth Committee I helped launch the iStart Insider podcast and pitched a $300k startup concept, and I have led on the floor and in the courts of American Legion Colorado Boys State, in Economics For Leaders, and through Sewa's Design to Lead, where research turned into real lobbying.",
     stats: [
       { value: "2×", label: "NSDA National Qualifier" },
-      { value: "960+", label: "NSDA points" },
+      { value: "1000+", label: "NSDA points" },
       { value: "2.3k+", label: "iStart Insider streams" },
     ],
     narrative: [
@@ -208,7 +208,7 @@ export const sections: Section[] = [
         kicker: "NSDA Debate · Varsity, School Co-Captain",
         heading: "Debate, and widening the door to it",
         body:
-          "As varsity co-captain I have earned 960+ NSDA points across Public Forum, Congressional, and World Schools, qualified for Nationals twice in World Schools, reached the Public Forum state final, and was named an Academic All-American. As Secretary of the Colorado Chapter of Equality in Forensics, a student-led nonprofit that makes debate more accessible, I helped grow the chapter from 5 members to more than 40.",
+          "As varsity co-captain I have earned 1000+ NSDA points across Public Forum, Congressional, and World Schools, qualified for Nationals twice in World Schools, reached the Public Forum state final, and was named an Academic All-American. As Secretary of the Colorado Chapter of Equality in Forensics, a student-led nonprofit that makes debate more accessible, I helped grow the chapter from 5 members to more than 40.",
         links: [
           {
             label: "Join Equality in Forensics",
@@ -253,7 +253,7 @@ export const sections: Section[] = [
       "Public Forum State Finalist and 4A State Quarterfinalist",
       "iStartValley Innovator Award & International Semifinalist",
       "AP Scholar",
-      "4× Dean's List",
+      "6× Dean's List",
     ],
   },
 ];
