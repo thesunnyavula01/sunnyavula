@@ -112,6 +112,9 @@ function FallbackHero() {
             </a>
           ))}
         </p>
+        <p className="font-mono text-[11px] tracking-wide text-neutral-500">
+          Developed entirely by {SITE.name} · © {new Date().getFullYear()}
+        </p>
       </div>
     </div>
   );
@@ -543,7 +546,8 @@ export function DeskScene() {
           >
             Scroll to explore ↓
           </p>
-          <div className="pointer-events-auto flex items-center gap-4 font-mono text-[11px] tracking-wide text-neutral-400">
+          <div className="pointer-events-auto flex flex-wrap items-center justify-end gap-x-4 gap-y-1 font-mono text-[11px] tracking-wide text-neutral-400">
+            <span>Developed entirely by {SITE.name}</span>
             <a
               href={SITE.github}
               target="_blank"

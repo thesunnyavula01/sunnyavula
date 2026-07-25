@@ -49,7 +49,9 @@ Content copy must match the **Content facts** section below (numbers are load-be
    For Leaders, Sewa Design to Lead. Outbound: **iStart Insider** podcast —
    https://open.spotify.com/show/4vbP7cvc3Qyb1N96vZN8Me
 
-**Footer / global:** GitHub → https://github.com/divcollective01 · email → abhiram.avula01@gmail.com
+**Footer / global:** GitHub → https://github.com/thesunnyavula01 · email → abhiram.avula01@gmail.com ·
+credit line "Developed entirely by {SITE.name}" (subpage `Footer`, the deck's bottom-right chrome,
+and the `FallbackHero`)
 
 ---
 
@@ -118,7 +120,7 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 | `NEXT_PUBLIC_SITE_URL`      | **No longer read** — the canonical origin (`https://sunnyavula.com`) is hardcoded as `SITE.url` in `content/sections.ts` so sitemap/canonicals/OG can never emit the workers.dev host |
 | `NEXT_PUBLIC_SITE_NAME`     | Display name in hero + `<title>`                   |
 | `NEXT_PUBLIC_CONTACT_EMAIL` | `mailto:` link target                              |
-| `NEXT_PUBLIC_GITHUB_URL`    | GitHub profile link in footer (`divcollective01`)  |
+| `NEXT_PUBLIC_GITHUB_URL`    | GitHub profile link in footer (`thesunnyavula01`)  |
 
 **Deployment (Wrangler reads these from the environment — keep in CI secrets, never commit real values):**
 
@@ -456,7 +458,7 @@ Verified from the résumé docs. Use these exact figures.
   AP Scholar; 6× Dean's List.
 
 **Links**
-- GitHub: https://github.com/divcollective01
+- GitHub: https://github.com/thesunnyavula01
 - Email: abhiram.avula01@gmail.com
 - ATT Agency: https://attagency.co
 - iStart Insider podcast: https://open.spotify.com/show/4vbP7cvc3Qyb1N96vZN8Me
@@ -471,5 +473,5 @@ Verified from the résumé docs. Use these exact figures.
 - **Research PDFs:** same paper — `Northeastern paper` is the main paper, `Northeastern paper 1` is
   its methodology companion. `/research` links both, labeled "Paper" and "Methodology".
 - **Markets:** intentionally link-less for now.
-- Links set: ATT → attagency.co, Leadership → iStart Insider (Spotify), GitHub → divcollective01.
+- Links set: ATT → attagency.co, Leadership → iStart Insider (Spotify), GitHub → thesunnyavula01.
 - **Honors:** live inside the Leadership & Policy page (decided — not a separate footer strip).

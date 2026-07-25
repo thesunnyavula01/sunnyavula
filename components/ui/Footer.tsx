@@ -15,7 +15,8 @@ export function Footer() {
         <span>
           © {new Date().getFullYear()} {SITE.fullName} · {SITE.location}
         </span>
-        <div className="flex gap-4">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+          <span>Developed entirely by {SITE.name}</span>
           <a
             href={SITE.github}
             target="_blank"

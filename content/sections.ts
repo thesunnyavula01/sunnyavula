@@ -51,7 +51,7 @@ export const SITE = {
   podcast: "https://open.spotify.com/show/4vbP7cvc3Qyb1N96vZN8Me",
   attAgency: "https://attagency.co",
   email: process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "abhiram.avula01@gmail.com",
-  github: process.env.NEXT_PUBLIC_GITHUB_URL ?? "https://github.com/divcollective01",
+  github: process.env.NEXT_PUBLIC_GITHUB_URL ?? "https://github.com/thesunnyavula01",
   // Shown on the deck's closing contact stop (the phone on the desk). `phone`
   // is the display form; `phoneHref` is the E.164 tel: target.
   discord: "avavula01",
