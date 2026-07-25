@@ -1,8 +1,19 @@
 @import "tailwindcss";
 
+/* The site is dark-only. The landing deck is a lamp-lit night study rendered in
+   WebGL with a hardcoded palette, so the subpages state their colors
+   unconditionally to match it — `--background` is PALETTE.bg from
+   components/desk/palette.ts.
+
+   Do NOT reintroduce a `prefers-color-scheme: light` branch or gate subpage
+   colors behind Tailwind's `dark:` variant. That variant is media-driven, so on
+   a light-OS visitor every `dark:`-only color silently fell back to its light
+   value while the deck stayed dark — which is exactly why the four subpages
+   rendered white against a dark home page. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
+  --background: #10131c;
+  --foreground: #fafafa;
 }
 
 @theme inline {
@@ -12,15 +23,17 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  background: var(--background);
+  /* Same radial gradient the deck <section> paints on "/", attachment-fixed so
+     it stays viewport-sized instead of stretching over a long subpage. */
+  background-color: var(--background);
+  background-image: radial-gradient(
+    120% 120% at 50% 0%,
+    #1a1f2e 0%,
+    #10131c 55%,
+    #0a0c12 100%
+  );
+  background-attachment: fixed;
   color: var(--foreground);
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
 }

@@ -7,12 +7,10 @@ export function StatBlock({ stats }: { stats: Stat[] }) {
       {stats.map((st) => (
         <div
           key={st.label}
-          className="rounded-lg border border-black/10 p-4 dark:border-white/10"
+          className="rounded-xl border border-white/10 bg-white/[0.03] p-4"
         >
-          <dt className="text-2xl font-bold">{st.value}</dt>
-          <dd className="mt-1 text-xs text-black/50 dark:text-white/50">
-            {st.label}
-          </dd>
+          <dt className="text-2xl font-bold text-neutral-50">{st.value}</dt>
+          <dd className="mt-1 text-xs text-neutral-500">{st.label}</dd>
         </div>
       ))}
     </dl>

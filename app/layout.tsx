@@ -42,11 +42,10 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
+// Dark-only site (see globals.css) — one theme color for both OS schemes so the
+// mobile browser chrome matches the deck's backdrop instead of flashing white.
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
-  ],
+  themeColor: "#10131c",
 };
 
 export default function RootLayout({

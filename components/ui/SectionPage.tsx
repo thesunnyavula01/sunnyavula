@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { MotionConfig, motion, type Variants } from "framer-motion";
-import type { Section } from "@/content/sections";
+import { sections, type Section } from "@/content/sections";
+import { ACCENTS } from "@/components/desk/palette";
 import { SectionHero } from "./SectionHero";
 import { StatBlock } from "./StatBlock";
 
@@ -17,7 +18,7 @@ function BackToDesk({ className = "" }: { className?: string }) {
   return (
     <Link
       href="/"
-      className={`text-sm text-black/50 hover:underline dark:text-white/50 ${className}`}
+      className={`text-sm text-neutral-500 transition hover:text-neutral-200 ${className}`}
     >
       ← Back to the desk
     </Link>
@@ -26,13 +27,21 @@ function BackToDesk({ className = "" }: { className?: string }) {
 
 // Full Phase 2 section subpage: hero + stats + narrative + honors + outbound
 // links + back-to-desk. All copy comes from content/sections.ts.
+//
+// Colors are dark-only and stated outright — see the note in app/globals.css on
+// why nothing here may be gated behind Tailwind's media-driven `dark:` variant.
 export function SectionPage({ section }: { section: Section }) {
+  // ACCENTS is indexed like `sections`, same as the deck's per-stop accent, so
+  // each subpage inherits the color its desk object glows on the landing page.
+  const accentIndex = sections.findIndex((s) => s.slug === section.slug);
+  const accent = ACCENTS[accentIndex] ?? ACCENTS[0];
+
   return (
     <MotionConfig reducedMotion="user">
       <article className="mx-auto max-w-3xl px-4 pb-12 pt-28">
         <motion.div variants={rise} initial="hidden" animate="show">
           <BackToDesk />
-          <SectionHero section={section} />
+          <SectionHero section={section} accent={accent} />
         </motion.div>
 
         <motion.div
@@ -54,18 +63,18 @@ export function SectionPage({ section }: { section: Section }) {
               viewport={inView}
             >
               {block.kicker && (
-                <p className="text-xs uppercase tracking-widest text-black/40 dark:text-white/40">
+                <p className="text-xs uppercase tracking-widest text-neutral-500">
                   {block.kicker}
                 </p>
               )}
-              <h2 className="mt-2 text-2xl font-semibold tracking-tight">
+              <h2 className="mt-2 text-2xl font-semibold tracking-tight text-neutral-50">
                 {block.heading}
               </h2>
-              <p className="mt-3 leading-relaxed text-black/80 dark:text-white/80">
+              <p className="mt-3 leading-relaxed text-neutral-300">
                 {block.body}
               </p>
               {block.bullets && (
-                <ul className="mt-4 space-y-2 border-l border-black/10 pl-5 text-sm text-black/70 dark:border-white/10 dark:text-white/70">
+                <ul className="mt-4 space-y-2 border-l border-white/10 pl-5 text-sm text-neutral-400">
                   {block.bullets.map((b) => (
                     <li key={b}>{b}</li>
                   ))}
@@ -79,7 +88,8 @@ export function SectionPage({ section }: { section: Section }) {
                       href={l.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="rounded-full bg-foreground px-5 py-2 text-sm font-medium text-background transition hover:opacity-90"
+                      className="rounded-full px-5 py-2 text-sm font-semibold text-white shadow-md transition hover:scale-[1.03] hover:opacity-95 active:scale-100"
+                      style={{ backgroundColor: accent }}
                     >
                       {l.label} ↗
                     </a>
@@ -98,14 +108,14 @@ export function SectionPage({ section }: { section: Section }) {
             whileInView="show"
             viewport={inView}
           >
-            <h2 className="text-sm font-semibold uppercase tracking-widest text-black/40 dark:text-white/40">
+            <h2 className="text-sm font-semibold uppercase tracking-widest text-neutral-500">
               Honors
             </h2>
             <ul className="mt-3 grid gap-2 sm:grid-cols-2">
               {section.honors.map((h) => (
                 <li
                   key={h}
-                  className="rounded-lg border border-black/10 px-4 py-3 text-sm text-black/80 dark:border-white/10 dark:text-white/80"
+                  className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-neutral-300"
                 >
                   {h}
                 </li>
@@ -128,7 +138,8 @@ export function SectionPage({ section }: { section: Section }) {
                 href={l.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-full bg-foreground px-5 py-2 text-sm font-medium text-background transition hover:opacity-90"
+                className="rounded-full px-5 py-2 text-sm font-semibold text-white shadow-md transition hover:scale-[1.03] hover:opacity-95 active:scale-100"
+                style={{ backgroundColor: accent }}
               >
                 {l.label} ↗
               </a>
@@ -136,7 +147,7 @@ export function SectionPage({ section }: { section: Section }) {
           </motion.div>
         )}
 
-        <div className="mt-16 border-t border-black/10 pt-6 dark:border-white/10">
+        <div className="mt-16 border-t border-white/10 pt-6">
           <BackToDesk />
         </div>
       </article>

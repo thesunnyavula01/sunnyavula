@@ -147,6 +147,27 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 
 ## Build phases
 
+> **Status (2026-07-25, latest+1): the site is now DARK-ONLY.** The four subpages rendered
+> white on a light-OS machine while the WebGL deck stayed dark, because every subpage color was
+> gated behind Tailwind's `dark:` variant — which is **media-driven** (`prefers-color-scheme`),
+> not class-driven, so it never matched the deck's hardcoded palette. Fix: `globals.css` drops
+> the `prefers-color-scheme: light/dark` branches, sets `color-scheme: dark` and
+> `--background: #10131c` (= `PALETTE.bg`), and paints `body` with the **same radial gradient**
+> the deck `<section>` uses, `background-attachment: fixed` so it stays viewport-sized over a
+> long page. **Never reintroduce a `dark:` variant or a light branch here** — state subpage
+> colors outright. Every `dark:`/`text-black`/`bg-white` pair in `Nav`, `Footer`, `SectionHero`,
+> `StatBlock` and `SectionPage` is now a fixed dark value on the deck's type ramp (accent
+> kicker → `neutral-50` heading → `neutral-300` body → `neutral-500` meta; cards are
+> `border-white/10 bg-white/[0.03]`). Subpages also inherit their **desk accent**: `SectionPage`
+> looks up `ACCENTS[sections.findIndex(...)]` from `components/desk/palette.ts` (a dependency-free
+> module — it pulls no three.js) and uses it for the hero kicker and every outbound pill, which
+> replaces the old `bg-foreground` pills. `viewport.themeColor` is the single value `#10131c`.
+> Subpage First Load JS unchanged at 153 kB. Also in this pass: the footer row is reordered to
+> `GitHub | Email | … | Developed entirely by {name}` with pipe dividers, in both the subpage
+> `Footer` and the deck's bottom-right chrome (the deck one ends `… {year}`; the subpage one
+> omits the year since its left-hand `©` line carries it). Build + lint pass; **not eyeballed in
+> a browser** (no dev server was run). Live deploy predates this — run `npm run deploy`.
+>
 > **Status (2026-07-25): technical SEO pass — per-page metadata, JSON-LD, crawlable desk.**
 > Zero rendered-appearance changes; only `<head>`, JSON-LD, and one visually-hidden nav.
 > **(1) Next merges route metadata SHALLOWLY** — a page-level `openGraph`/`twitter` object
