@@ -546,8 +546,7 @@ export function DeskScene() {
           >
             Scroll to explore ↓
           </p>
-          <div className="pointer-events-auto flex flex-wrap items-center justify-end gap-x-4 gap-y-1 font-mono text-[11px] tracking-wide text-neutral-400">
-            <span>Developed entirely by {SITE.name}</span>
+          <div className="pointer-events-auto flex flex-wrap items-center justify-end gap-x-3 gap-y-1 font-mono text-[11px] tracking-wide text-neutral-400">
             <a
               href={SITE.github}
               target="_blank"
@@ -556,13 +555,21 @@ export function DeskScene() {
             >
               GitHub
             </a>
+            <span aria-hidden="true" className="text-neutral-600">
+              |
+            </span>
             <a
               href={`mailto:${SITE.email}`}
               className="transition hover:text-neutral-100"
             >
               Email
             </a>
-            <span aria-hidden="true">© {new Date().getFullYear()}</span>
+            <span aria-hidden="true" className="text-neutral-600">
+              |
+            </span>
+            <span>
+              Developed entirely by {SITE.name} {new Date().getFullYear()}
+            </span>
           </div>
         </div>
       </MotionConfig>

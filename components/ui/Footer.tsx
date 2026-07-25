@@ -15,8 +15,7 @@ export function Footer() {
         <span>
           © {new Date().getFullYear()} {SITE.fullName} · {SITE.location}
         </span>
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-          <span>Developed entirely by {SITE.name}</span>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <a
             href={SITE.github}
             target="_blank"
@@ -25,9 +24,15 @@ export function Footer() {
           >
             GitHub
           </a>
+          <span aria-hidden="true" className="text-black/25 dark:text-white/25">
+            |
+          </span>
           <a href={`mailto:${SITE.email}`} className="hover:underline">
             Email
           </a>
+          <span aria-hidden="true" className="text-black/25 dark:text-white/25">
+            |
+          </span>
           <a
             href="https://attagency.co"
             target="_blank"
@@ -36,6 +41,11 @@ export function Footer() {
           >
             ATT Agency
           </a>
+          <span aria-hidden="true" className="text-black/25 dark:text-white/25">
+            |
+          </span>
+          {/* year lives in the © line on the left, so it isn't repeated here */}
+          <span>Developed entirely by {SITE.name}</span>
         </div>
       </div>
     </footer>
