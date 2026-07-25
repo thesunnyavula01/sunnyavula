@@ -275,8 +275,8 @@ export const phoneScreenTexture = once(() => {
   }
 
   // the two call buttons
-  p.circle(-0.062, -0.194, 0.032, P.red);
-  p.circle(0.062, -0.194, 0.032, P.green);
+  p.circle(-0.062, -0.194, 0.032, P.green);
+  p.circle(0.062, -0.194, 0.032, P.red);
   handset(p.ctx, X(-0.062), Y(-0.194), 0.03 * sx, Math.PI * 0.78, "#ffffff");
   handset(p.ctx, X(0.062), Y(-0.194), 0.03 * sx, -0.3, "#ffffff");
 
