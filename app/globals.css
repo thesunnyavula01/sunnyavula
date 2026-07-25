@@ -30,6 +30,22 @@ body {
   color: #fff;
 }
 
+/* Visually hidden, but genuinely present for screen readers and crawlers.
+   Used by the crawlable desk-object nav on the landing page. Deliberately NOT
+   display:none / visibility:hidden — both remove the content from the
+   accessibility tree and are discounted by search engines. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+}
+
 /* hover label above desk hotspots (rendered via drei <Html>) */
 .desk-label {
   animation: desk-label-in 240ms cubic-bezier(0.2, 0.8, 0.3, 1) both;

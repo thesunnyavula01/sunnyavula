@@ -145,6 +145,43 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 
 ## Build phases
 
+> **Status (2026-07-25): technical SEO pass — per-page metadata, JSON-LD, crawlable desk.**
+> Zero rendered-appearance changes; only `<head>`, JSON-LD, and one visually-hidden nav.
+> **(1) Next merges route metadata SHALLOWLY** — a page-level `openGraph`/`twitter` object
+> *replaces* the root layout's outright and also drops the `app/opengraph-image.tsx` card
+> (`mergeStaticMetadata` only merges the static file when the segment's own openGraph has no
+> `images` key, and only for the segment the file lives in). So the shared OG/Twitter defaults
+> live in **`content/metadata.ts`** (`OG_DEFAULTS`, `TWITTER_DEFAULTS`) and are **spread** into
+> every page via `pageMetadata()` / `sectionMetadata()`. **Never "inherit" og/twitter from the
+> layout** — a page that sets only og:title silently loses og:image, og:type, og:site_name,
+> og:locale and twitter:card. All five pages now emit self-referential title / description /
+> canonical / og:* / twitter:*.
+> **(2) Titles/descriptions:** `title.default` is `SITE.metaTitle`, template `%s — ${fullName}`;
+> the home page passes `absoluteTitle` so the name isn't doubled. Each section carries its own
+> `metaDescription` (all ≤155 chars, all distinct) in `content/sections.ts`.
+> **(3) JSON-LD** in `content/schema.ts`, rendered by the server component
+> `components/seo/JsonLd.tsx` (escapes `<`). One canonical Person node at
+> `https://sunnyavula.com/#person`; the agency (`ProfessionalService`), the ERTA
+> `ScholarlyArticle`, and `worksFor` all reference it by `@id` instead of restating it. All four
+> subpages carry a `BreadcrumbList`.
+> **(4) Crawlable desk:** the WebGL hotspots are invisible to crawlers and assistive tech, so
+> `app/page.tsx` server-renders a `.visually-hidden` `<nav>` of real `<a href>`s (four sections +
+> mailto + tel + attagency.co — the last also gives `/` the sitewide agency link the hidden
+> footer can't). The `.visually-hidden` class in `globals.css` is `position:absolute;
+> width/height:1px; overflow:hidden; clip-path:inset(50%)` — **never `display:none` or
+> `visibility:hidden`**, which drop it from the a11y tree and are discounted by crawlers.
+> Verified in-pane: 1×1 box at (−1,−1), `visibility:visible`, document scroll size unchanged,
+> links present in the accessibility tree.
+> **(5) Sitemap:** `<priority>`/`<changefreq>` removed (Google ignores both); `<lastmod>` is no
+> longer `new Date()` (an identical, every-build-changing timestamp is what makes Google distrust
+> the field) but hand-maintained per-page `updated` dates in `content/sections.ts`, sourced from
+> `git log -1 --format=%cI -L <start>,<end>:content/sections.ts` — **bump the one you touch when
+> you edit a section's copy**. Both `/papers/*.pdf` added. The home `<loc>` is the bare origin
+> with **no** trailing slash because that is what the canonical actually emits: Next hard-codes
+> `result.pathname === '/' ? result.origin : result.href`, so `https://sunnyavula.com/` is
+> unreachable without `trailingSlash: true` (which would rewrite every subpage to `/research/`).
+> If that's ever wanted, flip `next.config.ts` and `app/sitemap.ts` together.
+>
 > **Status (2026-07-23, latest+4): contact slide — the deck is now SIX stops.** After
 > Leadership the tour pans to the **phone** lying at the near-right corner of the desk
 > (`<Phone position={[2.65, 0, 1.5]} />` in `Desk.tsx`) and the copy card becomes a

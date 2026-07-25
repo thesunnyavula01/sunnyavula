@@ -19,6 +19,20 @@ export type Section = {
   deskObject: string; // the desk hotspot this section maps to (Phase 1)
   tagline: string;
   blurb: string;
+  // <meta name="description"> for this page. Must be DISTINCT per page (a
+  // shared description is a duplicate-content signal) and ≤ ~155 chars so it
+  // isn't truncated in the SERP. Never reuse SITE.metaDescription here.
+  metaDescription: string;
+  // Sitemap <lastmod>, YYYY-MM-DD. Deliberately hand-maintained rather than
+  // `new Date()`: a build timestamp changes on every deploy and is identical
+  // across all URLs, which makes Google distrust and ignore the field. These
+  // are the real dates this section's copy last changed, from:
+  //   git log -1 --format=%cI -L <start>,<end>:content/sections.ts
+  // Bump the one you touch when you edit a section's copy.
+  updated: string;
+  // Short screen-reader/crawler description of the desk object that opens this
+  // section, used by the visually-hidden desk nav on the landing page.
+  deskLinkText: string;
   stats: Stat[];
   narrative: NarrativeBlock[];
   links: OutboundLink[];
@@ -43,6 +57,18 @@ export const SITE = {
   discord: "avavula01",
   phone: "720-400-8337",
   phoneHref: "tel:+17204008337",
+  // Homepage <title>. Subpage titles are `${nav} — ${fullName}` via the title
+  // template in app/layout.tsx.
+  metaTitle: 'Abhiram "Sunny" Avula — Economics Researcher',
+  // Homepage <meta name="description">. Every subpage overrides this with its
+  // own `metaDescription` — it must never be reused.
+  metaDescription:
+    'Abhiram "Sunny" Avula — economics researcher, ATT Agency co-founder, investor, and NSDA debate co-captain in Longmont, Colorado.',
+  // Sitemap <lastmod> for "/" — the desk scene's last real change. See the
+  // `updated` note on the Section type for why these are not build timestamps.
+  updated: "2026-07-25",
+  // Sitemap <lastmod> for the two PDFs under /papers.
+  papersUpdated: "2026-07-22",
   // Canonical production origin — hardcoded on purpose. Metadata, sitemap,
   // robots, and canonical tags must always emit this domain, never the
   // *.workers.dev origin (duplicate content) or a stale env value.
@@ -56,6 +82,11 @@ export const sections: Section[] = [
     title: "Research",
     deskObject: "Stack of papers / notebook",
     tagline: "Econometrics on tax policy and the political economy of peacekeeping.",
+    metaDescription:
+      "Econometric study of the 1981 ERTA's effect on U.S. income disparity, plus CU Boulder research on why autocracies join UN peacekeeping.",
+    updated: "2026-07-23",
+    deskLinkText:
+      "Research — econometrics on tax policy and the political economy of peacekeeping",
     blurb:
       "As team lead at Northeastern, under Prof. Omar Robles, I directed a study of the socioeconomic legacy of the 1981 Economic Recovery Tax Act (ERTA) on U.S. income disparity, running five econometric specifications across 65 years of U.S. data and an 812-observation OECD panel, then turning the findings into a corrective policy proposal. In a separate CU Boulder internship under Prof. Megan Shannon, I examined why autocracies contribute to UN peacekeeping and found that deployments track strategic self-interest over humanitarian need.",
     stats: [
@@ -101,6 +132,11 @@ export const sections: Section[] = [
     title: "ATT Agency",
     deskObject: "Laptop / monitor",
     tagline: "A dev studio modernizing Colorado small businesses.",
+    metaDescription:
+      'ATT Agency, a Colorado dev studio co-founded by Abhiram "Sunny" Avula: four client sites shipped, paid media, and ~$10k projected ARR for FY27.',
+    updated: "2026-07-23",
+    deskLinkText:
+      "ATT Agency — a dev studio modernizing Colorado small businesses",
     blurb:
       "I co-founded ATT Agency to help Colorado small businesses hurt by the digital divide modernize their digital infrastructure. I own the business and accounting side, so when you reach out I am your first point of contact: I handle client calls, scoping, and scheduling, and I make sure every project ships on time. So far we have shipped four sites plus a paid-ad campaign for Thriftly.",
     stats: [
@@ -135,6 +171,11 @@ export const sections: Section[] = [
     title: "Markets",
     deskObject: "Ticker / trading screen",
     tagline: "A value-investing model that beat the S&P 500.",
+    metaDescription:
+      "A value-investing formula at VSD Investments compounding at ~27% CAGR — $35k to $91k, top 8% on Investopedia — plus finance-club leadership.",
+    updated: "2026-07-23",
+    deskLinkText:
+      "Markets — a value-investing model that beat the S&P 500",
     blurb:
       "At VSD Investments I built a value-investing predictive formula that screens for supply bottlenecks in emerging trends, weights entries against Federal Reserve rate cycles, and scores company fundamentals into a composite trustworthiness index. It has compounded at roughly 27% and outpaced the S&P 500, and I carry the same focus on markets into competition and financial-literacy work.",
     stats: [
@@ -180,6 +221,11 @@ export const sections: Section[] = [
     title: "Leadership & Policy",
     deskObject: "Gavel + microphone",
     tagline: "Debate, civics, and youth entrepreneurship.",
+    metaDescription:
+      "2x NSDA National Qualifier and debate co-captain, iStartValley Sr. Director behind the 2.3k-stream iStart Insider podcast, and Boys State senator.",
+    updated: "2026-07-24",
+    deskLinkText:
+      "Leadership & Policy — debate, civics, and youth entrepreneurship",
     blurb:
       "I am a varsity NSDA debater and school co-captain, a 2x World Schools National Qualifier with 1000+ career points. As Senior Director on the iStartValley Youth Committee I helped launch the iStart Insider podcast and pitched a $300k startup concept, and I have led on the floor and in the courts of American Legion Colorado Boys State, in Economics For Leaders, and through Sewa's Design to Lead, where research turned into real lobbying.",
     stats: [

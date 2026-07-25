@@ -4,6 +4,7 @@ import "./globals.css";
 import { Nav } from "@/components/ui/Nav";
 import { Footer } from "@/components/ui/Footer";
 import { SITE } from "@/content/sections";
+import { OG_DEFAULTS, TWITTER_DEFAULTS } from "@/content/metadata";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,31 +16,29 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const description = `${SITE.fullName} — research, ATT Agency, markets, and leadership in ${SITE.location}.`;
-
+// Root metadata holds metadataBase, the title template, the robots rule, and
+// fallbacks for any route without its own metadata export.
+//
+// Everything page-specific — title, description, canonical, and the whole
+// og:*/twitter:* set — is declared in each page's own `metadata` export via
+// `pageMetadata`/`sectionMetadata`. Next merges metadata shallowly, so shared
+// OG/Twitter defaults cannot be inherited from here; see content/metadata.ts.
+// Inheriting them is what made every subpage emit the homepage's og:title,
+// og:description and og:url.
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: {
-    default: SITE.name,
-    template: `%s — ${SITE.name}`,
+    default: SITE.metaTitle,
+    template: `%s — ${SITE.fullName}`,
   },
-  description,
-  // "./" resolves against metadataBase *per route*, so every page emits a
-  // self-referencing canonical on the production domain regardless of the
-  // host it was served from (workers.dev vs sunnyavula.com).
+  description: SITE.metaDescription,
+  // "./" resolves against metadataBase *per route*, so any route that does not
+  // set its own canonical still emits a self-referencing one on the production
+  // domain regardless of the host it was served from (workers.dev vs
+  // sunnyavula.com).
   alternates: { canonical: "./" },
-  openGraph: {
-    type: "website",
-    siteName: SITE.name,
-    title: SITE.name,
-    description,
-    url: "/",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: SITE.name,
-    description,
-  },
+  openGraph: OG_DEFAULTS,
+  twitter: TWITTER_DEFAULTS,
   robots: { index: true, follow: true },
 };
 
