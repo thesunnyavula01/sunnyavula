@@ -5,6 +5,7 @@ import { Instance, Instances } from "@react-three/drei";
 import * as THREE from "three";
 import { PALETTE as P } from "./palette";
 import { SoftBox } from "./SoftBox";
+import { PHONE_SCREEN, phoneScreenTexture } from "./screens";
 
 // The desk ISLAND — a floating chunk of study, sarastotey-style: a rounded
 // floor slab carrying a legged desk, a chair, a rug, a floor plant, a lamp and
@@ -422,14 +423,27 @@ function Phone({ position }: { position: [number, number, number] }) {
       <SoftBox castShadow args={[0.32, 0.035, 0.64]} radius={0.016} position={[0, 0.018, 0]}>
         <meshStandardMaterial color={P.charcoal} roughness={0.4} metalness={0.3} />
       </SoftBox>
+      {/* volume rocker + power key, so the slab has a silhouette */}
+      <mesh castShadow position={[-0.163, 0.02, -0.09]}>
+        <boxGeometry args={[0.008, 0.014, 0.075]} />
+        <meshStandardMaterial color={P.slate} roughness={0.35} metalness={0.5} />
+      </mesh>
+      <mesh castShadow position={[0.163, 0.02, -0.05]}>
+        <boxGeometry args={[0.008, 0.014, 0.055]} />
+        <meshStandardMaterial color={P.slate} roughness={0.35} metalness={0.5} />
+      </mesh>
+
+      {/* lock screen: incoming call, decline + accept buttons. Self-lit via the
+          emissive map so it glows like a real screen in the dark study. */}
       <mesh position={[0, 0.037, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[0.27, 0.58]} />
+        <planeGeometry args={[PHONE_SCREEN.w, PHONE_SCREEN.h]} />
         <meshStandardMaterial
-          color="#1a1d26"
-          emissive="#2a3350"
-          emissiveIntensity={0.5}
-          roughness={0.2}
-          metalness={0.4}
+          map={phoneScreenTexture()}
+          emissiveMap={phoneScreenTexture()}
+          emissive="#ffffff"
+          emissiveIntensity={0.6}
+          roughness={0.22}
+          metalness={0.1}
         />
       </mesh>
     </group>

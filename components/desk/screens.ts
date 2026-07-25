@@ -183,6 +183,109 @@ export const tickerScreenTexture = once(() => {
   return p.finish();
 });
 
+/* --------------------------- Contact: phone screen -------------------------- */
+
+// The phone lies flat like the paper sheet, so its local +y maps onto world −z:
+// high y is the far end of the handset, which reads as the top of the frame.
+export const PHONE_SCREEN = { w: 0.27, h: 0.58 } as const;
+
+/** Handset glyph: a thick round-capped arc with fattened ear/mouth ends. */
+function handset(
+  ctx: CanvasRenderingContext2D,
+  cx: number,
+  cy: number,
+  s: number,
+  rot: number,
+  color: string
+) {
+  const r = s * 0.5;
+  const a0 = Math.PI * 0.2;
+  const a1 = Math.PI * 0.8;
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(rot);
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineCap = "round";
+  ctx.lineWidth = s * 0.24;
+  ctx.beginPath();
+  ctx.arc(0, -s * 0.16, r, a0, a1);
+  ctx.stroke();
+  for (const a of [a0, a1]) {
+    ctx.beginPath();
+    ctx.arc(Math.cos(a) * r, -s * 0.16 + Math.sin(a) * r, s * 0.2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+export const phoneScreenTexture = once(() => {
+  const W = 320;
+  const H = 688;
+  const p = painter(W, H, -0.135, 0.135, -0.29, 0.29);
+  const sx = W / PHONE_SCREEN.w;
+  const sy = H / PHONE_SCREEN.h;
+  const X = (x: number) => (x + 0.135) * sx;
+  const Y = (y: number) => (0.29 - y) * sy;
+
+  // lock-screen wallpaper, warmer toward the top
+  const g = p.ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, "#1c2238");
+  g.addColorStop(0.55, "#111524");
+  g.addColorStop(1, "#0c0f19");
+  p.ctx.fillStyle = g;
+  p.ctx.fillRect(0, 0, W, H);
+
+  // earpiece slit + status bar (clock, signal bars, battery)
+  p.rect(0, 0.272, 0.055, 0.007, "#232838");
+  p.rect(-0.088, 0.253, 0.05, 0.013, "#c9d1e6");
+  [0.006, 0.009, 0.012, 0.015].forEach((h, i) =>
+    p.rect(0.05 + i * 0.011, 0.2455 + h / 2, 0.007, h, "#c9d1e6")
+  );
+  p.rect(0.106, 0.253, 0.026, 0.013, "#5c6784");
+  p.rect(0.102, 0.253, 0.016, 0.008, "#c9d1e6");
+
+  // "incoming call" kicker rule
+  p.rect(0, 0.163, 0.078, 0.011, P.berry);
+
+  // caller avatar: berry disc with a silhouette clipped inside it
+  p.circle(0, 0.072, 0.058, "#2a1a2c");
+  p.circle(0, 0.072, 0.052, P.berry);
+  p.ctx.save();
+  p.ctx.beginPath();
+  p.ctx.ellipse(X(0), Y(0.072), 0.052 * sx, 0.052 * sy, 0, 0, Math.PI * 2);
+  p.ctx.clip();
+  p.ctx.fillStyle = "#f6e9ef";
+  p.ctx.beginPath();
+  p.ctx.ellipse(X(0), Y(0.088), 0.018 * sx, 0.018 * sy, 0, 0, Math.PI * 2);
+  p.ctx.fill();
+  p.ctx.beginPath();
+  p.ctx.ellipse(X(0), Y(0.008), 0.036 * sx, 0.062 * sy, 0, 0, Math.PI * 2);
+  p.ctx.fill();
+  p.ctx.restore();
+
+  // caller name + subtitle
+  p.rect(0, -0.012, 0.14, 0.019, "#e9edf7");
+  p.rect(0, -0.042, 0.088, 0.012, "#69749a");
+
+  // secondary actions: remind me / message
+  for (const x of [-0.052, 0.052]) {
+    p.circle(x, -0.116, 0.021, "#232a3f");
+    p.rect(x, -0.116, 0.017, 0.004, "#7f8bb0");
+  }
+
+  // the two call buttons
+  p.circle(-0.062, -0.194, 0.032, P.red);
+  p.circle(0.062, -0.194, 0.032, P.green);
+  handset(p.ctx, X(-0.062), Y(-0.194), 0.03 * sx, Math.PI * 0.78, "#ffffff");
+  handset(p.ctx, X(0.062), Y(-0.194), 0.03 * sx, -0.3, "#ffffff");
+
+  // home indicator
+  p.rect(0, -0.262, 0.084, 0.007, "#3a4258");
+
+  return p.finish();
+});
+
 /* ------------------------- Research: printed top sheet ---------------------- */
 
 // This one lies flat on the desk, so its second axis is world −z: a plane
