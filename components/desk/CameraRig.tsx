@@ -18,7 +18,10 @@ export const KEYS: Key[] = [
   { pos: [1.0, 8.6, 10.2], target: [-1.3, -0.9, 0] }, // island overview
   { pos: [-4.7, 2.5, 3.1], target: [-3.95, 0.15, -0.5] }, // papers, from the left
   { pos: [-0.5, 2.3, 3.6], target: [-1.65, 0.4, 0.3] }, // laptop, from the front
-  { pos: [2.9, 2.7, 2.7], target: [0.85, 0.8, -0.8] }, // monitor, front-right
+  // monitor, front-right — moved back with the monitor (POSITIONS[2] z -0.8 →
+  // -1.6); pos keeps the old target→camera offset [2.05, 1.9, 3.5] so the
+  // framing of the screen is unchanged.
+  { pos: [2.9, 2.7, 1.9], target: [0.85, 0.8, -1.6] },
   { pos: [4.7, 2.2, 2.9], target: [2.55, 0.3, 0.3] }, // gavel + mic, right end
   { pos: [3.15, 1.55, 3.4], target: [2.1, 0.1, 1.4] }, // phone, near corner — contact
 ];

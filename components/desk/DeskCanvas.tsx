@@ -43,10 +43,15 @@ const OBJECTS: ComponentType<{ hovered: boolean }>[] = [
 const POSITIONS: [number, number, number][] = [
   [-3.2, 0, -0.4],
   [-0.9, 0.05, 0.35], // sits on the blotter
-  [1.55, 0, -0.8],
+  // Behind the blotter (its back edge is z = -0.6), where a monitor belongs:
+  // at z = -0.8 the stand stood ON the mat and sank 0.05 into it, and the ring
+  // (r 1.05) was half-buried under the mat, so the hover circle broke mid-arc.
+  // The ring now lands entirely on bare wood between z = -0.7 and -2.5, inside
+  // the desk top's back edge (-2.6). Keep KEYS[3] in CameraRig.tsx in sync.
+  [1.55, 0, -1.6],
   [3.3, 0, 0.45],
 ];
-const RING_RADII = [1.0, 1.15, 1.05, 1.05];
+const RING_RADII = [1.0, 1.15, 0.9, 1.05];
 
 // Fires `onFirstFrame` one rAF after the first rendered frame, i.e. once the
 // scene is actually on screen — DeskScene uses it to fade out the loading

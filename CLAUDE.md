@@ -147,6 +147,23 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 
 ## Build phases
 
+> **Status (2026-07-30, latest+2): monitor moved off the blotter.** The Markets hotspot's
+> hover ring is a flat annulus lying on the desk top (y≈0), but the monitor stood at
+> `[1.55, 0, -0.8]` — inside the indigo blotter's footprint — so its base sank 0.05 into the mat
+> and the mat swallowed the half of the ring that ran under it: the circle broke mid-sweep and
+> the focus animation read as unanchored. Fixes: (1) the blotter is shallower —
+> `position z 0.3 → 0.55`, `depth 2.85 → 2.3`, i.e. its back edge moves `-1.125 → -0.6`, leaving
+> a bare-wood strip behind it (the laptop's base, min z ≈ -0.34, still sits on the mat);
+> (2) `POSITIONS[2]` is `[1.55, 0, -1.6]` with `RING_RADII[2]` 1.05 → 0.9, so the whole ring lands
+> on wood between z -0.7 and -2.5, inside the desk's back edge (-2.6) and clear of the gavel ring
+> (z ≥ -0.6); (3) `KEYS[3]` moves with it — `target [0.85, 0.8, -1.6]`, `pos [2.9, 2.7, 1.9]`,
+> keeping the old target→camera offset `[2.05, 1.9, 3.5]` so screen framing is unchanged;
+> (4) belt-and-braces, `Hotspot`'s ring plane sits at **y 0.06** instead of 0.015 — above the
+> blotter's 0.05 top face, so no ring can ever be buried again (the papers ring still grazes the
+> mat's left corner). Build + lint pass; **not eyeballed** (no dev server was run per request),
+> and `public/desk-poster.webp` now predates the scene — recapture it via the rafshim procedure
+> below. Live deploy predates this — run `npm run deploy`.
+>
 > **Status (2026-07-25, latest+1): the site is now DARK-ONLY.** The four subpages rendered
 > white on a light-OS machine while the WebGL deck stayed dark, because every subpage color was
 > gated behind Tailwind's `dark:` variant — which is **media-driven** (`prefers-color-scheme`),

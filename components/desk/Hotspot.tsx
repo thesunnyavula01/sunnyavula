@@ -70,7 +70,10 @@ export function Hotspot({
         router.push(href);
       }}
     >
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.015, 0]}>
+      {/* y = 0.06 clears the blotter's top face (0.05, see Desk.tsx): at 0.015
+          any arc that crossed the mat was swallowed by it, so the circle broke
+          mid-sweep. The lift is ~1cm at desk scale — invisible over bare wood. */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.06, 0]}>
         <ringGeometry args={[ringRadius, ringRadius + 0.045, 64, 1]} />
         <meshBasicMaterial
           ref={ringMat}

@@ -144,9 +144,13 @@ function DeskTable() {
       ))}
 
       {/* indigo blotter under the laptop area — seen flat from above, so its
-          2.5cm corner radius never reads; a plain box saves an extrude */}
-      <mesh receiveShadow position={[-0.2, 0.025, 0.3]}>
-        <boxGeometry args={[4.4, 0.05, 2.85]} />
+          2.5cm corner radius never reads; a plain box saves an extrude.
+          Depth stops at z = -0.6 (was -1.125) so the monitor and its hover ring
+          stand on bare wood BEHIND the mat: the ring is a flat annulus on the
+          desk, and when the mat cut through it the circle read as broken. Top
+          surface sits at y = 0.05 — Hotspot's ring clears that (see Hotspot). */}
+      <mesh receiveShadow position={[-0.2, 0.025, 0.55]}>
+        <boxGeometry args={[4.4, 0.05, 2.3]} />
         <meshStandardMaterial color={P.blotter} roughness={0.9} />
       </mesh>
     </group>
