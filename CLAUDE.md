@@ -147,17 +147,24 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 
 ## Build phases
 
-> **Status (2026-08-01, latest+3): site icon is the LEGO-avatar portrait.** `app/favicon.ico`,
-> `app/icon.png` (512×512) and `app/apple-icon.png` (180×180) are all generated from the same
-> source render, centre-cropped square (2076×2048 → 2048×2048). They are **palette-quantized**
-> (sharp `png({ palette: true, quality: 90 })`) on purpose — the source is photographic, and a
-> full-colour 512×512 favicon is ~640 kB that every page load pays for; quantized it is 124 kB,
-> and the `.ico` is 5.6 kB. The `.ico` is a hand-built container (16/32/48 PNG payloads, Vista-era
-> PNG-in-ICO) because sharp cannot write `.ico`; regenerate all three together if the portrait
-> changes. Next's link tag reports the ico as `sizes="16x16"` (it reads the first directory
-> entry) while browsers actually pick the 48px one — that mismatch is cosmetic. Verified against
-> the dev server: all three routes 200 with the right content types and decode at their stated
-> sizes.
+> **Status (2026-08-01, latest+3): site icon is the LEGO-avatar portrait, cropped for search
+> results.** `app/favicon.ico` (16/32/48), `app/icon.png` (192×192) and `app/apple-icon.png`
+> (180×180) are all generated from `Gemini_Generated_Image_ngkwucngkwucngkw.png` with
+> **`extract({ left: 302, top: 40, width: 1400, height: 1400 })`** — a head-and-shoulders crop,
+> *not* the full circular avatar. Google renders the search-result favicon at ~16–24px, where the
+> full 2076×2048 frame (white ring + a lot of tree) collapses into an unreadable smudge; the tight
+> crop keeps the face legible. Head bbox in source pixels is x 478–1526, y 171–1194 if it ever
+> needs re-framing.
+> **Constraints baked into the sizes:** Google requires the favicon be a **multiple of 48px
+> square**, so `icon.png` is 192 (4×48), not an arbitrary 512; Apple wants exactly 180.
+> The `.ico` is a hand-built container (PNG-in-ICO, Vista-era) because sharp cannot write `.ico`,
+> and its entries are ordered **largest-first** — Next fills the `<link sizes>` attribute from the
+> *first* directory entry, so 16-first made it advertise `sizes="16x16"` for a file whose best
+> payload is 48. All three are palette-quantized (sharp `png({ palette: true, quality: 90 })`):
+> the source is photographic, and full-colour output made a 640 kB favicon.
+> Regenerate all three together if the portrait changes. Verified on the dev server: links emit
+> `48x48` / `192x192` / `180x180`, each decodes at that size, and `robots.txt` is `Allow: /` so
+> Googlebot can fetch them.
 >
 > **Status (2026-07-30, latest+2): monitor moved off the blotter.** The Markets hotspot's
 > hover ring is a flat annulus lying on the desk top (y≈0), but the monitor stood at
