@@ -13,7 +13,7 @@ import * as THREE from "three";
 import { sections } from "@/content/sections";
 import { ACCENTS, PALETTE } from "./palette";
 import { CameraRig, type OrbitState } from "./CameraRig";
-import { Desk } from "./Desk";
+import { BLOTTER_TOP, Desk } from "./Desk";
 import { Hotspot } from "./Hotspot";
 import { makeStudioEnv } from "./env";
 import { shadowsDirty } from "./shadowBus";
@@ -42,7 +42,7 @@ const OBJECTS: ComponentType<{ hovered: boolean }>[] = [
 ];
 const POSITIONS: [number, number, number][] = [
   [-3.2, 0, -0.4],
-  [-0.9, 0.05, 0.35], // sits on the blotter
+  [-0.9, BLOTTER_TOP, 0.35], // sits on the blotter
   // Behind the blotter (its back edge is z = -0.6), where a monitor belongs:
   // at z = -0.8 the stand stood ON the mat and sank 0.05 into it, and the ring
   // (r 1.05) was half-buried under the mat, so the hover circle broke mid-arc.

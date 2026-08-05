@@ -148,6 +148,32 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 
 ## Build phases
 
+> **Status (2026-08-04, latest+5): desk props no longer clip through the mat or the
+> desk.** Six placement bugs, all the same two shapes.
+> **(1) `BLOTTER_TOP` (= 0.05) is now exported from `Desk.tsx`**, alongside `BLOTTER_X`
+> ([-2.4, 2.0]) and `BLOTTER_Z` ([-0.6, 1.7]), and the blotter mesh is derived from them.
+> "Sits on the mat" had been hardcoded per object, so it drifted: the mug's saucer, the pencil
+> cup and the second loose sheet were all placed at y ≈ 0 while standing on a mat whose top is
+> 0.05 — their bases were *inside* it — and the keyboard was at 0.072, hovering 0.022 above it
+> (its comment claimed the mat top was ~0.007, which had been stale since the mat was
+> thickened). **Anything on the mat must use `BLOTTER_TOP`; anything at y = 0 must clear
+> `BLOTTER_X`/`BLOTTER_Z` in plan.** `POSITIONS[1]` in `DeskCanvas` imports the constant too.
+> **(2) The floor plant was standing *through* the desk.** Its foliage spans world y
+> -0.44..0.71, which straddles the desk slab's own -0.42..0 band, so x clearance is the only
+> thing keeping it out; at x -5.0 three of six leaves intersected the desk top and one was
+> centred at x -4.64, i.e. inside it. Now x -5.5, with leaf 1 pulled in 0.36 → 0.30. The rule:
+> `max(leaf.x + leaf.r) + potX <= -4.85`, and the pot cannot go further out than -5.5 because
+> its rim reaches -6.04 against the floor slab's -6.1 edge.
+> Also: loose sheet 2 moved to [-2.95, 1.15] (it straddled the mat's left edge and z-fought the
+> papers folder), and the bin's crumpled paper pulled in to local x 0.42 — the bin is
+> near-black on a near-black floor, so at 0.55 the bright paper read as a shape floating in the
+> dark rather than as litter beside a bin.
+> **Verified numerically, not visually** (no dev server was run, per request): a throwaway
+> script modelled every prop's world AABB and reported resting height vs the mat, plant-vs-desk
+> intersection, and pairwise plan-view collisions. It reproduces all six defects on the old
+> coordinates and reports none on the new ones. Build + lint pass. **Still not eyeballed**, and
+> `public/desk-poster.webp` now predates this too — recapture it via the rafshim procedure.
+>
 > **Status (2026-08-04, latest+4): the deck now runs on PHONES — desktop byte-for-byte
 > unchanged.** Phones were gated out of the tour entirely: `DeskScene`'s fallback test was
 > `!webgl || small` (`max-width: 640px`), so every phone got `FallbackHero` — a static

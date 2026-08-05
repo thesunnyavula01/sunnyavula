@@ -15,6 +15,14 @@ import { PHONE_SCREEN, phoneScreenTexture } from "./screens";
 
 export const FLOOR_TOP = -1.42;
 
+// Top surface of the indigo blotter, and the footprint it covers on the desk
+// top. Anything standing ON the mat must be placed at BLOTTER_TOP, not y = 0 —
+// at y = 0 its base sits *inside* the mat and reads as sunk into it. Anything
+// placed at y = 0 must stay clear of BLOTTER_X / BLOTTER_Z entirely.
+export const BLOTTER_TOP = 0.05;
+const BLOTTER_X: [number, number] = [-2.4, 2.0];
+const BLOTTER_Z: [number, number] = [-0.6, 1.7];
+
 /* --------------------------- procedural wood map --------------------------- */
 
 function useWoodTexture() {
@@ -149,8 +157,21 @@ function DeskTable() {
           stand on bare wood BEHIND the mat: the ring is a flat annulus on the
           desk, and when the mat cut through it the circle read as broken. Top
           surface sits at y = 0.05 — Hotspot's ring clears that (see Hotspot). */}
-      <mesh receiveShadow position={[-0.2, 0.025, 0.55]}>
-        <boxGeometry args={[4.4, 0.05, 2.3]} />
+      <mesh
+        receiveShadow
+        position={[
+          (BLOTTER_X[0] + BLOTTER_X[1]) / 2,
+          BLOTTER_TOP / 2,
+          (BLOTTER_Z[0] + BLOTTER_Z[1]) / 2,
+        ]}
+      >
+        <boxGeometry
+          args={[
+            BLOTTER_X[1] - BLOTTER_X[0],
+            BLOTTER_TOP,
+            BLOTTER_Z[1] - BLOTTER_Z[0],
+          ]}
+        />
         <meshStandardMaterial color={P.blotter} roughness={0.9} />
       </mesh>
     </group>
@@ -210,17 +231,26 @@ function Rug() {
   );
 }
 
+// Stands beside the desk's left end, NOT through it. The foliage sits at world
+// y -0.44..0.71, which straddles the desk slab's own -0.42..0 band, so the only
+// thing keeping the leaves out of the desk is x clearance: the desk top starts
+// at x = -4.7, and the widest leaf reaches `leaf.x + leaf.r` from the pot. At
+// the old x of -5.0 three of the six leaves were buried in the desk top — the
+// second one was centred at x -4.64, i.e. inside it. Keep
+// `max(leaf.x + leaf.r) + POT_X <= -4.85`.
 function FloorPlant() {
   const leaves: { p: [number, number, number]; r: number }[] = [
     { p: [0, 1.55, 0], r: 0.46 },
-    { p: [0.36, 1.3, 0.12], r: 0.32 },
+    { p: [0.3, 1.3, 0.12], r: 0.32 }, // reach 0.62 — the binding one
     { p: [-0.34, 1.35, -0.1], r: 0.35 },
     { p: [0.1, 1.25, 0.36], r: 0.3 },
     { p: [-0.12, 1.2, -0.38], r: 0.31 },
     { p: [0.05, 1.85, -0.05], r: 0.28 },
   ];
+  // -5.5 is as far out as the pot can go: its 0.5 top radius plus the 0.05 rim
+  // reaches x -6.04 against the floor slab's -6.1 edge.
   return (
-    <group position={[-5.0, FLOOR_TOP, 0.9]}>
+    <group position={[-5.5, FLOOR_TOP, 0.9]}>
       <mesh castShadow position={[0, 0.42, 0]}>
         <cylinderGeometry args={[0.5, 0.38, 0.84, 20]} />
         <meshStandardMaterial color={P.terracotta} roughness={0.75} />
@@ -461,7 +491,11 @@ function Bin() {
         <cylinderGeometry args={[0.32, 0.25, 0.6, 18, 1, true]} />
         <meshStandardMaterial color={P.slate} roughness={0.6} side={THREE.DoubleSide} />
       </mesh>
-      <mesh castShadow position={[0.55, 0.09, 0.25]}>
+      {/* Crumpled paper that missed the bin. Pulled in from x 0.55: the bin is
+          near-black against a near-black floor, so at that distance the bright
+          paper read as a stray shape floating in the dark rather than as litter
+          beside a bin. 0.115 clear of the bin wall, so it still reads as a miss. */}
+      <mesh castShadow position={[0.42, 0.09, 0.2]}>
         <icosahedronGeometry args={[0.1, 0]} />
         <meshStandardMaterial color={P.paper} roughness={0.95} />
       </mesh>
@@ -476,7 +510,12 @@ function LooseSheets() {
         <planeGeometry args={[0.72, 0.95]} />
         <meshStandardMaterial color={P.paper} roughness={0.95} />
       </mesh>
-      <mesh receiveShadow position={[-2.45, 0.003, 0.75]} rotation={[-Math.PI / 2, 0, -0.25]}>
+      {/* Was [-2.45, …, 0.75]: it straddled the blotter's left edge, so ~40% of
+          the sheet lay INSIDE the mat (sheet y 0.003 vs mat top 0.05), and its
+          far corner also z-fought the papers folder. Moved into the clear wood
+          between the papers (z ends 0.41), the books (x ends -3.60) and the mat
+          (x starts -2.40). */}
+      <mesh receiveShadow position={[-2.95, 0.003, 1.15]} rotation={[-Math.PI / 2, 0, -0.25]}>
         <planeGeometry args={[0.68, 0.9]} />
         <meshStandardMaterial color="#f3efe4" roughness={0.95} />
       </mesh>
@@ -507,18 +546,24 @@ export function Desk() {
       <FloorPlant />
       <Bin />
 
-      {/* on the desk */}
+      {/* On the desk. Everything ON the mat is placed at BLOTTER_TOP; everything
+          at y = 0 is clear of the mat's footprint in plan. */}
       <Lamp />
-      {/* y-lift clears the blotter slab (top ~0.007); at y=0 the base plate
-          sank into the mat and z-fought it. x pulled in so it stays on the
-          blotter (right edge ~2.0) instead of overhanging onto bare wood. */}
-      <MiniKeyboard position={[1.42, 0.072, 0.35]} />
+      {/* x pulled in so it stays on the blotter (right edge 2.0) rather than
+          overhanging onto bare wood. y was 0.072 against a mat top that the old
+          comment put at ~0.007 — the mat is 0.05 tall, so it was hovering. */}
+      <MiniKeyboard position={[1.42, BLOTTER_TOP, 0.35]} />
       <Mouse position={[2.4, 0, 0.45]} />
       <LooseSheets />
-      <Mug position={[-2.0, 0, 1.55]} />
+      {/* Was [-2.0, 0, 1.55]: the saucer (y 0..0.03) sat below the mat's top and
+          straddled its front edge, so it was half-swallowed by the mat. Now it
+          stands ON the mat, pulled back inside the front edge (1.7) and kept
+          clear of both the mat's left edge (-2.4) and the laptop base (-1.76). */}
+      <Mug position={[-2.08, BLOTTER_TOP, 1.35]} />
       <Succulent position={[4.0, 0, -1.6]} />
       <Books position={[-4.1, 0, 1.5]} />
-      <PencilCup position={[0.62, 0, 1.5]} />
+      {/* Stands squarely on the mat, so it was sunk 0.05 into it at y = 0. */}
+      <PencilCup position={[0.62, BLOTTER_TOP, 1.5]} />
       <Phone position={[2.65, 0, 1.5]} />
     </group>
   );
