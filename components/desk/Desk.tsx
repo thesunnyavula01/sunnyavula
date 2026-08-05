@@ -359,24 +359,79 @@ function Mouse({ position }: { position: [number, number, number] }) {
 
 /* ------------------------------- small clutter ------------------------------ */
 
+// Half-profiles revolved by <latheGeometry>, as [radius, height] pairs. The mug
+// runs up the OUTSIDE wall, over the lip, and back down the INSIDE to the
+// interior floor, so one lathe yields a genuinely hollow vessel — real wall
+// thickness, a rounded rim, and an interior with depth to it. The lathe's
+// normals follow the profile tangent, so they point outward on the way up and
+// inward on the way back down without any extra work.
+//
+// This matters most from the deck's aerial camera, which looks straight down
+// INTO the mug: the old build was a solid cylinder with a dark disc laid over
+// its top cap, so from above it read as a plug with a lid rather than as a cup
+// with coffee in it. Same four draw calls as that version.
+const MUG_PROFILE = (
+  [
+    [0, 0.012], // underside centre
+    [0.128, 0.012], // foot
+    [0.134, 0.024],
+    [0.148, 0.182], // outer wall, gently flared
+    [0.156, 0.334],
+    [0.156, 0.348], // rim, outer face
+    [0.148, 0.354], // over the lip
+    [0.138, 0.348], // rim, inner face — 0.018 of ceramic across the top
+    [0.132, 0.182], // inner wall
+    [0.124, 0.054],
+    [0.1, 0.038], // fillet into the interior floor
+    [0, 0.034], // interior floor centre, 0.022 above the underside
+  ] as const
+).map(([r, h]) => new THREE.Vector2(r, h));
+
+// Foot ring, up to the lip, then a shallow well. Its floor stops 0.002 short of
+// the mug's underside so the two coincident discs cannot z-fight.
+const SAUCER_PROFILE = (
+  [
+    [0, 0],
+    [0.215, 0],
+    [0.238, 0.006],
+    [0.26, 0.024], // outer edge
+    [0.246, 0.03], // over the lip
+    [0.15, 0.016], // into the well
+    [0.12, 0.014],
+    [0, 0.01],
+  ] as const
+).map(([r, h]) => new THREE.Vector2(r, h));
+
 function Mug({ position }: { position: [number, number, number] }) {
   return (
-    <group position={position}>
-      <mesh castShadow position={[0, 0.015, 0]}>
-        <cylinderGeometry args={[0.24, 0.26, 0.03, 20]} />
-        <meshStandardMaterial color={P.paper} roughness={0.85} />
+    // Handle turned broadside to the tour. The overview camera looks along
+    // roughly (-0.33, -0.94), so this angle puts the handle's plane very nearly
+    // perpendicular to the view and it reads as a loop; point it along that
+    // axis instead and it collapses into a flat strip stuck to the cup. Its
+    // 0.277 reach lands exactly on the saucer's 0.26 silhouette, so the mug's
+    // footprint is unchanged and it still clears the laptop base by 0.06.
+    <group position={position} rotation={[0, 0.35, 0]}>
+      <mesh castShadow receiveShadow>
+        <latheGeometry args={[SAUCER_PROFILE, 18]} />
+        <meshStandardMaterial color={P.paper} roughness={0.45} metalness={0.04} />
       </mesh>
-      <mesh castShadow position={[0, 0.2, 0]}>
-        <cylinderGeometry args={[0.155, 0.135, 0.34, 20]} />
-        <meshStandardMaterial color={P.berry} roughness={0.55} />
+      <mesh castShadow receiveShadow>
+        <latheGeometry args={[MUG_PROFILE, 18]} />
+        <meshStandardMaterial color={P.berry} roughness={0.38} metalness={0.04} />
       </mesh>
-      <mesh position={[0, 0.36, 0]}>
-        <cylinderGeometry args={[0.125, 0.125, 0.015, 20]} />
-        <meshStandardMaterial color="#3d2a1e" roughness={0.35} />
+      {/* C-handle: a 4.3rad arc spun back by half of it, so the opening faces
+          the body and both cut ends finish ~0.02 INSIDE the wall where they
+          cannot be seen. A full torus read as a ring stuck on the side. */}
+      <mesh castShadow position={[0.168, 0.2, 0]} rotation={[0, 0, -2.15]}>
+        <torusGeometry args={[0.085, 0.024, 8, 16, 4.3]} />
+        <meshStandardMaterial color={P.berry} roughness={0.38} metalness={0.04} />
       </mesh>
-      <mesh castShadow position={[0.19, 0.21, 0]}>
-        <torusGeometry args={[0.085, 0.026, 8, 20]} />
-        <meshStandardMaterial color={P.berry} roughness={0.55} />
+      {/* Coffee, sitting 0.04 below the rim so the inner wall above it reads as
+          depth. Glossy and faintly metallic so it catches the lamp as a liquid
+          surface instead of sitting there as flat brown paint. */}
+      <mesh position={[0, 0.307, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <circleGeometry args={[0.135, 18]} />
+        <meshStandardMaterial color="#43301f" roughness={0.15} metalness={0.15} />
       </mesh>
     </group>
   );

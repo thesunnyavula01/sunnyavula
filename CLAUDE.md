@@ -148,6 +148,27 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 
 ## Build phases
 
+> **Status (2026-08-04, latest+6): the coffee mug is a real vessel.** It was a solid
+> cylinder with a dark disc laid over its top cap, which the deck's aerial camera — looking
+> straight down INTO it — read as a plug with a lid rather than a cup with coffee in it. The
+> body and saucer are now single **`<latheGeometry>`** revolutions: `MUG_PROFILE` runs up the
+> outside wall, over the lip and back down the inside to the interior floor, so one mesh gives
+> real wall thickness (0.016), a rounded rim (0.018 across the top) and an interior with visible
+> depth. **The lathe's normals come from the profile tangent** — `(dy, -dx)` — so they point
+> outward on the way up and inward on the way back down with no extra work; no `DoubleSide`, no
+> second mesh. The saucer's well floor stops 0.002 short of the mug's underside so the two
+> coincident discs cannot z-fight. The handle is a **partial torus** (`arc` 4.3rad spun back by
+> half of it, so the opening faces the body and both cut ends finish ~0.02 inside the wall)
+> instead of a full ring stuck to the side; the coffee sits 0.041 below the rim, glossy and
+> faintly metallic so it catches the lamp as liquid. **Handle orientation is load bearing:** the
+> overview camera looks along ≈(-0.33, -0.94), so the group is rotated `y 0.35` to put the
+> handle broadside; turned along that axis instead it collapses into a flat strip on the cup
+> (this was caught by eye — the geometry was correct either way). Reach is 0.277 against the
+> saucer's 0.26, so the footprint is unchanged and it still clears the laptop base by 0.06.
+> Still four draw calls, +~360 triangles on a ~37k scene. Verified by rendering the mug close
+> up and at the overview stop via the rafshim procedure below. `public/desk-poster.webp` now
+> predates the scene by three passes — recapture it.
+>
 > **Status (2026-08-04, latest+5): desk props no longer clip through the mat or the
 > desk.** Six placement bugs, all the same two shapes.
 > **(1) `BLOTTER_TOP` (= 0.05) is now exported from `Desk.tsx`**, alongside `BLOTTER_X`
@@ -168,11 +189,12 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 > papers folder), and the bin's crumpled paper pulled in to local x 0.42 — the bin is
 > near-black on a near-black floor, so at 0.55 the bright paper read as a shape floating in the
 > dark rather than as litter beside a bin.
-> **Verified numerically, not visually** (no dev server was run, per request): a throwaway
-> script modelled every prop's world AABB and reported resting height vs the mat, plant-vs-desk
-> intersection, and pairwise plan-view collisions. It reproduces all six defects on the old
-> coordinates and reports none on the new ones. Build + lint pass. **Still not eyeballed**, and
-> `public/desk-poster.webp` now predates this too — recapture it via the rafshim procedure.
+> **Verified numerically** (no dev server was run, per request): a throwaway script modelled
+> every prop's world AABB and reported resting height vs the mat, plant-vs-desk intersection,
+> and pairwise plan-view collisions. It reproduces all six defects on the old coordinates and
+> reports none on the new ones. Build + lint pass. **Since confirmed by eye** in the mug pass
+> above — the overview render shows the plant standing clear of the desk, the mug and pencil cup
+> sitting on the mat, and the loose sheet on bare wood.
 >
 > **Status (2026-08-04, latest+4): the deck now runs on PHONES — desktop byte-for-byte
 > unchanged.** Phones were gated out of the tour entirely: `DeskScene`'s fallback test was
