@@ -18,8 +18,9 @@ is **real interactive WebGL** (react-three-fiber), not pre-rendered slides.
   drag gives a small parallax orbit. Each desk object has a hover state and a click that routes
   to its section. A text nav (Home / Research / ATT Agency / Markets / Leadership) mirrors the
   hotspots for accessibility and mobile.
-- **Mobile fallback:** if WebGL is unavailable or the viewport is small, render a static
-  hero image of the desk + the same text nav (see Phase 3).
+- **Phones (<640px):** the same interactive deck, restacked — desk on top, copy card as a
+  bottom sheet, swipe the desk to travel, horizontal stop dots. **Not** a static image.
+- **Fallback:** only when WebGL is unavailable — a static hero image of the desk + text nav.
 
 ### Desk object → section mapping
 
@@ -147,6 +148,55 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 
 ## Build phases
 
+> **Status (2026-08-04, latest+4): the deck now runs on PHONES — desktop byte-for-byte
+> unchanged.** Phones were gated out of the tour entirely: `DeskScene`'s fallback test was
+> `!webgl || small` (`max-width: 640px`), so every phone got `FallbackHero` — a static
+> screenshot of the deck plus nav pills. The landing page's whole premise was desktop-only.
+> Now `fallback = !webgl`; `FallbackHero` is strictly the no-WebGL path.
+> **(1) The phone layout is pure `max-sm:` utilities, NOT a JS branch.** Every phone rule is
+> scoped to `width < 40rem`, so the desktop deck renders from exactly the class strings it
+> always did — and there is no SSR→hydration layout snap. Consequence: `PHONE_MQ` in
+> `DeskScene` is **`(max-width: 639.98px)`**, the exact complement of Tailwind's `sm`. It drives
+> only the camera mode and the touch wiring, and matching on `640px` would put the phone camera
+> under the desktop layout at exactly 640.
+> **(2) Stacked, and the SHEET owns the height.** Desk on top, copy card as a bottom sheet
+> (`h-[min(24.5rem,58svh)]`), desk takes the remainder via `flex-1`. Both consequences are load
+> bearing: a short phone shrinks the desk instead of clipping the copy, and **the canvas never
+> resizes mid-tour** — `AnimatePresence mode="wait"` empties the sheet for a beat between stops,
+> and a content-sized sheet would collapse and re-grow, making three.js reallocate its drawing
+> buffer on every step. The card is the sheet's scroll body (`overflow-y-auto`) as a safety
+> valve; the panel chrome (bg/blur/ring) moves up to the wrapper so the dots and credit line
+> share the sheet. Stop dots render **twice** — vertical rail (`max-sm:hidden`) and horizontal
+> row inside the sheet (`hidden max-sm:block`), 44px targets; `display:none` also drops the
+> unused one from the a11y tree, so there is no duplicate control set.
+> **(3) Portrait camera (`CameraRig`, `compact`).** `KEYS` are framed for a ~16:10 canvas whose
+> left third is covered by the copy card. Compact widens the vertical fov to hold the desktop
+> HORIZONTAL field as the canvas narrows, clamps at 60° (past which it goes fish-eye) and buys
+> the remainder with distance. **`COMPACT_PAN` is per-stop, not one constant** — every target
+> sits a flat ~0.75 world units left of its object, but the stops view the desk from different
+> azimuths and distances, so that same world offset projects to a different share of the screen
+> at each one; the values are `(object − target) · right`. `COMPACT_LIFT`/`COMPACT_ZOOM` are
+> per-stop too: the contact stop (the phone) needed both, or it read as a speck in bare wood.
+> Pointer parallax is off when compact — the only pointer is the swiping finger.
+> **(4) Touch listeners moved to the desk stage, not the section**, so the sheet's scroll is not
+> preventDefault'd away; multi-touch is ignored; threshold 55→48px.
+> **(5) `Hotspot` now ignores clicks that moved >10px** from their pointerdown. A click fires on
+> pointerup over the object no matter how far the pointer travelled, so a swipe starting on the
+> laptop navigated away mid-gesture (this also fixes desktop drag-orbit ending over an object).
+> **(6) `Nav`** under 640px is a single current-page pill that opens a dropdown — the 5 pills
+> need 491px inside a 343px bar, i.e. it was a silent horizontal scroller hiding two sections.
+> **Verified in-pane** via the rafshim procedure below, at 375×812 and 375×667: all six stops
+> captured and eyeballed, zero card overflow at both sizes, no page scroll, no horizontal
+> overflow, swipe-up/down steps and a swipe on the sheet does not, tap on the laptop routes to
+> `/att-agency` while a 90px drag over it does not, nav menu opens/Escape-closes. Desktop
+> re-measured at 1280×720: section still `display:block`, sheet still the 430px floating panel,
+> fov still 35, mobile-only nodes `display:none`. Home First Load JS 415 → **416 kB**.
+> **rafshim gotcha (new):** framer-motion drives opacity via **WAAPI**, and the pane's
+> `document.timeline` is frozen at 0, so `AnimatePresence` exits never complete and the copy card
+> stays stuck on stop 0 forever — the camera moves but the text does not. `a.finish()` does not
+> help. Add **`delete Element.prototype.animate`** to the shim to force framer onto its own
+> rAF-driven path. Live deploy predates this — run `npm run deploy`.
+>
 > **Status (2026-08-01, latest+3): site icon is the LEGO-avatar portrait, cropped for search
 > results.** `app/favicon.ico` (16/32/48), `app/icon.png` (192×192) and `app/apple-icon.png`
 > (180×180) are all generated from `Gemini_Generated_Image_ngkwucngkwucngkw.png` with

@@ -129,6 +129,7 @@ export default function DeskCanvas({
   orbit,
   active,
   reduced,
+  compact = false,
   paused = false,
   onFirstFrame,
 }: {
@@ -136,6 +137,7 @@ export default function DeskCanvas({
   orbit: RefObject<OrbitState>; // drag-to-look-around state
   active: number; // -1 = overview, 0..3 = focused section
   reduced: boolean;
+  compact?: boolean; // phone layout — see the portrait framing note in CameraRig
   paused?: boolean;
   onFirstFrame?: () => void; // desk is on screen — safe to drop the loader
 }) {
@@ -158,7 +160,12 @@ export default function DeskCanvas({
       }}
     >
       <fog attach="fog" args={[PALETTE.bg, 16, 40]} />
-      <CameraRig stop={stop} orbit={orbit} reduced={reduced} />
+      <CameraRig
+        stop={stop}
+        orbit={orbit}
+        reduced={reduced}
+        compact={compact}
+      />
 
       {/* night study: cool moon ambience, warm key from the lamp side, cool rim */}
       <ambientLight intensity={0.3} color="#c9d2ff" />

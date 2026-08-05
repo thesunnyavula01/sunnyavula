@@ -33,6 +33,13 @@ export function Hotspot({
   const [hovered, setHovered] = useState(false);
   useCursor(hovered);
 
+  // Where the gesture that is about to produce a click started. A click fires
+  // on pointerup over the object regardless of how far the pointer travelled,
+  // so without this a phone swipe-to-step that began on the laptop — or a
+  // desktop drag-orbit that ended over it — would navigate away mid-gesture.
+  const downAt = useRef<{ x: number; y: number } | null>(null);
+  const DRAG_SLOP = 10; // px
+
   useFrame((_, dt) => {
     const g = inner.current;
     if (!g) return;
@@ -65,8 +72,18 @@ export function Hotspot({
         setHovered(false);
         pokeShadows();
       }}
+      onPointerDown={(e) => {
+        downAt.current = { x: e.clientX, y: e.clientY };
+      }}
       onClick={(e) => {
         e.stopPropagation();
+        const from = downAt.current;
+        downAt.current = null;
+        if (
+          from &&
+          Math.hypot(e.clientX - from.x, e.clientY - from.y) > DRAG_SLOP
+        )
+          return; // that was a drag/swipe, not a tap
         router.push(href);
       }}
     >
