@@ -98,6 +98,26 @@ export function pop(
   };
 }
 
+/**
+ * Grows an SVG bar out of its own left edge. `transformBox: fill-box` is
+ * required for the same reason `pop` needs it: without it `transform-origin:
+ * left` resolves against the viewBox origin, so every bar would slide in from
+ * x = 0 rather than growing from the value axis it actually starts on.
+ */
+export function growX(
+  shown: boolean,
+  animate: boolean,
+  ms = 620,
+  delay = 0
+): CSSProperties {
+  return {
+    transform: shown ? "scaleX(1)" : "scaleX(0)",
+    transformBox: "fill-box",
+    transformOrigin: "left",
+    transition: animate ? `transform ${ms}ms ${EASE_OUT} ${delay}ms` : "none",
+  };
+}
+
 /** Grows a bar from its baseline. For HTML bars, not SVG. */
 export function growY(
   shown: boolean,

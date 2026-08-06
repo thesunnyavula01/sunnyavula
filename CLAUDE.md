@@ -156,6 +156,39 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 
 ## Build phases
 
+> **Status (2026-08-06, latest+10): the placebo figure was rebuilt — it was the one chart on
+> the site that fought its own labels.** `PlaceboRange` used to be two floating lanes with a
+> translucent full-height rectangle behind them standing in for the range. Three defects, all
+> structural: **(1)** the rectangle ran underneath both lane headings and the "Canada" label, so
+> body text sat half on and half off a gray box — that is what read as "visually discomforting";
+> **(2)** nothing tied the two lanes to the axis (three unconnected rules, no gridlines), so
+> *"the US lands inside their range"* — the entire claim of the block — could not be checked by
+> eye; **(3)** the "+4 more" note was centred at **F = 50**, i.e. it occupied a data position on
+> a value axis while carrying no value.
+> Now: ranked bars on **one shared scale**, every mark starting at the same zero line, with
+> shared vertical gridlines; a **name/value gutter** on the left (tabular-nums) where labels can
+> never collide with a mark — and which, because it is the left edge, is what a phone reader sees
+> first inside `ChartScroll`; the range redrawn as a **measurement bracket with end ticks**
+> between the two groups, sitting directly above the US bar so "inside their range" is a straight
+> vertical comparison; and a dashed guide carrying the US bar's end up to that bracket, because
+> **96.2 and 97.1 are four pixels apart at this scale** and the near-tie is the point.
+> **The four countries with no published F are off the scale on purpose** — chips in plain HTML
+> below the plot, not marks. The honest statement about them is "significant, magnitude unknown",
+> and there is no x-position for that; putting them anywhere on the axis invents one. Keep them
+> out of the SVG. A `Readout` carries the tally that a lay reader actually needs (**7 of 7**
+> countries tested showed a 1981 break) and the HTML chips reflow at full size on a phone instead
+> of inheriting the 640-unit viewBox.
+> New `growX` in `components/viz/motion.ts` (SVG bars; `transformBox: fill-box` for the same
+> reason `pop` needs it). Subpage First Load JS 175 → **176 kB**. Build + lint pass.
+> **Verified by eye without a dev server, via a new and much cheaper trick than the localhost-POST
+> one below:** esbuild bundles the figure's TSX with `framer-motion` aliased to a two-line stub
+> (`useInView: () => true`, `useReducedMotion: () => false`, so `useReveal` reports *revealed*),
+> `react-dom/server` renders it to static markup, the `<svg>` is lifted out, given `#171a23` as a
+> background, and **`sharp` rasterizes it to a PNG** — no browser, no server, no canvas. Two
+> iterations were caught that way: the first cut left a dead 68px band between the groups (the
+> bracket now fills it) and the range label needed to say "the countries above" rather than "all
+> six", since only two of the six have a published figure. Rendered and checked at 1x and 2x.
+>
 > **Status (2026-08-06, latest+8): `/research` and `/markets` now carry nine interactive
 > figures.** Both pages were three narrative blocks and no evidence. Research is now nine blocks
 > with five figures, markets seven blocks with three. New: `content/figures.ts` (every number,
