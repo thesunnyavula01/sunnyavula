@@ -53,8 +53,23 @@ export type Spec = {
   id: string;
   name: string;
   question: string;
+  /**
+   * One-sentence plain-English answer to `question`. This leads the row — the
+   * notation follows it rather than standing in for it, so a reader who has
+   * never seen an F-statistic still gets the result.
+   */
+  answer: string;
   /** Headline statistic, rendered verbatim. */
   stat: string;
+  /**
+   * What `stat` means with the notation taken out, printed directly above it.
+   *
+   * p-values are glossed as long-run frequencies UNDER THE NULL ("if nothing
+   * had really changed, a gap this large would turn up less than once in a
+   * thousand tries") — never as the probability that the finding is wrong,
+   * which is the usual mistranslation and is not what a p-value says.
+   */
+  plainStat: string;
   /** "signal" = rejects the null, "null" = cannot. Never color-only — the
    *  ladder always prints this word next to the swatch. */
   verdict: "signal" | "null";
@@ -67,8 +82,12 @@ export const ERTA_SPECS: Spec[] = [
   {
     id: "welch",
     name: "Welch two-sample t-test",
-    question: "Did the mean top-1% share actually move after 1981?",
+    question: "Did the top 1%'s share of income actually change after 1981?",
+    answer:
+      "Yes. The average went from 11.6% to 16.5% of all US income — a jump of 4.85 points.",
     stat: "t = −10.10, p < 0.001",
+    plainStat:
+      "If nothing had really changed, a gap this large would turn up less than once in a thousand tries.",
     verdict: "signal",
     finding:
       "The mean rose 4.85pp, from 11.60% to 16.45%, and the variance more than doubled (σ 1.09 → 2.77). Equality of means is rejected at the highest conventional level.",
@@ -78,8 +97,12 @@ export const ERTA_SPECS: Spec[] = [
   {
     id: "chow",
     name: "Chow structural-break test",
-    question: "Is 1981 a genuine break rather than a bend in one trend?",
+    question: "Is 1981 a real break, or just one long trend bending?",
+    answer:
+      "A real break. The line does not bend — it turns around and heads the other way.",
     stat: "F(2, 61) = 86.03, p < 0.001",
+    plainStat:
+      "The years before and after 1981 fit far better as two separate lines than as one. Again, less than a one-in-a-thousand fluke.",
     verdict: "signal",
     finding:
       "The break at 1981 is statistically overwhelming, and the trend does not merely steepen — it reverses. The pre-1981 slope is −0.156pp/year; the post-1981 slope is +0.206pp/year.",
@@ -89,8 +112,12 @@ export const ERTA_SPECS: Spec[] = [
   {
     id: "quandt",
     name: "Quandt-Andrews supremum test",
-    question: "If the break date is unknown, which year does the data pick?",
+    question: "If you don't tell the test where to look, which year does it pick?",
+    answer:
+      "1977 — four years before ERTA was signed. 1981 comes second.",
     stat: "max F = 107.8 at 1977 · 1981 F = 96.2",
+    plainStat:
+      "Every candidate year in the series was scored as a possible break point. 1977 scored highest at 107.8; 1981 scored 96.2.",
     verdict: "signal",
     finding:
       "Searching every candidate year with 15% trimming, the maximum break statistic lands on 1977 — four years before ERTA was enacted. 1981 comes second.",
@@ -100,8 +127,12 @@ export const ERTA_SPECS: Spec[] = [
   {
     id: "placebo",
     name: "OECD placebo test",
-    question: "Did countries that did NOT cut top rates break in 1981 too?",
+    question: "Did countries that never cut their top rate break in 1981 too?",
+    answer:
+      "Yes — all six of them. This is the result that damages the simple story.",
     stat: "6 of 6 significant · F 5.0 → 97.1",
+    plainStat:
+      "Six comparison countries, six significant 1981 breaks. The US score of 96.2 lands inside their range, not beyond it.",
     verdict: "signal",
     finding:
       "The same Chow test applied to six OECD economies with no comparable 1979–83 top-rate reduction finds a significant 1981 break in every one. The US statistic of 96.2 is not distinguishable from that placebo distribution.",
@@ -111,8 +142,12 @@ export const ERTA_SPECS: Spec[] = [
   {
     id: "panel",
     name: "Two-way fixed-effects panel",
-    question: "Across 17 OECD economies, does cutting the top rate raise the top share?",
+    question: "Across 17 rich economies, does cutting the top rate raise the top share?",
+    answer:
+      "No measurable effect. A 10-point cut moves the top share about a tenth of a point — indistinguishable from zero.",
     stat: "β = −0.0097, clustered SE 0.0286, p = 0.738",
+    plainStat:
+      "A result at least this large would turn up about three times in four even if rate cuts did nothing at all.",
     verdict: "null",
     finding:
       "On 812 country-year observations from 1965–2020 with country and year fixed effects, a 10pp rate cut is associated with a 0.097pp rise in the top-1% share. Neither statistically nor economically significant.",
@@ -122,8 +157,12 @@ export const ERTA_SPECS: Spec[] = [
   {
     id: "event",
     name: "Event study, 42 tax cuts",
-    question: "Do top shares move in the five years after a major rate cut?",
+    question: "Do top incomes move in the five years after a big tax cut?",
+    answer:
+      "No. Across 42 major tax cuts worldwide, nothing moves in any of the five years that follow.",
     stat: "all horizons k = 0…5, p > 0.30",
+    plainStat:
+      "Every year from the cut through five years later is indistinguishable from no change, and the estimates lean slightly negative.",
     verdict: "null",
     finding:
       "Across 42 events of 5pp or more — ERTA (−19pp), Thatcher (−15pp), Sweden (−24pp), New Zealand (−18pp) — every estimated coefficient is indistinguishable from zero. Point estimates run slightly negative: −0.04 at k=0, −0.15 at k=5.",
@@ -133,8 +172,12 @@ export const ERTA_SPECS: Spec[] = [
   {
     id: "fd",
     name: "First differences, Newey-West",
-    question: "Stripping the trend out, is there a same-year effect?",
+    question: "Strip the long-run trend out. Is there still a same-year effect?",
+    answer:
+      "Yes. Cut the top rate by one point and the top 1%'s share rises about 0.05 points that same year.",
     stat: "β = −0.053, SE 0.025, t = −2.16, p = 0.031",
+    plainStat:
+      "Roughly a 3-in-100 chance of seeing this by luck alone. This is the estimate the ~12% figure is built on.",
     verdict: "signal",
     finding:
       "First-differencing removes the trend and resolves the unit-root concern flagged by a Durbin-Watson of 0.237 in levels; DW improves to 1.80. A 1pp cut in the top marginal rate is associated with a 0.053pp rise in the top-1% share the same year.",

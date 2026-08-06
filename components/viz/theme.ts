@@ -39,9 +39,29 @@ export const VIZ = {
   inkStrong: "#e5e7eb",
 } as const;
 
-/** Verdict styling for the specification ladder. Never color-alone: every use
- *  prints `word` beside the swatch. */
+/**
+ * Verdict styling for the specification ladder. Never color-alone: every use
+ * prints `word` beside the swatch.
+ *
+ * `word` is deliberately blunt rather than clever. "Found something" is true of
+ * all four signal rows including the placebo test — which found significant
+ * breaks in six countries that changed no tax rate, and is therefore bad news
+ * for the thesis even though the test rejected its null. A verdict label that
+ * implied "supports the argument" would be wrong on exactly that row, which is
+ * the row the page most needs to report straight. `technical` carries the
+ * notation for a reader who wants it.
+ */
 export const VERDICT = {
-  signal: { color: VIZ.s3, word: "rejects the null", mark: "●" },
-  null: { color: VIZ.muted, word: "cannot reject", mark: "○" },
+  signal: {
+    color: VIZ.s3,
+    word: "Found something",
+    technical: "rejects the null",
+    mark: "●",
+  },
+  null: {
+    color: VIZ.muted,
+    word: "Found nothing",
+    technical: "cannot reject the null",
+    mark: "○",
+  },
 } as const;

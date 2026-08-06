@@ -362,12 +362,6 @@ export const sections: Section[] = [
         visual: "compounding",
       },
       {
-        kicker: "Limitations",
-        heading: "What the record does not show",
-        body:
-          "A CAGR over a handful of years is a small sample, and a small sample cannot separate a good process from a good run. The period was also a favourable one for the kind of concentrated, trend-adjacent positions the formula selects for, which is exactly when a method like this flatters itself. I would rather state that here than have a reader work it out. What I would claim is narrower than the number: the process is written down, it is applied the same way each time, and it can therefore be checked, criticised, and revised — which is the part that would still be worth something if the returns had been ordinary.",
-      },
-      {
         kicker: "Peak to Peak Finance Club",
         heading: "From member to president",
         body:

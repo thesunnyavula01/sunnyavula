@@ -8,9 +8,16 @@ import { Visual } from "@/components/viz";
 import { SectionHero } from "./SectionHero";
 import { StatBlock } from "./StatBlock";
 
+// Shared entrance. The curve is the same decelerating one the figures use
+// (EASE_OUT in components/viz/motion.ts) so a block and the chart inside it
+// settle on the same rhythm rather than two different ones.
 const rise: Variants = {
-  hidden: { opacity: 0, y: 16 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+  hidden: { opacity: 0, y: 14 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] },
+  },
 };
 
 const inView = { once: true, margin: "-60px" } as const;

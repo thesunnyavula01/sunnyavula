@@ -2,6 +2,8 @@
 
 import { useId, useState } from "react";
 import { ERTA_ATTRIBUTION as A } from "@/content/figures";
+import { Slider } from "./Figure";
+import { EASE_OUT, useEased } from "./motion";
 import { VIZ } from "./theme";
 
 /**
@@ -9,14 +11,22 @@ import { VIZ } from "./theme";
  * coefficient. This lets the reader run that arithmetic on any rate cut, and
  * carries the 95% interval alongside the point estimate — at 19pp the interval
  * is roughly 1%–24%, which is the honest width of the claim.
+ *
+ * The interval is not decoration. A single number here would read as precision
+ * the estimate does not have, so the meter always shows the band and the point
+ * mark together.
  */
 export function AttributionSlider() {
   const [cut, setCut] = useState<number>(A.ertaCut);
   const id = useId();
 
-  const pp = cut * A.beta;
-  const lo = cut * Math.max(0, A.beta - 1.96 * A.se);
-  const hi = cut * (A.beta + 1.96 * A.se);
+  // Everything downstream reads the eased value, so dragging rolls the numbers
+  // instead of snapping them a point at a time.
+  const c = useEased(cut, 320);
+
+  const pp = c * A.beta;
+  const lo = c * Math.max(0, A.beta - 1.96 * A.se);
+  const hi = c * (A.beta + 1.96 * A.se);
   const pct = (pp / A.observedRise) * 100;
   const pctLo = (lo / A.observedRise) * 100;
   const pctHi = (hi / A.observedRise) * 100;
@@ -26,14 +36,20 @@ export function AttributionSlider() {
 
   return (
     <div className="mt-6 rounded-xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
-      <h3 className="text-sm font-semibold text-neutral-100">
-        How much of the rise does the cut actually explain?
+      <h3 className="text-[15px] font-semibold leading-snug tracking-[-0.01em] text-neutral-50">
+        How much of the rise does the tax cut actually explain?
       </h3>
-      <p className="mt-1 text-xs leading-relaxed text-neutral-400">
-        The first-differences estimate is β = −{A.beta} — a 1pp cut in the top
-        marginal rate moves the top 1% share {A.beta}pp the same year. Run it
-        forward against the {A.observedRise}pp rise observed between 1980 and
-        2024.
+      <p className="mt-2.5 border-l-2 pl-3 text-[13px] leading-relaxed text-neutral-200" style={{ borderColor: VIZ.s1 }}>
+        Cut the top tax rate by one point and the top 1%&rsquo;s share of income
+        rises about five hundredths of a point that year ({A.beta}). ERTA cut it
+        by {A.ertaCut} points. Run that forward and it accounts for roughly an
+        eighth of the {A.observedRise}-point rise since 1980 — not the whole
+        story, which is the paper&rsquo;s actual claim.
+      </p>
+      <p className="mt-3 text-xs leading-relaxed text-neutral-400">
+        Drag to run the same arithmetic on any size of cut. The band under each
+        number is the 95% interval: the range the estimate is actually
+        consistent with, which is wide.
       </p>
 
       <label
@@ -45,25 +61,25 @@ export function AttributionSlider() {
           className="text-sm font-bold text-neutral-50"
           style={{ fontVariantNumeric: "tabular-nums" }}
         >
-          {cut}pp
+          {cut} points
         </span>
       </label>
-      <input
+      <Slider
         id={id}
-        type="range"
         min={0}
         max={A.sliderMax}
         step={1}
         value={cut}
-        onChange={(e) => setCut(Number(e.target.value))}
-        className="mt-2 w-full accent-[#808fdb]"
+        onChange={setCut}
+        accent={VIZ.s1}
+        valueText={`${cut} percentage points`}
       />
-      <div className="mt-1 flex justify-between text-[10px] text-neutral-500">
-        <span>0</span>
+      <div className="mt-1 flex items-center justify-between text-[10px] text-neutral-500">
+        <span>no cut</span>
         <button
           type="button"
           onClick={() => setCut(A.ertaCut)}
-          className="rounded px-1.5 py-0.5 transition hover:bg-white/10 hover:text-neutral-300 motion-reduce:transition-none"
+          className="rounded px-1.5 py-0.5 font-medium transition-colors hover:bg-white/10 hover:text-neutral-200 motion-reduce:transition-none"
         >
           ERTA · {A.ertaCut}pp
         </button>
@@ -73,25 +89,27 @@ export function AttributionSlider() {
       <div className="mt-5 grid gap-4 sm:grid-cols-2">
         <div>
           <p className="text-[11px] uppercase tracking-wider text-neutral-500">
-            Attributable rise
+            Points of the rise it explains
           </p>
           <p
             className="mt-1 text-3xl font-bold text-neutral-50"
             style={{ fontVariantNumeric: "tabular-nums" }}
           >
             {pp.toFixed(2)}
-            <span className="ml-1 text-base font-semibold text-neutral-400">pp</span>
+            <span className="ml-1 text-base font-semibold text-neutral-400">
+              of {A.observedRise}
+            </span>
           </p>
           <p
             className="mt-1 text-[11px] text-neutral-500"
             style={{ fontVariantNumeric: "tabular-nums" }}
           >
-            95% interval {lo.toFixed(2)}–{hi.toFixed(2)}pp
+            somewhere between {lo.toFixed(2)} and {hi.toFixed(2)}
           </p>
         </div>
         <div>
           <p className="text-[11px] uppercase tracking-wider text-neutral-500">
-            Share of the {A.observedRise}pp rise
+            As a share of the whole rise
           </p>
           <p
             className="mt-1 text-3xl font-bold"
@@ -104,7 +122,7 @@ export function AttributionSlider() {
             className="mt-1 text-[11px] text-neutral-500"
             style={{ fontVariantNumeric: "tabular-nums" }}
           >
-            95% interval {pctLo.toFixed(1)}–{pctHi.toFixed(1)}%
+            somewhere between {pctLo.toFixed(1)}% and {pctHi.toFixed(1)}%
           </p>
         </div>
       </div>
@@ -123,12 +141,17 @@ export function AttributionSlider() {
           />
           <div
             className="absolute inset-y-0 w-1 rounded-full"
-            style={{ left: `${clamp(pct)}%`, backgroundColor: VIZ.s1 }}
+            style={{
+              left: `${clamp(pct)}%`,
+              backgroundColor: VIZ.s1,
+              boxShadow: `0 0 8px ${VIZ.s1}`,
+              transition: `box-shadow 300ms ${EASE_OUT}`,
+            }}
           />
         </div>
         <div className="mt-1 flex justify-between text-[10px] text-neutral-500">
-          <span>0% of the rise</span>
-          <span>100%</span>
+          <span>none of the rise</span>
+          <span>all of it</span>
         </div>
       </div>
 
@@ -136,17 +159,17 @@ export function AttributionSlider() {
         {isErta ? (
           <>
             <span className="font-semibold text-neutral-300">
-              At ERTA&rsquo;s actual {A.ertaCut}pp cut
+              At ERTA&rsquo;s actual {A.ertaCut}-point cut
             </span>{" "}
-            the estimate attributes about 1.0pp — roughly 12% of the observed
+            the estimate attributes about 1.0 point — roughly 12% of the observed
             rise. The other 88% is what the complementary policies amplified: the
             10b-18 buyback regime, OBRA welfare contraction, the PAC explosion,
             and antitrust retrenchment.
           </>
         ) : (
           <>
-            Drag back to {A.ertaCut}pp for ERTA&rsquo;s actual cut, 70% to 50%
-            over 1981–82.
+            Drag back to {A.ertaCut} points for ERTA&rsquo;s actual cut, 70% down
+            to 50% over 1981–82.
           </>
         )}
       </p>

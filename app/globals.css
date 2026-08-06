@@ -80,3 +80,100 @@ body {
     animation: none;
   }
 }
+
+/* ------------------------------------------------------------------ */
+/* Subpage figures (components/viz)                                    */
+/* ------------------------------------------------------------------ */
+
+/* Each figure's "Data & method" disclosure. The default triangle marker is
+   removed in both engines — Safari still ships the WebKit pseudo-element — and
+   replaced by a chevron we can rotate. */
+.viz-note > summary {
+  list-style: none;
+}
+.viz-note > summary::-webkit-details-marker {
+  display: none;
+}
+.viz-chev {
+  display: inline-block;
+  transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.viz-note[open] .viz-chev {
+  transform: rotate(90deg);
+}
+
+/* Figure sliders. Native range inputs styled with `accent-color` inherit the
+   platform's track height and thumb, which reads soft next to hairline SVG
+   charts, so the track and thumb are drawn here instead.
+
+   --viz-accent is the figure's series color and --viz-fill the filled share of
+   the track; both are set inline by components/viz/Figure.tsx → <Slider>, which
+   is why no chart color appears in this file. Chromium needs the fill painted
+   as a gradient on the track (it has no ::-webkit-*-progress); Firefox has
+   ::-moz-range-progress and takes a flat color. */
+.viz-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 20px;
+  background: transparent;
+  cursor: pointer;
+}
+.viz-range::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    var(--viz-accent) 0 var(--viz-fill),
+    rgba(255, 255, 255, 0.1) var(--viz-fill) 100%
+  );
+}
+.viz-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  margin-top: -6px;
+  border-radius: 999px;
+  background: #fafafa;
+  border: 3px solid var(--viz-accent);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+  transition: transform 140ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.viz-range:hover::-webkit-slider-thumb,
+.viz-range:active::-webkit-slider-thumb {
+  transform: scale(1.15);
+}
+.viz-range::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+}
+.viz-range::-moz-range-progress {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--viz-accent);
+}
+.viz-range::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: #fafafa;
+  border: 3px solid var(--viz-accent);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+}
+
+/* Keyboard focus has to stay visible on both the input and the charts that take
+   arrow keys, so the outline is restated rather than reset away. */
+.viz-range:focus-visible,
+.viz-focus:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.55);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .viz-chev,
+  .viz-range::-webkit-slider-thumb {
+    transition: none;
+  }
+}
