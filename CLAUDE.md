@@ -210,7 +210,8 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 > call the handler off `__reactProps$*` instead.
 > Subpage First Load JS 155 → **169 kB** for all nine widgets (hand-rolled SVG, no chart
 > library — recharts alone would have roughly doubled it). `updated` bumped to 2026-08-06 for
-> both sections. Build + lint pass. Live deploy predates this — run `npm run deploy`.
+> both sections. Build + lint pass. **Confirmed live on sunnyavula.com after the push** — see
+> the deploy note under Commands; this repo does not need a manual `npm run deploy`.
 >
 > **Status (2026-08-05, latest+7): `/att-agency` rewritten from the live agency site.** The
 > page was two narrative blocks of role description and no evidence — the driest section on the
@@ -645,6 +646,17 @@ npm run deploy     # OpenNext build + deploy to Cloudflare Workers (wrangler dep
 deploys need `CLOUDFLARE_ACCOUNT_ID` + `CLOUDFLARE_API_TOKEN` in the environment (CI secrets
 preferred). Set any server-only runtime var with `wrangler secret put`; `NEXT_PUBLIC_*` are
 inlined at build time from `.env.local`.
+
+> **Deploying is automatic — do not tell the user to run `npm run deploy`.** Cloudflare Workers
+> Builds is wired to this GitHub repo and runs `npm run build` + `npx wrangler deploy` on every
+> push to `main` (that pipeline was fixed on 2026-07-23; see the status entry below). Verified
+> on 2026-08-06: three commits pushed that day were serving on **https://sunnyavula.com** within
+> minutes, with no manual step.
+> `npm run deploy` is the out-of-band escape hatch — a local deploy without a push, or a push
+> whose CI build failed. **Several status entries below end with "Live deploy predates this —
+> run `npm run deploy`". For anything after 2026-07-23 that line is wrong**; it was carried
+> forward from the pre-CI era and repeated without being checked. Confirm against the live URL
+> instead of assuming either way.
 
 ---
 
