@@ -49,7 +49,7 @@ export default function Home() {
           </li>
           <li>
             <a href={SITE.attAgency} rel="noopener noreferrer">
-              ATT Agency — attagency.co, the dev studio co-founded by{" "}
+              ATT Agency — attagency.co, the Boulder growth studio co-founded by{" "}
               {SITE.fullName}
             </a>
           </li>

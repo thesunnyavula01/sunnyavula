@@ -42,7 +42,8 @@ Content copy must match the **Content facts** section below (numbers are load-be
    (team lead) and the CU Boulder autocracies/UN-peacekeeping study. Outbound: the ERTA paper in
    `/public/papers/` — the main paper plus its methodology companion (`Northeastern paper 1`, same
    paper), both staged from `~/Downloads` (still under faculty review).
-2. **ATT Agency** (`/att-agency`) — the dev agency. Outbound: **https://attagency.co**.
+2. **ATT Agency** (`/att-agency`) — the Boulder growth studio. Outbound: **https://attagency.co**
+   and **https://attagency.co/results**, plus per-case-study links to the client projects.
 3. **Markets** (`/markets`) — VSD Investments value-investing formula + finance competition
    record. Outbound: none for now (intentionally link-less). **Dividend Collective is
    intentionally excluded.**
@@ -148,6 +149,32 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 
 ## Build phases
 
+> **Status (2026-08-05, latest+7): `/att-agency` rewritten from the live agency site.** The
+> page was two narrative blocks of role description and no evidence — the driest section on the
+> site. It is now nine blocks built from `attagency.co` and `attagency.co/results`: role and
+> mission, the studio's positioning against AI site builders, a "by the numbers" block, four
+> case studies (The Dividend Collective, soymods & Pathmind, Kodama, the three artist
+> portfolios), the interactive-experiments shelf, and the existing Google Skillshop block.
+> Every figure is transcribed in **Content facts → ATT Agency** below; the reconciled counts
+> and the display-domain-vs-real-host trap are documented there.
+> **`stats` deliberately stayed at three entries.** They render in *two* places — the subpage
+> `StatBlock` (a 2/3-col grid, so 3 or 6 are the only clean counts) and the deck's copy card,
+> which on phones lives in a **fixed-height sheet** (`h-[min(24.5rem,58svh)]`). More stats push
+> that sheet into its `overflow-y-auto` safety valve, and the zero-overflow phone layout was
+> verified by eye at 375×812/375×667 and can't be re-verified without a dev server. The full
+> results set lives in the "by the numbers" narrative bullets instead. Values refreshed to
+> `10+` / `130K` / `~$10k` — "4 client sites shipped" was stale.
+> **Also updated:** `tagline`, `blurb`, `metaDescription` (150 chars), `deskLinkText`, `updated`
+> → 2026-08-05, the hidden desk-nav line in `app/page.tsx` ("dev studio" → "Boulder growth
+> studio"), and `agencySchema` in `content/schema.ts` (Boulder address, `areaServed` city/state/
+> country, `slogan`, `numberOfEmployees`, `priceRange`, seven `serviceType` entries).
+> **The Dividend Collective now appears on the site** as an agency client case study — the
+> "intentionally excluded" note under *Sections → Markets* is about Sunny's own market work, not
+> ATT's client roster. If it should be off the site entirely, delete that narrative block and
+> the `0 → 9` bullet.
+> Build + lint pass; **not eyeballed** (no dev server was run, per request). Live deploy
+> predates this — run `npm run deploy`.
+>
 > **Status (2026-08-04, latest+6): the coffee mug is a real vessel.** It was a solid
 > cylinder with a dark disc laid over its top cap, which the deck's aerial camera — looking
 > straight down INTO it — read as a plug with a lid rather than a cup with coffee in it. The
@@ -583,9 +610,42 @@ Verified from the résumé docs. Use these exact figures.
   deployments track strategic self-interest, not humanitarian need.
 
 **ATT Agency** (co-founder & lead business executive)
-- Manages clients, taxes, dev & deployment. Shipped 4 sites + a Thriftly paid-ad campaign.
-  Expected ~$10k ARR for FY27. Mission: help Colorado small businesses hit by the digital divide
-  modernize their digital infrastructure. Site: attagency.co.
+- Manages clients, taxes, dev & deployment. Expected ~$10k ARR for FY27. Mission: help small
+  businesses hit by the digital divide modernize their digital infrastructure.
+  Site: attagency.co (a static `.html` site; `/results` resolves without the extension).
+- Positioning per the live site: "a creative growth agency", **Boulder, CO**, tagline
+  *"Growth, designed on purpose."* Three founders — Saras Totey, Ryder Thomas, Sunny Avula.
+  Brand + website + ad creative + analytics from one team. **Packages from $99**, fixed quote
+  within **one business day**, **brief to launch in six weeks** across three phases
+  (Diagnose → Build → Optimize).
+- **Counts are two different numbers and must not be conflated:** **6 live client websites**
+  (homepage "By the numbers") vs **10+ live custom websites, apps, and interactive builds**
+  (`/results` header). Plus the Thriftly paid-ad campaign (not on the agency site).
+- **Results / case studies** (`attagency.co/results`), the load-bearing figures:
+  - *The Dividend Collective* — paid personal-finance newsletter + members site. **0 → 9 paying
+    subscribers in the first launch quarter.** Custom Stripe billing, member auth, content
+    gating, weekly "Dispatch", self-hosted (no platform cut). → thedividendcollective.com
+  - *soymods & Pathmind* — Minecraft Fabric mod with a no-code drag-and-drop node panel, on
+    Modrinth + GitHub, plus the soymods.com hub. Featured days after launch by the mod-review
+    channel **KasaiSora (130,000+ subscribers), zero ad spend**. → soymods.com
+  - *Kodama* — AI historian Discord bot: semantic search over server history, receipt answers
+    that link back to source messages, slash commands (`/lore search`, `/recap today`,
+    `/settings personality`, `/optout`), admin/personality controls, free tier + paid Store.
+    → askkodama.com
+  - *BAIR* — single-page photographer portfolio; brutalist wordmark, macOS-style window frame,
+    custom cursor, live timecode. Displayed as bair.my, **hosted at bair.netlify.app**.
+  - *ryduzz.com* (blackletter wordmark, grid overlay, barcode footer) and *shitaltayde.art*
+    (cream gallery-serif, Boulder oil painter) — **under three weeks each**, no templates.
+    shitaltayde.art is **actually served from shital-tayde-art.pages.dev**.
+  - *Interactive experiments* — Solaris Breach (boss-rush game), threebody.app (RK4/RKF45
+    Newtonian sim, Figure-8 / Lagrange / Euler-collinear presets), solarsystem.dev (Keplerian
+    J2000, 1 day/sec → 100 yr/sec). Real hosts: `solaris-breach.pages.dev`,
+    `three-body-dh1.pages.dev`, `solar-system-3d-8bt.pages.dev`.
+- **Vanity domains ≠ hrefs.** Four of these projects are presented under a display domain that
+  does not resolve. `content/sections.ts` links the **real** host and labels the button by the
+  project ("BAIR portfolio", "Shital Tayde gallery", "Try the solar system") rather than by a
+  domain the link does not go to. Re-check these if the agency moves them onto their vanity
+  domains.
 
 **Markets**
 - VSD Investments LLC: value-investing predictive formula, **~27.0% CAGR** (beat the S&P 500);

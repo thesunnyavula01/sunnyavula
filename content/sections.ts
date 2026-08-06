@@ -131,39 +131,143 @@ export const sections: Section[] = [
     nav: "ATT Agency",
     title: "ATT Agency",
     deskObject: "Laptop / monitor",
-    tagline: "A dev studio modernizing Colorado small businesses.",
+    tagline: "A Boulder growth studio: brand, websites, and ads that ship.",
     metaDescription:
-      'ATT Agency, a Colorado dev studio co-founded by Abhiram "Sunny" Avula: four client sites shipped, paid media, and ~$10k projected ARR for FY27.',
-    updated: "2026-07-23",
+      "ATT Agency, the Boulder studio Sunny Avula co-founded: 10+ sites and apps shipped, a 130K-subscriber press feature, and 0 to 9 paid subs for a client.",
+    updated: "2026-08-05",
     deskLinkText:
-      "ATT Agency — a dev studio modernizing Colorado small businesses",
+      "ATT Agency — a Boulder growth studio shipping brand, websites, and ads for small businesses",
     blurb:
-      "I co-founded ATT Agency to help Colorado small businesses hurt by the digital divide modernize their digital infrastructure. I own the business and accounting side, so when you reach out I am your first point of contact: I handle client calls, scoping, and scheduling, and I make sure every project ships on time. So far we have shipped four sites plus a paid-ad campaign for Thriftly.",
+      "I co-founded ATT Agency to help small businesses hurt by the digital divide get a web presence that matches the quality of what they sell. Three founders run the studio out of Boulder, covering brand, website, ad creative, and analytics from one team, starting at $99 with a fixed quote back inside one business day. I own the business and accounting side, so when you reach out I am your first point of contact: client calls, scoping, scheduling, and making sure every project ships on time. Ten-plus sites, apps, and interactive builds are live, among them a client newsletter that went from zero to nine paying subscribers in its launch quarter and a mod that picked up a 130,000-subscriber YouTube feature days after release.",
     stats: [
-      { value: "4", label: "client sites shipped" },
+      { value: "10+", label: "sites, apps & builds shipped" },
+      { value: "130K", label: "reached by a client launch" },
       { value: "~$10k", label: "projected ARR (FY27)" },
-      { value: "Co-founder", label: "clients · dev · deploy" },
     ],
     narrative: [
       {
         kicker: "Co-founder & lead business executive",
         heading: "Closing the digital divide, one storefront at a time",
         body:
-          "ATT Agency exists for the Colorado small businesses the digital divide left behind, the shops whose web presence does not match the quality of what they sell. We modernize their digital infrastructure end to end. As lead business executive I run the business and accounting side: client calls, scoping, scheduling, taxes, development, and deployment, and I keep every engagement on schedule.",
+          "ATT Agency exists for the small businesses the digital divide left behind, the shops whose web presence does not match the quality of what they sell. Three of us run the studio out of Boulder with no hand-offs between freelancers: one quote, one timeline, one set of files at the end. As lead business executive I run the business and accounting side, from client calls, scoping, and scheduling to taxes, development, and deployment, and I keep every engagement on schedule.",
         bullets: [
           "First point of contact for every prospective and active client.",
-          "Shipped four client sites, plus a paid-ad campaign for Thriftly.",
+          "A fixed quote in the client's inbox within one business day; packages start at $99.",
+          "Brief to launch in six weeks, in three phases: diagnose, build, optimize.",
+          "Six live client websites, plus a paid-ad campaign for Thriftly.",
           "On track for roughly $10k ARR in FY27.",
+        ],
+      },
+      {
+        kicker: "Positioning",
+        heading: "Why a studio and not an AI builder",
+        body:
+          "Lovable, v0, and Cursor will spin up a working page in an afternoon, and if a founder already knows exactly what their site should say, that is the cheapest path. We tell prospects so. What those tools do not decide is what to build. That is what the studio sells: strategy about what the page should say and to whom, a brand and a tone the models cannot fake yet, real iteration after launch instead of an abandoned file, a human who answers when something breaks, and code the client owns and hosts wherever they like, with no monthly platform lock-in.",
+      },
+      {
+        kicker: "Results",
+        heading: "The numbers we scope new work against",
+        body:
+          "Most agencies show pretty screenshots. We publish the figures underneath them, and they are the same numbers we use to scope and quote new business. Every one of them comes off a project the studio built and launched.",
+        bullets: [
+          "0 → 9 paying subscribers for The Dividend Collective in a single launch quarter.",
+          "130,000+ subscribers reached when Pathmind was featured on the KasaiSora YouTube channel, on zero ad spend.",
+          "10+ live custom websites, apps, and interactive builds shipped.",
+          "2 artist portfolio sites delivered in under three weeks each, hand-coded with no templates.",
+        ],
+        links: [
+          { label: "See the full case studies", href: "https://attagency.co/results" },
+        ],
+      },
+      {
+        kicker: "Case study · The Dividend Collective",
+        heading: "A paid newsletter that owns its own rails",
+        body:
+          "Personal-finance publishing online is mostly Substack-aesthetic noise on one side and big-publisher paywalls on the other. We launched a brand that reads like a real publication and runs its own subscription infrastructure: a print-inspired editorial homepage, a member-only Portfolio section, a weekly Dispatch, and a custom Stripe billing stack with member authentication and content gating built from scratch. Because it is self-hosted, the business keeps both the customer relationship and the full revenue cut.",
+        bullets: [
+          "Zero to nine paying subscribers in the first launch quarter.",
+          "The Dispatch ships every Monday on a clean publishing pipeline.",
+          "No platform lock-in: billing, member portal, and gating are all first-party.",
+        ],
+        links: [
+          {
+            label: "Visit The Dividend Collective",
+            href: "https://thedividendcollective.com/",
+          },
+        ],
+      },
+      {
+        kicker: "Case study · soymods & Pathmind",
+        heading: "A no-code mod that found 130,000 people on its own",
+        body:
+          "Automating anything in Minecraft normally means writing code or running a separate bot. Pathmind is a Fabric mod that replaces that with a drag-and-drop node panel in the game: movement, interact, and item-move nodes, navigation, and crafting, chained into a routine in seconds. The studio shipped the mod on Modrinth with source on GitHub and paired it with soymods.com, a pixel-styled project hub that points players straight at downloads, source, and Discord. Days after launch the mod-review channel KasaiSora featured it to an audience of more than 130,000, entirely organically.",
+        bullets: [
+          "130,000+ subscriber channel reached with zero ad spend.",
+          "KasaiSora called it a drag-and-drop panel with “essentially endless possibilities” and no coding knowledge required.",
+          "One flagship mod on Modrinth, one custom mod hub around it.",
+        ],
+        links: [{ label: "Visit soymods.com", href: "https://soymods.com/" }],
+      },
+      {
+        kicker: "Case study · Kodama",
+        heading: "An AI historian for Discord",
+        body:
+          "Every active Discord server buries its own history, the decisions and running jokes and tournament results, under thousands of messages nobody will scroll back through. Kodama indexes all of it and answers questions with receipts: each reply links back to the original messages, so a server can check the source instead of trusting a summary. We designed the brand, built the product around Discord-native slash commands, and shipped askkodama.com as the marketing site.",
+        bullets: [
+          "Semantic search index over a server's full message history.",
+          "Slash commands: /lore search, /recap today, /settings personality, /optout.",
+          "Personality and admin controls for moderators, plus a per-user opt-out.",
+          "Free to add to any server, with a paid Store for extras.",
+        ],
+        links: [{ label: "Visit askkodama.com", href: "https://askkodama.com" }],
+      },
+      {
+        kicker: "Case study · BAIR, ryduzz.com, shitaltayde.art",
+        heading: "Three artists, three sites, zero templates",
+        body:
+          "Creative professionals usually get squeezed into portfolio grids that look like every other template. BAIR is a single-scroll site for a photographer, built around a brutalist wordmark over a wide sky photo, a macOS-style window frame, a custom cursor, and a live timecode. ryduzz.com is a dark portfolio for an advertising creative, with a blackletter wordmark, a technical grid overlay, and a barcode footer strip. shitaltayde.art is a cream, gallery-serif site for a Boulder oil painter, anchored by a full-bleed wildlife painting and a quiet inquiry flow.",
+        bullets: [
+          "The two portfolio sites each shipped in under three weeks.",
+          "A complete brand system per project: logo, typography, and palette.",
+          "Hand-written and mobile-first throughout. No Squarespace, no Wix.",
+        ],
+        links: [
+          { label: "BAIR portfolio", href: "https://bair.netlify.app/" },
+          { label: "ryduzz.com", href: "https://ryduzz.com/" },
+          {
+            label: "Shital Tayde gallery",
+            href: "https://shital-tayde-art.pages.dev/",
+          },
+        ],
+      },
+      {
+        kicker: "Between client projects",
+        heading: "A shelf of interactive builds",
+        body:
+          "Client work rewards taste and reliability. Experiments reward everything else: physics, shader math, camera work, game feel. So between projects the studio ships browser-first builds to stay sharp. Solaris Breach is a boss rush through a dying star system. threebody.app is a Newtonian gravity simulator with RK4 and RKF45 integrators and named-solution presets from the Figure-8 orbit to the Lagrange points. solarsystem.dev is a 3D Keplerian solar system on real J2000 orbital elements, with time control from one day per second up to a hundred years per second. All of it runs in the browser with nothing to install.",
+        links: [
+          {
+            label: "Try the solar system",
+            href: "https://solar-system-3d-8bt.pages.dev/",
+          },
+          {
+            label: "Three-body simulator",
+            href: "https://three-body-dh1.pages.dev/",
+          },
+          { label: "Solaris Breach", href: "https://solaris-breach.pages.dev/" },
         ],
       },
       {
         kicker: "Performance marketing",
         heading: "Certified for the ad side of the work",
         body:
-          "The agency's growth work leans on paid media, so I earned two Google Skillshop certifications to back it: Measurement and Analytics, and AI-Powered Performance Ads. That foundation is what sits behind campaigns like the paid-ad push we ran for Thriftly.",
+          "The growth half of the studio is paid media: static and video creative for Meta, TikTok, YouTube, and Google, then Search Console and analytics reporting that decides where next month's spend goes. I earned two Google Skillshop certifications to back that work, in Measurement and Analytics and in AI-Powered Performance Ads. That foundation is what sits behind campaigns like the paid-ad push we ran for Thriftly.",
       },
     ],
-    links: [{ label: "Visit attagency.co", href: "https://attagency.co" }],
+    links: [
+      { label: "Visit attagency.co", href: "https://attagency.co" },
+      { label: "See the results", href: "https://attagency.co/results" },
+    ],
   },
   {
     slug: "markets",
