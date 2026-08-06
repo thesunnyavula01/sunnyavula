@@ -156,6 +156,62 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 
 ## Build phases
 
+> **Status (2026-08-06, latest+8): `/research` and `/markets` now carry nine interactive
+> figures.** Both pages were three narrative blocks and no evidence. Research is now nine blocks
+> with five figures, markets seven blocks with three. New: `content/figures.ts` (every number,
+> cited), `components/viz/` (the figures), `ChartScroll` + `Figure`/`Legend` primitives.
+> **(1) The ERTA PDFs were a goldmine nobody had opened.** `public/papers/*.pdf` embed subset
+> fonts, so naive text extraction returns glyph ids, which is presumably why the stats were
+> never used. The subset is a flat offset from WinAnsi: **`char = glyphCode + 29`** (glyph 0x03
+> is space). Decode the `<hex> Tj` operators with that and the full text falls out. Everything
+> in `content/figures.ts` came from there — Welch t = −10.10, Chow F(2,61) = 86.03, trend
+> −0.156 → +0.206 pp/yr, Quandt-Andrews max at **1977** (F 107.8) not 1981 (96.2), the six-country
+> placebo, the panel and event-study **nulls**, first-differences β = −0.053, and the arithmetic
+> behind the ~12%.
+> **(2) The page shows the null results on purpose** — decided with Sunny. `ERTA_SPECS` carries
+> all seven specifications, the two nulls written up at the same length as the wins, and the
+> placebo test (which is the most damaging result for a naive causal claim) gets its own block
+> and figure. **Do not filter `SpecLadder` down to the significant rows.** The thesis the page
+> argues is the defensible one: the break was global, the magnitude was American.
+> **(3) Chart colors are NOT `ACCENTS`.** The deck accents were brightened for the 3D scene and
+> sit at OKLCH L ≈ 0.71–0.76, above the 0.48–0.67 band a mark needs on a dark surface. `VIZ` in
+> `components/viz/theme.ts` is the same hues snapped to the top of the band: `#808fdb` /
+> `#c37f29` / `#0daf80`. Validated as a set with the dataviz skill's validator against the card
+> surface `#171a23` (= page bg under `bg-white/[0.03]`): worst adjacent CVD ΔE 23.7 research /
+> 9.7 markets, normal-vision 23.6 / 20.1, lightness band + chroma floor + 3:1 contrast all pass.
+> **Re-run the validator if any of these change**; do not eyeball a replacement.
+> **(4) `ChartScroll` is load bearing, not styling.** Charts are authored against a 640-unit
+> viewBox. `w-full` alone shrinks that to the container, and the figure area on a 375px phone is
+> ~309px — a 0.48x downscale that renders the 9px axis labels at **4.4px**. So the plot keeps its
+> design width and overflows into its own scroller. **Wrap only the `<svg>`** — sliders and
+> readouts must stay outside or they inherit the 640px floor and scroll for nothing. On desktop
+> the figure is 694px, min-width never binds, nothing scrolls.
+> **(5) The markets compounding curve is arithmetic, not a trade record.** Only the two
+> endpoints and the CAGR are real; the curve between them is what those endpoints imply and the
+> caption says exactly that. **Never add intermediate marks, drawdowns, or dates to it**, and
+> never date the axis — it is "Year 0–4" deliberately. Same rule for `FormulaStages`: the three
+> published pillars only, no invented sub-factors or weights.
+> **(6) Registry wiring.** `VisualKey` is a union in `content/sections.ts`; `VISUALS` in
+> `components/viz/index.tsx` is typed `Record<VisualKey, ComponentType>`, so adding a key fails
+> the build until its component exists. Copy stays in content, components stay out of it.
+> **Verified on a running dev server** (Sunny approved it this time). The preview pane still
+> cannot composite, so `computer{screenshot}` times out — instead each SVG was serialized with
+> `XMLSerializer`, drawn to a canvas at 2x, and POSTed as a PNG to a throwaway localhost:3999
+> receiver, then read back as an image. **That trick works for any SVG in this repo and is much
+> cheaper than the rafshim procedure below** (which is still the only option for WebGL).
+> Caught by eye that way: the placebo figure had two label collisions, the FIRE figure labelled
+> zero as if it were the right end of the axis, the trend bands read as an area chart, and the
+> distribution's threshold line ran full height. All four fixed. Also verified: both sliders
+> compute correctly against the closed forms, the accordion opens one row at a time, the stepper
+> disables at both ends, no page-level horizontal overflow at 375 or 1280, no clipped text.
+> **React state updates are async — assertions in the same synchronous `javascript_tool` call
+> read stale DOM.** Await a tick between acting and asserting, or you will "find" bugs that
+> aren't there. Likewise `element.click()` does not reach React's root listener in this pane;
+> call the handler off `__reactProps$*` instead.
+> Subpage First Load JS 155 → **169 kB** for all nine widgets (hand-rolled SVG, no chart
+> library — recharts alone would have roughly doubled it). `updated` bumped to 2026-08-06 for
+> both sections. Build + lint pass. Live deploy predates this — run `npm run deploy`.
+>
 > **Status (2026-08-05, latest+7): `/att-agency` rewritten from the live agency site.** The
 > page was two narrative blocks of role description and no evidence — the driest section on the
 > site. It is now eight blocks built from `attagency.co` and `attagency.co/results`: role and

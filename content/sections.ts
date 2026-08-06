@@ -4,12 +4,31 @@
 export type Stat = { value: string; label: string };
 export type OutboundLink = { label: string; href: string };
 
+/**
+ * Figures a narrative block can attach. The vocabulary lives here rather than
+ * in components/viz so the dependency points the right way: content names the
+ * figure it wants, and `VISUALS` in components/viz/index.tsx is typed as a
+ * total map over this union, so adding a key here fails the build until the
+ * component exists. Numbers behind each one are in content/figures.ts.
+ */
+export type VisualKey =
+  | "trend-flip"
+  | "distribution-shift"
+  | "spec-ladder"
+  | "attribution"
+  | "placebo-range"
+  | "fire-control"
+  | "compounding"
+  | "formula-stages"
+  | "club-ladder";
+
 export type NarrativeBlock = {
   kicker?: string; // small over-line: institution / role
   heading: string;
   body: string;
   bullets?: string[];
   links?: OutboundLink[]; // outbound buttons rendered under this block
+  visual?: VisualKey; // figure rendered after the bullets, before the links
 };
 
 export type Section = {
@@ -84,7 +103,7 @@ export const sections: Section[] = [
     tagline: "Econometrics on tax policy and the political economy of peacekeeping.",
     metaDescription:
       "Econometric study of the 1981 ERTA's effect on U.S. income disparity, plus CU Boulder research on why autocracies join UN peacekeeping.",
-    updated: "2026-07-23",
+    updated: "2026-08-06",
     deskLinkText:
       "Research — econometrics on tax policy and the political economy of peacekeeping",
     blurb:
@@ -96,6 +115,63 @@ export const sections: Section[] = [
     ],
     narrative: [
       {
+        kicker: "Northeastern University · Team lead · Prof. Omar Robles",
+        heading: "ERTA and the U.S. income gap",
+        body:
+          "As team lead, I directed a study of the socioeconomic legacy of the 1981 Economic Recovery Tax Act on U.S. income disparity, running five econometric specifications over 65 years of U.S. tax and income data and an 812-observation panel of 17 OECD economies. The question is narrower than the usual argument about Reaganomics: not whether inequality rose after 1981, which is not in dispute, but how much of the rise the rate cuts themselves can carry.",
+        bullets: [
+          "Data: WID.world top-1% pre-tax shares, Tax Foundation marginal rates, FRED real GDP per capita, Census Gini, Saez-Zucman wealth shares.",
+          "Specifications: Welch t-tests, Chow and Quandt-Andrews structural-break tests, a six-country OECD placebo test, and a first-differences regression with Newey-West errors.",
+          "Presented to Prof. Robles with strongly positive feedback; currently under faculty review.",
+        ],
+        links: [
+          { label: "Read the paper", href: "/papers/erta-paper.pdf" },
+          { label: "Methodology", href: "/papers/erta-methodology.pdf" },
+        ],
+      },
+      {
+        kicker: "Finding · Structural break",
+        heading: "The trend did not steepen in 1981. It reversed.",
+        body:
+          "The easy version of this story is that inequality was already climbing and 1981 made it climb faster. That is not what the series does. Through the New Deal-era rate structure the top 1% share was in slow decline, about a sixth of a percentage point a year. After 1981 the same series turns and rises at roughly a fifth of a point a year. A Chow test puts the break at 1981 with F(2, 61) = 86.03. The sign of the trend, not just its slope, is what changed.",
+        visual: "trend-flip",
+      },
+      {
+        kicker: "Finding · Level and variance",
+        heading: "Two different distributions, not one drifting",
+        body:
+          "Treating the two eras as samples rather than a single series makes the size of the move legible. The pre-ERTA mean is 11.60% across 21 years; the post-ERTA mean is 16.45% across 44. A Welch two-sample t-test returns t = −10.10. The second thing the comparison shows is less quoted and more interesting: the standard deviation more than doubles, from 1.09 to 2.77. Top incomes did not just get bigger, they got far more cyclical, which is what you would expect once they are tied to asset prices rather than wages.",
+        visual: "distribution-shift",
+      },
+      {
+        kicker: "Method · The full specification curve",
+        heading: "Seven specifications, two of which found nothing",
+        body:
+          "One specification that agrees with you is a coincidence. The defensible version of this claim is the whole set, so the paper runs five and the methodology companion documents two more, and the two that return nulls are written up at the same length as the ones that do not. A reader who opens the PDF should find no result there that is missing from this page.",
+        visual: "spec-ladder",
+      },
+      {
+        kicker: "Finding · The placebo test",
+        heading: "The result that cuts against the thesis",
+        body:
+          "The hardest test in the paper is the one designed to break it. Applying the same Chow test at 1981 to six OECD economies that enacted no comparable top-rate reduction between 1979 and 1983 should, if ERTA is doing the work, find nothing. It finds a significant break in all six, and the US statistic of 96.2 sits inside their range rather than beyond it. That rules out the strong claim. What survives is the more precise one: the break was global, the magnitude was American. ERTA is not the cause of a worldwide shift, it is the policy architecture through which that shift was channelled into uniquely concentrated US outcomes.",
+        visual: "placebo-range",
+      },
+      {
+        kicker: "Mechanism · Financialization",
+        heading: "Where the effect was actually hiding",
+        body:
+          "Run the top marginal rate against the top 1% share on its own and it looks irrelevant. Add the FIRE sector's share of GDP as a control and the rate coefficient flips sign and becomes significant, while FIRE itself enters enormous. The financial sector's expansion had been absorbing the effect, and the ERTA-era deregulation that enabled that expansion — SEC Rule 10b-18 above all, which turned buybacks from a legal risk into standard practice — is the link between the tax cut and the concentration. Frydman and Saks put the same shift in compensation: real executive pay grew 0.8% a year from 1936 to 1976 and 8.0% a year from 1977 to 2005.",
+        visual: "fire-control",
+      },
+      {
+        kicker: "Estimate · First differences",
+        heading: "Putting a number on it",
+        body:
+          "The cleanest specification is a first-differences regression with Newey-West errors, which strips the trend out and resolves the serial correlation that makes the levels regression untrustworthy — Durbin-Watson moves from 0.237 to 1.80. It returns a coefficient of −0.053: a one-point cut in the top marginal rate moves the top 1% share about five hundredths of a point in the same year. Applied to ERTA's actual 19-point cut, that is roughly 1.0pp of the 8pp rise between 1980 and 2024, or about 12%. The remaining 88% belongs to the complementary policies, which is the paper's actual claim and a smaller one than the headline usually gets.",
+        visual: "attribution",
+      },
+      {
         kicker: "Team leadership · From findings to policy",
         heading: "Leading the team, and a pivot to policy",
         body:
@@ -105,23 +181,7 @@ export const sections: Section[] = [
         kicker: "CU Boulder · Research intern · Prof. Megan Shannon",
         heading: "Why autocracies join UN peacekeeping",
         body:
-          "Selected for a research internship under political science professor Megan Shannon, I synthesized ten years of scholarship and mission-level evidence to explain why non-democratic states contribute troops to UN peacekeeping. The stories point one way: China's and Russia's deployments track strategic self-interest, not humanitarian need.",
-      },
-      {
-        kicker: "Northeastern University · Team lead · Prof. Omar Robles",
-        heading: "ERTA and the U.S. income gap",
-        body:
-          "As team lead, I directed a study of the socioeconomic legacy of the 1981 Economic Recovery Tax Act on U.S. income disparity, running five econometric specifications over 65 years of U.S. tax and income data and an 812-observation panel of 17 OECD economies.",
-        bullets: [
-          "Specifications: Welch t-tests, Chow and Quandt-Andrews structural-break tests, a six-country OECD placebo test, and a first-differences regression with Newey-West errors.",
-          "The placebo test showed the 1981 structural break was global, not U.S.-specific.",
-          "The first-difference estimate attributes roughly 12% of the rise in income disparity directly to ERTA's rate cuts.",
-          "Presented to Prof. Robles with strongly positive feedback; currently under faculty review.",
-        ],
-        links: [
-          { label: "Read the paper", href: "/papers/erta-paper.pdf" },
-          { label: "Methodology", href: "/papers/erta-methodology.pdf" },
-        ],
+          "Selected for a research internship under political science professor Megan Shannon, I synthesized ten years of scholarship and mission-level evidence to explain why non-democratic states contribute troops to UN peacekeeping. The puzzle is that peacekeeping is expensive, and the humanitarian return on it accrues mostly to other people, so a regime that answers to no electorate has thin reason to pay. The evidence points one way: China's and Russia's deployments track strategic self-interest — access, influence over mission mandates, and standing in the institutions that authorize them — rather than humanitarian need. It is the same instinct as the ERTA work, applied to a different subject: take the stated rationale for a policy, and check it against where the resources actually go.",
       },
     ],
     links: [],
@@ -260,7 +320,7 @@ export const sections: Section[] = [
     tagline: "A value-investing model that beat the S&P 500.",
     metaDescription:
       "A value-investing formula at VSD Investments compounding at ~27% CAGR — $35k to $91k, top 8% on Investopedia — plus finance-club leadership.",
-    updated: "2026-07-23",
+    updated: "2026-08-06",
     deskLinkText:
       "Markets — a value-investing model that beat the S&P 500",
     blurb:
@@ -275,29 +335,56 @@ export const sections: Section[] = [
         kicker: "VSD Investments LLC",
         heading: "A formula built on supply bottlenecks",
         body:
-          "The formula starts where demand outruns supply. It screens for supply bottlenecks inside emerging trends, for example nuclear power constraining the AI data-center buildout, then weights entry timing against Federal Reserve rate cycles and scores company fundamentals into a composite trustworthiness index.",
+          "The formula starts where demand outruns supply. It screens for supply bottlenecks inside emerging trends, then weights entry timing against Federal Reserve rate cycles, then scores company fundamentals into a composite trustworthiness index. Three passes, each one removing a different kind of mistake: buying the wrong thing, buying the right thing at the wrong time, and buying the right thing at the right time from the wrong company.",
+        visual: "formula-stages",
+      },
+      {
+        kicker: "Worked example",
+        heading: "Nuclear power and the data-center buildout",
+        body:
+          "The trend everyone can see is AI. The trend is not the trade. Training and inference need electricity at a scale and a reliability that intermittent generation cannot cover, and baseload capacity takes years to permit and build, so power becomes the binding constraint on how fast compute can actually be deployed. That is what the first pass is looking for: the input that physically cannot scale as fast as the demand pulling on it. A constraint like that turns a narrative into pricing power, because the constrained supplier does not have to compete on price to capture the trend's economics.",
+        bullets: [
+          "The screen asks what runs out first, not what grows fastest.",
+          "A bottleneck has to be physical or regulatory to hold. Anything a competitor can simply build more of is not one.",
+          "The same logic reads across trends: the constraint moves, the method does not.",
+        ],
+      },
+      {
+        kicker: "Track record",
+        heading: "What it compounded to",
+        body:
+          "The formula compounded at roughly 27.0% a year and took the portfolio from $35,000 to $91,000, ahead of the S&P 500 over the same period. Compounding is the whole argument for a repeatable method over a good call: the gap against a market-return baseline is small in year one and is most of the balance by year four.",
         bullets: [
           "Roughly 27.0% CAGR, beating the S&P 500 over the same period.",
           "Grew the portfolio from $35k to $91k.",
           "Top 8% finish as an Investopedia competitor.",
         ],
+        visual: "compounding",
+      },
+      {
+        kicker: "Limitations",
+        heading: "What the record does not show",
+        body:
+          "A CAGR over a handful of years is a small sample, and a small sample cannot separate a good process from a good run. The period was also a favourable one for the kind of concentrated, trend-adjacent positions the formula selects for, which is exactly when a method like this flatters itself. I would rather state that here than have a reader work it out. What I would claim is narrower than the number: the process is written down, it is applied the same way each time, and it can therefore be checked, criticised, and revised — which is the part that would still be worth something if the returns had been ordinary.",
       },
       {
         kicker: "Peak to Peak Finance Club",
         heading: "From member to president",
         body:
           "I joined as a freshman, was elected Secretary junior year, and now lead the club as President, growing membership to 85 students. Competing in the Council for Economic Education's National Personal Finance Challenge, our team was the best in the state and advanced to the national semifinals, and I have competed at the international level in high-school economics and finance competitions.",
-        bullets: [
-          "Member (9th, 10th), Secretary (11th), President (12th).",
-          "Grew the club to 85 members.",
-          "CEE National Personal Finance Challenge: Colorado State Champion and National Semifinalist.",
-        ],
+        visual: "club-ladder",
       },
       {
         kicker: "Financial literacy",
         heading: "Making the market legible",
         body:
           "Beyond my own portfolio, I work to close the financial-literacy gap. Through SEWA International USA my current focus is the shortage of practical money education in the United States, and my academic grounding runs through AP Microeconomics, AP Macroeconomics, and a college-level Personal Finance course I finished with an A.",
+      },
+      {
+        kicker: "Philosophy",
+        heading: "Why value investing",
+        body:
+          "Momentum asks what other people will do next. Value asks what a business is worth and waits for the price to agree, which means the work is research rather than prediction and the edge compounds instead of expiring. It also fails honestly: when a value thesis is wrong, the reason is usually written down in the thesis itself, so the next one can be better. That is the same reason the research work appeals to me. Both are the practice of holding a claim to evidence and being specific about the conditions under which you would abandon it.",
       },
     ],
     links: [],

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { MotionConfig, motion, type Variants } from "framer-motion";
 import { sections, type Section } from "@/content/sections";
 import { ACCENTS } from "@/components/desk/palette";
+import { Visual } from "@/components/viz";
 import { SectionHero } from "./SectionHero";
 import { StatBlock } from "./StatBlock";
 
@@ -80,6 +81,7 @@ export function SectionPage({ section }: { section: Section }) {
                   ))}
                 </ul>
               )}
+              {block.visual && <Visual name={block.visual} />}
               {block.links && block.links.length > 0 && (
                 <div className="mt-5 flex flex-wrap gap-3">
                   {block.links.map((l) => (
