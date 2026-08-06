@@ -10,8 +10,12 @@ import { VIZ } from "./theme";
 // period's mean and slope but not the year-by-year series, so this draws the
 // two regression lines those two numbers define and nothing else — anchoring
 // each on its period mean at its own midpoint year.
-const W = 640, H = 280;
-const PAD = { l: 34, r: 14, t: 16, b: 28 };
+// PAD.t buys the row the y-axis title sits in. The gridlines are labelled
+// "22%", "20%" … and nothing on the chart said a percent of WHAT, which is the
+// one thing a reader with no economics has to be given before any of the rest
+// of the figure means anything.
+const W = 640, H = 292;
+const PAD = { l: 34, r: 14, t: 32, b: 28 };
 const X0 = 1960, X1 = 2024;
 const Y0 = 9, Y1 = 22;
 
@@ -58,8 +62,14 @@ export function TrendFlip() {
       legend={
         <Legend
           items={[
-            { color: VIZ.s1, label: `${D.pre.label} ${D.pre.years} · falling 0.156pp a year` },
-            { color: VIZ.s2, label: `${D.post.label} ${D.post.years} · rising 0.206pp a year` },
+            {
+              color: VIZ.s1,
+              label: `${D.pre.label} ${D.pre.years} · share shrinking 0.156 points a year`,
+            },
+            {
+              color: VIZ.s2,
+              label: `${D.post.label} ${D.post.years} · share growing 0.206 points a year`,
+            },
           ]}
         />
       }
@@ -92,6 +102,16 @@ export function TrendFlip() {
             }
           }}
         >
+          <text
+            x={0}
+            y={14}
+            fontSize={9.5}
+            fill={VIZ.ink}
+            style={fade(shown, animate, 380, 40)}
+          >
+            Share of all US income going to the top 1%
+          </text>
+
           {[10, 12, 14, 16, 18, 20, 22].map((v) => (
             <GridLine
               key={v}
@@ -133,6 +153,19 @@ export function TrendFlip() {
               ))}
             </g>
           ))}
+
+          {/* The bands shipped unlabelled, which left two dotted rules floating
+              across the chart with no stated meaning. The provenance note
+              explained them, but that note is behind a disclosure. */}
+          <text
+            x={px(1992)}
+            y={py(D.post.min) + 14}
+            fontSize={9}
+            fill={VIZ.ink}
+            style={fade(shown, animate, 380, 620)}
+          >
+            shaded bands = lowest to highest year actually recorded
+          </text>
 
           {/* The break. Already dashed, so it fades rather than draws. */}
           <g style={fade(shown, animate, 420, 900)}>

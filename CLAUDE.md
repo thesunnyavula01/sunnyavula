@@ -156,6 +156,38 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 
 ## Build phases
 
+> **Status (2026-08-06, latest+11): audited all nine figures for a reader with no economics.**
+> Every figure was rendered and read (see the sharp/esbuild trick in latest+10). **Five were
+> already fine and were left alone** — `SpecLadder` and `AttributionSlider` are the strongest
+> writing on the site (plain question → plain answer → `plainStat` → notation; do not "tidy" the
+> redundancy out of them), and `CompoundingCurve`, `FormulaStages` and `ClubLadder` carry no
+> jargon. **Three were failing, all in the same way: the chart assumed a vocabulary the takeaway
+> had not given it.**
+> **(1) `FireControl` was the worst on the site.** Two bare coefficients and two bare p-values,
+> on an axis with no ticks, no unit, and only one of its two directions named — nothing told the
+> reader what `+0.013` was 0.013 *of*. Now: the axis states its unit outright ("each dot = how
+> far the top 1% share moves per 1-point rise in the tax rate"), it has ticks, **both**
+> directions are named (the right-hand one at 0.7 opacity — it is not a claim anyone makes, but
+> an axis with one end labelled cannot be read at all), each p-value ships with the sentence it
+> stands for ("could easily be chance" / "unlikely to be chance"), and the two states are
+> **numbered** because the "after" estimate sits to the LEFT of the "before" one — reading order
+> and time order run opposite ways and a chevron alone does not fix that. **The FIRE coefficient
+> moved out of the collapsed provenance note into a `Readout`** — it is the reason the figure
+> exists, phrased as "each extra point of GDP going to finance → +2.97 points to the top 1%".
+> H 146 → 184.
+> **(2) `TrendFlip` never said what its y axis was a percent OF.** Gridlines read "22%", "20%"
+> … and the only statement of the variable was in the subtitle. `PAD.t` 16 → 32 (H 280 → 292)
+> buys a row for the title "Share of all US income going to the top 1%". The min–max bands were
+> also unlabelled — two dotted rules floating across the chart, explained only inside the
+> disclosure — so they now carry an in-chart caption. Legend drops the `pp` abbreviation.
+> **(3) `DistributionShift` had no stated meaning for curve HEIGHT**, and the white threshold
+> marker was an unexplained vertical rule. One line each: "taller = more of that era's years
+> landed at that level", and a note under the slider tying the marker to it.
+> Rule this pass encodes: **a figure has to be legible with the disclosure closed.** `source` is
+> provenance, not the glossary — if a mark, an axis or a number cannot be read without opening
+> it, the explanation belongs on the chart. Build + lint pass, subpage First Load JS unchanged at
+> 176 kB, no dev server run.
+>
 > **Status (2026-08-06, latest+10): the placebo figure was rebuilt — it was the one chart on
 > the site that fought its own labels.** `PlaceboRange` used to be two floating lanes with a
 > translucent full-height rectangle behind them standing in for the range. Three defects, all

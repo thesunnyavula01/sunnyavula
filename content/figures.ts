@@ -203,9 +203,11 @@ export const ERTA_ATTRIBUTION = {
 } as const;
 
 /**
- * Placebo Chow statistics at 1981. Only three of the six countries have a
- * published F in either document; the other three are reported as significant
- * without a value, so the chart plots the range and labels what it knows.
+ * Placebo Chow statistics at 1981. Only two of the six countries have a
+ * published F in either document; the other four are reported as significant
+ * without a value, so the chart plots what it knows and lists the rest off the
+ * scale — "significant, magnitude unknown" has no x-position, and giving them
+ * one would invent a number the paper does not report.
  */
 export const ERTA_PLACEBO = {
   countries: [

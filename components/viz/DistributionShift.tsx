@@ -107,6 +107,21 @@ export function DistributionShift() {
             </linearGradient>
           </defs>
 
+          {/* The y axis is a density and carries no ticks, deliberately — but
+              that left the height of the curves meaning nothing at all to a
+              reader who has not met a distribution. One line fixes it without
+              teaching the word. */}
+          <text
+            x={W - PAD.r}
+            y={24}
+            textAnchor="end"
+            fontSize={9}
+            fill={VIZ.ink}
+            style={fade(shown, animate, 380, 140)}
+          >
+            taller = more of that era&rsquo;s years landed at that level
+          </text>
+
           <polygon
             points={area(D.pre.mean, D.pre.sd)}
             fill={`url(#${id}-a)`}
@@ -247,6 +262,12 @@ export function DistributionShift() {
           <span>9%</span>
           <span>22%</span>
         </div>
+        {/* The white marker on the chart is driven by this slider and nothing
+            said so, so it read as an unexplained vertical rule. */}
+        <p className="mt-2 text-[10px] leading-relaxed text-neutral-500">
+          The white marker on the chart moves with this slider. Everything to
+          its right is a year the top 1% took more than that.
+        </p>
 
         <dl className="mt-4 grid gap-3 sm:grid-cols-2">
           {rows.map((r) => (
