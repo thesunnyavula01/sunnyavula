@@ -45,8 +45,15 @@ Content copy must match the **Content facts** section below (numbers are load-be
 2. **ATT Agency** (`/att-agency`) — the Boulder growth studio. Outbound: **https://attagency.co**
    and **https://attagency.co/results**, plus per-case-study links to the client projects.
 3. **Markets** (`/markets`) — VSD Investments value-investing formula + finance competition
-   record. Outbound: none for now (intentionally link-less). **Dividend Collective is
-   intentionally excluded.**
+   record. Outbound: none for now (intentionally link-less).
+
+> **The Dividend Collective is excluded SITEWIDE — not just from Markets.** It must not appear
+> anywhere: not as a Markets venture, not as an ATT client case study, not in a stat, a bullet,
+> a blurb, a `metaDescription`, or a link. It is a real ATT project and it is prominent on
+> `attagency.co/results` (it carries the agency's strongest single metric, `0 → 9` paid
+> subscribers in a launch quarter), so **any future pass that re-reads the agency site will be
+> tempted to pull it back in. Don't.** When a results figure is needed, use the Pathmind /
+> KasaiSora reach or the shipped-site counts instead.
 4. **Leadership & Policy** (`/leadership`) — iStartValley, NSDA debate, Boys State, Economics
    For Leaders, Sewa Design to Lead. Outbound: **iStart Insider** podcast —
    https://open.spotify.com/show/4vbP7cvc3Qyb1N96vZN8Me
@@ -151,10 +158,10 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 
 > **Status (2026-08-05, latest+7): `/att-agency` rewritten from the live agency site.** The
 > page was two narrative blocks of role description and no evidence — the driest section on the
-> site. It is now nine blocks built from `attagency.co` and `attagency.co/results`: role and
-> mission, the studio's positioning against AI site builders, a "by the numbers" block, four
-> case studies (The Dividend Collective, soymods & Pathmind, Kodama, the three artist
-> portfolios), the interactive-experiments shelf, and the existing Google Skillshop block.
+> site. It is now eight blocks built from `attagency.co` and `attagency.co/results`: role and
+> mission, the studio's positioning against AI site builders, a "by the numbers" block, three
+> case studies (soymods & Pathmind, Kodama, the three artist portfolios), the
+> interactive-experiments shelf, and the existing Google Skillshop block.
 > Every figure is transcribed in **Content facts → ATT Agency** below; the reconciled counts
 > and the display-domain-vs-real-host trap are documented there.
 > **`stats` deliberately stayed at three entries.** They render in *two* places — the subpage
@@ -164,14 +171,16 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 > verified by eye at 375×812/375×667 and can't be re-verified without a dev server. The full
 > results set lives in the "by the numbers" narrative bullets instead. Values refreshed to
 > `10+` / `130K` / `~$10k` — "4 client sites shipped" was stale.
-> **Also updated:** `tagline`, `blurb`, `metaDescription` (150 chars), `deskLinkText`, `updated`
+> **Also updated:** `tagline`, `blurb`, `metaDescription` (149 chars), `deskLinkText`, `updated`
 > → 2026-08-05, the hidden desk-nav line in `app/page.tsx` ("dev studio" → "Boulder growth
 > studio"), and `agencySchema` in `content/schema.ts` (Boulder address, `areaServed` city/state/
 > country, `slogan`, `numberOfEmployees`, `priceRange`, seven `serviceType` entries).
-> **The Dividend Collective now appears on the site** as an agency client case study — the
-> "intentionally excluded" note under *Sections → Markets* is about Sunny's own market work, not
-> ATT's client roster. If it should be off the site entirely, delete that narrative block and
-> the `0 → 9` bullet.
+> **The Dividend Collective was in the first cut of this pass and was then pulled back out, at
+> Sunny's instruction, sitewide** — the case-study block, the `0 → 9` results bullet, the blurb
+> clause and the `metaDescription` clause are all gone. See the callout under *Sections* for the
+> standing rule; the point of that callout is that re-reading `attagency.co/results` makes this
+> an easy mistake to repeat. The `10+` and `6` counts are the agency's own published totals and
+> stay as published.
 > Build + lint pass; **not eyeballed** (no dev server was run, per request). Live deploy
 > predates this — run `npm run deploy`.
 >
@@ -621,10 +630,10 @@ Verified from the résumé docs. Use these exact figures.
 - **Counts are two different numbers and must not be conflated:** **6 live client websites**
   (homepage "By the numbers") vs **10+ live custom websites, apps, and interactive builds**
   (`/results` header). Plus the Thriftly paid-ad campaign (not on the agency site).
-- **Results / case studies** (`attagency.co/results`), the load-bearing figures:
-  - *The Dividend Collective* — paid personal-finance newsletter + members site. **0 → 9 paying
-    subscribers in the first launch quarter.** Custom Stripe billing, member auth, content
-    gating, weekly "Dispatch", self-hosted (no platform cut). → thedividendcollective.com
+- **Results / case studies** (`attagency.co/results`), the load-bearing figures. Note that the
+  agency's own results page leads with **The Dividend Collective**, which is **excluded from
+  this site sitewide** — see the callout under *Sections*. Everything below is usable; that one
+  is not, and is deliberately not transcribed here.
   - *soymods & Pathmind* — Minecraft Fabric mod with a no-code drag-and-drop node panel, on
     Modrinth + GitHub, plus the soymods.com hub. Featured days after launch by the mod-review
     channel **KasaiSora (130,000+ subscribers), zero ad spend**. → soymods.com

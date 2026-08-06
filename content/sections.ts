@@ -133,12 +133,12 @@ export const sections: Section[] = [
     deskObject: "Laptop / monitor",
     tagline: "A Boulder growth studio: brand, websites, and ads that ship.",
     metaDescription:
-      "ATT Agency, the Boulder studio Sunny Avula co-founded: 10+ sites and apps shipped, a 130K-subscriber press feature, and 0 to 9 paid subs for a client.",
+      "ATT Agency, the Boulder studio Sunny Avula co-founded: 10+ sites, apps, and interactive builds shipped, plus a 130K-subscriber organic press feature.",
     updated: "2026-08-05",
     deskLinkText:
       "ATT Agency — a Boulder growth studio shipping brand, websites, and ads for small businesses",
     blurb:
-      "I co-founded ATT Agency to help small businesses hurt by the digital divide get a web presence that matches the quality of what they sell. Three founders run the studio out of Boulder, covering brand, website, ad creative, and analytics from one team, starting at $99 with a fixed quote back inside one business day. I own the business and accounting side, so when you reach out I am your first point of contact: client calls, scoping, scheduling, and making sure every project ships on time. Ten-plus sites, apps, and interactive builds are live, among them a client newsletter that went from zero to nine paying subscribers in its launch quarter and a mod that picked up a 130,000-subscriber YouTube feature days after release.",
+      "I co-founded ATT Agency to help small businesses hurt by the digital divide get a web presence that matches the quality of what they sell. Three founders run the studio out of Boulder, covering brand, website, ad creative, and analytics from one team, starting at $99 with a fixed quote back inside one business day. I own the business and accounting side, so when you reach out I am your first point of contact: client calls, scoping, scheduling, and making sure every project ships on time. Ten-plus sites, apps, and interactive builds are live, among them a Discord product with semantic search over a server's entire history and a mod that picked up a 130,000-subscriber YouTube feature days after release.",
     stats: [
       { value: "10+", label: "sites, apps & builds shipped" },
       { value: "130K", label: "reached by a client launch" },
@@ -170,30 +170,13 @@ export const sections: Section[] = [
         body:
           "Most agencies show pretty screenshots. We publish the figures underneath them, and they are the same numbers we use to scope and quote new business. Every one of them comes off a project the studio built and launched.",
         bullets: [
-          "0 → 9 paying subscribers for The Dividend Collective in a single launch quarter.",
           "130,000+ subscribers reached when Pathmind was featured on the KasaiSora YouTube channel, on zero ad spend.",
           "10+ live custom websites, apps, and interactive builds shipped.",
+          "6 live client websites for founders, artists, and small businesses.",
           "2 artist portfolio sites delivered in under three weeks each, hand-coded with no templates.",
         ],
         links: [
           { label: "See the full case studies", href: "https://attagency.co/results" },
-        ],
-      },
-      {
-        kicker: "Case study · The Dividend Collective",
-        heading: "A paid newsletter that owns its own rails",
-        body:
-          "Personal-finance publishing online is mostly Substack-aesthetic noise on one side and big-publisher paywalls on the other. We launched a brand that reads like a real publication and runs its own subscription infrastructure: a print-inspired editorial homepage, a member-only Portfolio section, a weekly Dispatch, and a custom Stripe billing stack with member authentication and content gating built from scratch. Because it is self-hosted, the business keeps both the customer relationship and the full revenue cut.",
-        bullets: [
-          "Zero to nine paying subscribers in the first launch quarter.",
-          "The Dispatch ships every Monday on a clean publishing pipeline.",
-          "No platform lock-in: billing, member portal, and gating are all first-party.",
-        ],
-        links: [
-          {
-            label: "Visit The Dividend Collective",
-            href: "https://thedividendcollective.com/",
-          },
         ],
       },
       {
