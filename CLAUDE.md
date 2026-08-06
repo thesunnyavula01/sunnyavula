@@ -259,8 +259,8 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 > (this was caught by eye — the geometry was correct either way). Reach is 0.277 against the
 > saucer's 0.26, so the footprint is unchanged and it still clears the laptop base by 0.06.
 > Still four draw calls, +~360 triangles on a ~37k scene. Verified by rendering the mug close
-> up and at the overview stop via the rafshim procedure below. `public/desk-poster.webp` now
-> predates the scene by three passes — recapture it.
+> up and at the overview stop via the rafshim procedure below. ~~`public/desk-poster.webp` now
+> predates the scene by three passes — recapture it.~~ **Done 2026-08-06** (latest+9).
 >
 > **Status (2026-08-04, latest+5): desk props no longer clip through the mat or the
 > desk.** Six placement bugs, all the same two shapes.
@@ -575,11 +575,14 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 > — the sandbox pane can't composite (rAF frozen), so camera framing/lighting are untuned-by-eye.
 > The live Workers deploy predates this redesign; run `npm run deploy` to refresh it.
 >
-> **Status (2026-07-22): Phase 3 complete — SITE IS LIVE** at
-> **https://sunnyavula.black-pine-e5ad.workers.dev** (deployed via `npm run deploy`; workers.dev
-> URL until the custom domain is wired in the Cloudflare dashboard — that step is manual and
-> still open, as is a human visual review of the desk scene, which the sandbox still can't
-> render). Phase 3 shipped: (1) small-viewport (≤640px) + no-WebGL static fallback hero —
+> **Status (2026-07-22): Phase 3 complete — SITE IS LIVE.** *(Superseded 2026-08-06: the
+> custom domain **is** wired — **https://sunnyavula.com** serves, and pushes to `main` deploy
+> automatically via Workers Builds. The two "still open" items below were both closed long ago
+> and the note was never updated; the original text is kept for history only.)*
+> Originally at **https://sunnyavula.black-pine-e5ad.workers.dev** (deployed via
+> `npm run deploy`; workers.dev URL until the custom domain is wired in the Cloudflare dashboard
+> — that step is manual and still open, as is a human visual review of the desk scene, which the
+> sandbox still can't render). Phase 3 shipped: (1) small-viewport (≤640px) + no-WebGL static fallback hero —
 > `public/hero-fallback.svg` (hand-authored aerial desk illustration matching the scene palette)
 > plus a text section nav; (2) WebGL frameloop pauses (`frameloop="never"`) when the hero is
 > scrolled off-screen (IntersectionObserver); (3) SEO: `app/opengraph-image.tsx` (static
