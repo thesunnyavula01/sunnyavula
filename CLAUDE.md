@@ -156,6 +156,50 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 
 ## Build phases
 
+> **Status (2026-08-06, latest+12): the landing card is a LEGEND, not a name card.** Stop 0 —
+> the first thing anyone sees — opened with "My name is Sunny Avula." plus a list of four job
+> titles, which is the one screen on the site that said nothing the `<title>` didn't. It now
+> reads the desk as its own key: kicker `Sunny Avula · Longmont, Colorado`, h1 **"A desk, read
+> as a résumé."**, one line of copy, then four rows — `● PAPERS  The 1981 tax act, tested five
+> ways` / `LAPTOP  A growth studio in Boulder` / `MONITOR  A formula I trust with real money` /
+> `GAVEL  Every room I've argued in` — each dotted in that section's desk accent. It states the
+> metaphor and teaches that the desk is clickable in the same breath. **Camera rig, stops, dots,
+> wheel/swipe/keyboard stepping and every other stop are untouched.**
+> **(1) Copy lives in `DESK_INTRO` (`content/sections.ts`), and `legend[i]` is POSITIONAL** —
+> it pairs with `sections[i]`, `ACCENTS[i]` and camera stop `i + 1`; `DeskLegend` indexes all
+> three off one `i`. Keep the array the same length and order as `sections`.
+> **(2) The rows jump stops (`goTo(i + 1)`), they do NOT route.** Same move the dots make, so a
+> visitor can never skip the tour from the first screen; the section stop they land on already
+> carries its own "Explore X →" link. `FallbackHero` passes no `onSelect` — it has no camera —
+> and renders the identical rows as static text captioning the poster.
+> **(3) The label column is `w-20`, measured not chosen.** "MONITOR" renders **76px** at 10px
+> mono/0.18em, and letter-spacing adds a trailing gap after the last letter, so the first cut
+> (4.25rem desktop / 3.5rem phone) had MONITOR overrunning its box and colliding with the phrase
+> beside it. One width at every size; the phrase column still has ~20px to spare at 375px.
+> **(4) The phone kicker drops to `tracking-[0.14em]`.** Name + city wraps to a second line at
+> 0.25em in a 375px sheet, and **the sheet's height is fixed** (`h-[min(24.5rem,58svh)]`), so a
+> wrapped line is 16px stolen from the copy below it — with the legend added, the card body
+> overflowed its scroll valve by 17px. With that plus `max-sm:space-y-0.5` on the rows, measured
+> overflow is **0 at both 375×812 and 375×667**.
+> **(5) The name is out of the `<h1>` on purpose** — it is in the accent kicker instead. The
+> search-weighted variants are unaffected: `SITE.metaTitle`, the Person JSON-LD, and the
+> visually-hidden desk nav in `app/page.tsx` all still carry `Abhiram "Sunny" Avula`.
+> `SITE.updated` bumped to 2026-08-06. Home First Load JS **421 → 422 kB** (the "416 kB" in the
+> latest+4 note was stale; 421 is the measured pre-change baseline).
+> **Verified by eye with NO dev server, via a new trick worth keeping.** `next build`
+> prerenders `/` to `.next/server/app/index.html`; copy it to `.next/home-preview.html` with
+> `sed 's|/_next/|./|g'` (so `/_next/static/*` resolves against `.next/`) and open it over
+> **`file://`** in the pane. It must live INSIDE the project folder — files outside it render as
+> a static snapshot the pane cannot screenshot. The page **hydrates and renders the real WebGL
+> desk**, so this is a full-page substitute for the localhost-POST trick, not just an SVG one.
+> Two caveats: the `<footer>` appears (it hides on `pathname === "/"`, and under `file://` the
+> pathname is the file path — not a regression), and framer's `AnimatePresence` needs ~1s
+> between acting and asserting, not one tick. Caught this way: the MONITOR collision and the
+> 17px sheet overflow, neither of which was visible in the source. All four rows were then
+> driven through `__reactProps$*` and land on Research / ATT Agency / Markets / Leadership with
+> the right CTA. Build + lint pass (`next build`; the OpenNext wrapper was not run locally —
+> nothing in this pass touches deps or worker config, and CI runs it on push).
+>
 > **Status (2026-08-06, latest+11): audited all nine figures for a reader with no economics.**
 > Every figure was rendered and read (see the sharp/esbuild trick in latest+10). **Five were
 > already fine and were left alone** — `SpecLadder` and `AttributionSlider` are the strongest

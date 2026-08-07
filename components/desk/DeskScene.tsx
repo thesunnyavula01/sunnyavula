@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, MotionConfig, motion } from "framer-motion";
-import { sections, SITE } from "@/content/sections";
+import { DESK_INTRO, sections, SITE } from "@/content/sections";
 import { ACCENTS, PALETTE } from "./palette";
 import type { OrbitState } from "./CameraRig";
 import DeskCanvas from "./DeskCanvas";
@@ -44,6 +44,79 @@ const POSTER = { src: "/desk-poster.webp", width: 1920, height: 810 } as const;
 // layout at exactly 640.
 const PHONE_MQ = "(max-width: 639.98px)";
 
+/* -------------------------------- desk legend -------------------------------- */
+
+// The opening stop introduces the desk as a legend: one row per object, dotted
+// with that section's desk accent, so the metaphor and the interaction are
+// taught together. Rows are POSITIONAL against `sections`/`ACCENTS` — see the
+// note on DESK_INTRO.
+//
+// `onSelect` jumps the camera to that object's stop (the same move the dots
+// make, so the tour is never skipped). The no-WebGL hero has no camera, so it
+// omits it and the same rows render as static text captioning the poster.
+function DeskLegend({
+  onSelect,
+  className = "",
+}: {
+  onSelect?: (i: number) => void;
+  className?: string;
+}) {
+  return (
+    <ul className={`space-y-1 max-sm:space-y-0.5 ${className}`}>
+      {DESK_INTRO.legend.map((row, i) => {
+        const dot = (
+          <span
+            aria-hidden="true"
+            className="h-1.5 w-1.5 shrink-0 rounded-full transition-transform duration-300 group-hover:scale-[1.6]"
+            style={{ backgroundColor: ACCENTS[i] }}
+          />
+        );
+        const object = (
+          // 5rem is measured, not chosen: the widest label ("MONITOR") renders
+          // 76px at 10px mono with 0.18em tracking — and letter-spacing adds a
+          // trailing gap after the last letter, so a snug column collides with
+          // the phrase beside it. Same width at every size; the phrase column
+          // has room to spare even on a 375px phone.
+          <span className="w-20 shrink-0 font-mono text-[10px] uppercase tracking-[0.18em] text-neutral-400 transition-colors group-hover:text-neutral-200">
+            {row.object}
+          </span>
+        );
+        const line = (
+          <span className="text-sm leading-snug text-neutral-300 transition-colors group-hover:text-neutral-50 max-sm:text-[0.8125rem]">
+            {row.line}
+          </span>
+        );
+        const rowClass =
+          "group flex w-full items-center gap-3 text-left max-sm:gap-2.5";
+
+        return (
+          <li key={row.object}>
+            {onSelect ? (
+              <button
+                type="button"
+                onClick={() => onSelect(i)}
+                // Reads as one sentence: what the object is, then where it goes.
+                aria-label={`${row.object} — ${row.line}. Go to ${sections[i].nav}.`}
+                className={`pointer-events-auto -mx-2 rounded-lg px-2 py-1 transition-colors hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 ${rowClass}`}
+              >
+                {dot}
+                {object}
+                {line}
+              </button>
+            ) : (
+              <div className={`py-1 ${rowClass}`}>
+                {dot}
+                {object}
+                {line}
+              </div>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
 /* ----------------------------- fallback (no WebGL) ----------------------------- */
 
 function FallbackHero() {
@@ -51,15 +124,13 @@ function FallbackHero() {
     <div className="flex min-h-[100svh] flex-col items-center justify-center gap-8 bg-[#10131c] px-6 pb-16 pt-28 text-center">
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#e8548a]">
-          Longmont, Colorado
+          {DESK_INTRO.kicker}
         </p>
         <h1 className="mt-3 text-4xl font-bold tracking-tight text-neutral-50 sm:text-6xl">
-          My name is {SITE.name}.
+          {DESK_INTRO.heading}
         </h1>
         <p className="mx-auto mt-4 max-w-md text-lg text-neutral-300">
-          I&apos;m {SITE.fullName} — economics researcher, ATT Agency co-founder,
-          investor, and debate co-captain. Research, a dev agency, markets, and
-          leadership — all on one desk.
+          {DESK_INTRO.body}
         </p>
       </div>
       <Image
@@ -74,6 +145,9 @@ function FallbackHero() {
         sizes="(max-width: 640px) 100vw, 576px"
         className="w-full max-w-xl rounded-3xl bg-[radial-gradient(120%_120%_at_50%_0%,#1a1f2e_0%,#10131c_55%,#0a0c12_100%)] shadow-[0_24px_60px_-24px_rgba(0,0,0,0.8)] ring-1 ring-white/10"
       />
+      {/* Static here — there is no camera to jump. It captions the poster
+          above, which is a real capture of the same desk. */}
+      <DeskLegend className="-mt-2 text-left" />
       <nav aria-label="Sections" className="flex flex-wrap justify-center gap-2">
         {sections.map((s, i) => (
           <Link
@@ -562,21 +636,26 @@ export function DeskScene() {
                 </>
               ) : section === null ? (
                 <>
+                  {/* Tighter tracking on phones only: this kicker carries the
+                      name AND the city, which wraps to a second line at 0.25em
+                      in a 375px sheet — and the sheet's height is fixed, so a
+                      wrapped line is 16px stolen from the copy below it. */}
                   <p
-                    className="mt-4 text-xs font-bold uppercase tracking-[0.25em] max-sm:mt-2.5"
+                    className="mt-4 text-xs font-bold uppercase tracking-[0.25em] max-sm:mt-2.5 max-sm:tracking-[0.14em]"
                     style={{ color: accent }}
                   >
-                    Longmont, Colorado
+                    {DESK_INTRO.kicker}
                   </p>
-                  <h1 className="mt-3 text-4xl font-bold leading-[1.05] tracking-tight text-neutral-50 sm:text-5xl max-sm:mt-2 max-sm:text-[1.7rem]">
-                    My name is {SITE.name}.
+                  <h1 className="mt-3 text-4xl font-bold leading-[1.05] tracking-tight text-neutral-50 sm:text-5xl max-sm:mt-2 max-sm:text-[1.55rem]">
+                    {DESK_INTRO.heading}
                   </h1>
                   <p className="mt-4 text-base leading-relaxed text-neutral-300 sm:text-lg max-sm:mt-2.5 max-sm:text-[0.9375rem] max-sm:leading-normal">
-                    I&apos;m {SITE.fullName} — economics researcher, ATT Agency
-                    co-founder, investor, and debate co-captain. Research, a dev
-                    agency, markets, and leadership — all on one desk. Every
-                    object opens a chapter.
+                    {DESK_INTRO.body}
                   </p>
+                  <DeskLegend
+                    onSelect={(i) => goTo(i + 1)}
+                    className="mt-5 max-sm:mt-3"
+                  />
                   <p className="mt-4 font-mono text-[11px] tracking-wide text-neutral-500 max-sm:mt-2.5">
                     <span className="max-sm:hidden">
                       scroll to travel · drag to look around · click an object

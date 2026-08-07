@@ -85,13 +85,40 @@ export const SITE = {
     'Abhiram "Sunny" Avula — economics researcher, ATT Agency co-founder, investor, and NSDA debate co-captain in Longmont, Colorado.',
   // Sitemap <lastmod> for "/" — the desk scene's last real change. See the
   // `updated` note on the Section type for why these are not build timestamps.
-  updated: "2026-07-25",
+  updated: "2026-08-06",
   // Sitemap <lastmod> for the two PDFs under /papers.
   papersUpdated: "2026-07-22",
   // Canonical production origin — hardcoded on purpose. Metadata, sitemap,
   // robots, and canonical tags must always emit this domain, never the
   // *.workers.dev origin (duplicate content) or a stale env value.
   url: "https://sunnyavula.com",
+} as const;
+
+/**
+ * Copy for the deck's opening stop — the first thing a visitor reads — and for
+ * its no-WebGL twin in `FallbackHero`. Keep the two in sync by editing here.
+ *
+ * The landing page introduces itself as a LEGEND rather than as a name card:
+ * each row names a real object in the 3D scene and the chapter it opens, so the
+ * metaphor and the interaction are taught in the same breath. The name lives in
+ * the accent kicker instead of the `<h1>` (the legal-name variants that carry
+ * search weight are in `SITE.metaTitle`, the Person JSON-LD, and the
+ * visually-hidden desk nav in app/page.tsx).
+ *
+ * `legend` is POSITIONAL — `legend[i]` pairs with `sections[i]`, and therefore
+ * with `ACCENTS[i]` and camera stop `i + 1`. Keep it the same length and order
+ * as `sections`; DeskScene indexes all three off the same `i`.
+ */
+export const DESK_INTRO = {
+  kicker: `${SITE.name} · ${SITE.location}`,
+  heading: "A desk, read as a résumé.",
+  body: "Four objects. Four chapters. Everything here is something I actually built.",
+  legend: [
+    { object: "Papers", line: "The 1981 tax act, tested five ways" },
+    { object: "Laptop", line: "A growth studio in Boulder" },
+    { object: "Monitor", line: "A formula I trust with real money" },
+    { object: "Gavel", line: "Every room I've argued in" },
+  ],
 } as const;
 
 export const sections: Section[] = [
