@@ -24,12 +24,30 @@ const CONTACT = STOPS - 1;
 const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
 const pad = (n: number) => String(n).padStart(2, "0");
 
+// Labels for the index strip along the bottom edge. The four middle stops are
+// named for the OBJECT, not the section — the strip is a key to the desk, and
+// the section name is already the heading of the stop it lands on. Screen
+// readers get the section name in the button's aria-label.
+const STOP_LABELS = [
+  "Start",
+  ...DESK_INTRO.legend.map((l) => l.object),
+  "Say hi",
+];
+const stopAccent = (i: number) =>
+  i === 0 || i === CONTACT ? PALETTE.brandLight : ACCENTS[i - 1];
+const stopTarget = (i: number) =>
+  i === 0
+    ? "the overview"
+    : i === CONTACT
+      ? "contact details"
+      : sections[i - 1].nav;
+
 // A 24px-wide encode of the hero image, inlined so a desk-shaped blur is
 // present in the server-rendered HTML itself — zero requests, so on a slow link
 // the fallback hero is never a flat empty gradient while desk-poster.webp
 // (43 kB) is still in flight.
 const POSTER_BLUR =
-  "data:image/webp;base64,UklGRuQAAABXRUJQVlA4WAoAAAAQAAAAFwAACQAAQUxQSGEAAAARb6C0bSM4WVzU++/QRUTAYuJUVsYPuKm17WleOozM3UDvCGDEBQZYUdOTiMjaBfR8atIdRPR/AvDXsS03yqv4QUTr4sWFXrJPp1cCAPvxSgbQ0WsNQHN85QBQw3r1IKIKAFZQOCBcAAAAEAQAnQEqGAAKAD8ZerNRrKekorAIAZAjCWMAAFqfIJidB6jkIa2G0gAA/uLmG0CpdmukEerrPHh1rxgFujr86qa9yigRZbMNYC2hchfl2CyII4g5P4REJlW2gAA=";
+  "data:image/webp;base64,UklGRuoAAABXRUJQVlA4WAoAAAAQAAAAFwAACQAAQUxQSFwAAAARb6CgjSQ1dAKYHyMiQPZo+tGPbgm2tba9eGVKdV4gl2rHFjoLaE2idcxhAAtk7zTyBhH9nwD82jfFZFzlB8khu1h4KZ6mKwWAf1zpADpeWwDq8SoAYKZVu5MsAVZQOCBoAAAAEAQAnQEqGAAKAD7taKpOqaYkIjAIATAdiWMAAFqfL3g9TSom92/qBXQA/uveJj9ED8FlWFuTaNMqkeBf5/JOfdWuz3GgA05euaNjLjMAP0M78jCMtEgoBk11Z0HcA6uo/e9fyGtqoAA=";
 
 // A real capture of the WebGL scene, used only by the no-WebGL fallback hero
 // below. The live deck renders the 3D desk directly.
@@ -51,9 +69,9 @@ const PHONE_MQ = "(max-width: 639.98px)";
 // taught together. Rows are POSITIONAL against `sections`/`ACCENTS` — see the
 // note on DESK_INTRO.
 //
-// `onSelect` jumps the camera to that object's stop (the same move the dots
-// make, so the tour is never skipped). The no-WebGL hero has no camera, so it
-// omits it and the same rows render as static text captioning the poster.
+// `onSelect` jumps the camera to that object's stop (the same move the index
+// strip makes, so the tour is never skipped). The no-WebGL hero has no camera,
+// so it omits it and the same rows render as static text captioning the poster.
 function DeskLegend({
   onSelect,
   className = "",
@@ -97,7 +115,7 @@ function DeskLegend({
                 onClick={() => onSelect(i)}
                 // Reads as one sentence: what the object is, then where it goes.
                 aria-label={`${row.object} — ${row.line}. Go to ${sections[i].nav}.`}
-                className={`pointer-events-auto -mx-2 rounded-lg px-2 py-1 transition-colors hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 ${rowClass}`}
+                className={`pointer-events-auto -mx-2 px-2 py-1 transition-colors hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/50 ${rowClass}`}
               >
                 {dot}
                 {object}
@@ -121,15 +139,18 @@ function DeskLegend({
 
 function FallbackHero() {
   return (
-    <div className="flex min-h-[100svh] flex-col items-center justify-center gap-8 bg-[#10131c] px-6 pb-16 pt-28 text-center">
+    <div className="mx-auto flex min-h-[100svh] max-w-3xl flex-col justify-center gap-8 px-6 pb-16 pt-32">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#e8548a]">
+        <p
+          className="font-mono text-[11px] uppercase tracking-[0.28em]"
+          style={{ color: PALETTE.brandLight }}
+        >
           {DESK_INTRO.kicker}
         </p>
-        <h1 className="mt-3 text-4xl font-bold tracking-tight text-neutral-50 sm:text-6xl">
+        <h1 className="mt-4 font-serif text-5xl leading-[1.02] text-neutral-50 sm:text-6xl">
           {DESK_INTRO.heading}
         </h1>
-        <p className="mx-auto mt-4 max-w-md text-lg text-neutral-300">
+        <p className="mt-4 max-w-lg text-lg leading-relaxed text-neutral-300">
           {DESK_INTRO.body}
         </p>
       </div>
@@ -142,29 +163,32 @@ function FallbackHero() {
         unoptimized
         placeholder="blur"
         blurDataURL={POSTER_BLUR}
-        sizes="(max-width: 640px) 100vw, 576px"
-        className="w-full max-w-xl rounded-3xl bg-[radial-gradient(120%_120%_at_50%_0%,#1a1f2e_0%,#10131c_55%,#0a0c12_100%)] shadow-[0_24px_60px_-24px_rgba(0,0,0,0.8)] ring-1 ring-white/10"
+        sizes="(max-width: 640px) 100vw, 768px"
+        className="w-full bg-[radial-gradient(120%_120%_at_50%_0%,#1a1f2e_0%,#10131c_55%,#0a0c12_100%)]"
       />
       {/* Static here — there is no camera to jump. It captions the poster
           above, which is a real capture of the same desk. */}
-      <DeskLegend className="-mt-2 text-left" />
-      <nav aria-label="Sections" className="flex flex-wrap justify-center gap-2">
-        {sections.map((s, i) => (
-          <Link
-            key={s.slug}
-            href={`/${s.slug}`}
-            className="rounded-full px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
-            style={{ backgroundColor: ACCENTS[i] }}
-          >
-            {s.nav}
-          </Link>
-        ))}
+      <DeskLegend />
+      <nav aria-label="Sections" className="border-t border-white/10 pt-6">
+        <ul className="grid grid-cols-2 gap-x-6 sm:grid-cols-4">
+          {sections.map((s, i) => (
+            <li key={s.slug}>
+              <Link
+                href={`/${s.slug}`}
+                className="block border-t-2 pt-2 font-mono text-[11px] uppercase tracking-[0.18em] text-neutral-300 transition-colors hover:text-white"
+                style={{ borderColor: ACCENTS[i] }}
+              >
+                {s.nav}
+              </Link>
+            </li>
+          ))}
+        </ul>
       </nav>
       {/* The deck's closing contact stop has no equivalent here (and the global
           footer is hidden on "/"), so the same details ride along with the
           fallback hero. */}
-      <div className="space-y-3">
-        <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-neutral-500">
+      <div className="space-y-3 border-t border-white/10 pt-6">
+        <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-neutral-500">
           Contact
         </p>
         <p className="text-sm text-neutral-300">
@@ -178,7 +202,10 @@ function FallbackHero() {
           <span className="mx-2 text-neutral-600">·</span>
           Discord: {SITE.discord}
         </p>
-        <p className="flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm font-semibold text-[#e8548a]">
+        <p
+          className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold"
+          style={{ color: PALETTE.brandLight }}
+        >
           {[
             { label: "LinkedIn", href: SITE.linkedin },
             { label: "GitHub", href: SITE.github },
@@ -189,7 +216,7 @@ function FallbackHero() {
               href={l.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="underline decoration-2 underline-offset-4"
+              className="underline decoration-1 underline-offset-4"
             >
               {l.label}
             </a>
@@ -203,64 +230,63 @@ function FallbackHero() {
   );
 }
 
-/* --------------------------------- stop dots --------------------------------- */
+/* -------------------------------- index strip -------------------------------- */
 
-// Rendered twice — a vertical rail pinned to the right edge on desktop, and a
-// horizontal row at the top of the copy sheet on phones. Only one is ever in
-// the layout: the other is `display:none`, which also drops it out of the
-// accessibility tree, so there is no duplicate set of controls to tab through.
-function StopDots({
-  stop,
-  goTo,
-  className = "",
-  horizontal = false,
-}: {
-  stop: number;
-  goTo: (n: number) => void;
-  className?: string;
-  horizontal?: boolean;
-}) {
+// Pinned to the bottom edge, full width: six ruled columns, one per stop. This
+// is the tour's only stop control, and it replaces THREE pieces of chrome the
+// deck used to carry separately — the vertical dot rail, the "01 / 06" counter,
+// and the "scroll to explore" prompt. A ruled strip states position, length and
+// destination at once, which none of the three did on its own.
+//
+// Phones keep the same six columns but drop the names: 62px is not enough for
+// "MONITOR" at a legible size, and the active stop's name is the heading
+// directly above it either way.
+function IndexStrip({ stop, goTo }: { stop: number; goTo: (n: number) => void }) {
   return (
-    <div className={className}>
-      <ul
-        className={`flex items-center ${
-          horizontal ? "justify-center gap-1" : "flex-col gap-2.5"
-        }`}
-      >
-        {["Home", ...sections.map((s) => s.nav), "Contact"].map((label, i) => {
-          const isActive = stop === i;
-          const dotAccent =
-            i === 0 || i === CONTACT ? PALETTE.berryLight : ACCENTS[i - 1];
-          return (
-            <li key={label}>
-              <button
-                type="button"
-                onClick={() => goTo(i)}
-                aria-label={`Go to ${label}`}
-                aria-current={isActive ? "true" : undefined}
-                // 44px tall on phones: these are the tour's only always-visible
-                // controls there, and a 24px box is below the minimum a thumb
-                // can hit reliably.
-                className={`group flex items-center justify-center ${
-                  horizontal ? "h-11 w-10" : "h-6 w-6"
+    <nav
+      aria-label="Tour stops"
+      className="pointer-events-auto absolute inset-x-0 bottom-0 z-20 grid grid-cols-6"
+    >
+      {STOP_LABELS.map((label, i) => {
+        const active = stop === i;
+        const accent = stopAccent(i);
+        return (
+          <button
+            key={label}
+            type="button"
+            onClick={() => goTo(i)}
+            aria-label={`Stop ${pad(i)} — go to ${stopTarget(i)}`}
+            aria-current={active ? "true" : undefined}
+            className="group flex flex-col items-start gap-2 px-3 pb-4 pt-3 text-left sm:px-5 sm:pb-5"
+          >
+            <span
+              aria-hidden="true"
+              className="block h-[2px] w-full transition-colors duration-300"
+              style={{
+                backgroundColor: active ? accent : "rgba(255,255,255,0.14)",
+              }}
+            />
+            <span className="flex items-baseline gap-2 font-mono text-[10px] uppercase tracking-[0.18em]">
+              <span
+                className="transition-colors"
+                style={{ color: active ? accent : undefined }}
+              >
+                <span className={active ? "" : "text-neutral-600"}>{pad(i)}</span>
+              </span>
+              <span
+                className={`transition-colors max-sm:hidden ${
+                  active
+                    ? "text-neutral-200"
+                    : "text-neutral-500 group-hover:text-neutral-300"
                 }`}
               >
-                <span
-                  className={`block rounded-full transition-all duration-300 ${
-                    isActive
-                      ? horizontal
-                        ? "h-1.5 w-7"
-                        : "h-7 w-1.5"
-                      : "h-1.5 w-1.5 bg-white/30 group-hover:bg-white/50"
-                  }`}
-                  style={isActive ? { backgroundColor: dotAccent } : undefined}
-                />
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
+                {label}
+              </span>
+            </span>
+          </button>
+        );
+      })}
+    </nav>
   );
 }
 
@@ -341,7 +367,7 @@ export function DeskScene() {
     const el = deckRef.current;
     if (!el) return;
     // On phones the swipe surface is the desk itself, not the whole deck: the
-    // copy sheet below it is a scroll container (a long stop's card can
+    // copy block below it is a scroll container (a long stop's copy can
     // outgrow a short phone), and a handler here would preventDefault that
     // scroll away. On desktop both live on the section, as before.
     const touchEl = (phone ? stageRef.current : el) ?? el;
@@ -464,26 +490,30 @@ export function DeskScene() {
 
   const isContact = stop === CONTACT;
   const section = stop > 0 && !isContact ? sections[stop - 1] : null;
-  const accent =
-    section === null ? PALETTE.berryLight : ACCENTS[stop - 1];
+  const accent = stopAccent(stop);
 
-  // Everything below is one layout with `max-sm:` overrides, not two branches:
-  // every phone rule is scoped to `width < 40rem`, so the desktop deck renders
-  // from exactly the classes it always did.
+  // Editorial layout, deliberately NOT a floating card.
   //
-  // Phones stack instead of overlaying — desk on top, copy sheet below. The
-  // SHEET is the one with a height (a viewport-capped constant, not its own
+  // The copy used to live in a rounded, blurred, ring-lit panel over the left
+  // third of the scene, with a counter, a vertical dot rail and a scroll prompt
+  // around it. That is the stock chrome of every scroll-driven portfolio deck.
+  // Now the type sits directly on the scene — anchored bottom-left, above the
+  // index strip — and legibility comes from a corner SCRIM rather than a panel,
+  // so the desk is never boxed in.
+  //
+  // Phones stack instead of overlaying — desk on top, copy below. The copy
+  // region is the one with a height (a viewport-capped constant, not its own
   // content) and the desk takes what is left. Two consequences, both load
   // bearing: a short phone shrinks the desk instead of clipping the copy, and
-  // the canvas never resizes mid-tour — AnimatePresence empties the sheet for a
-  // beat between stops, and a content-sized sheet would collapse and re-grow,
+  // the canvas never resizes mid-tour — AnimatePresence empties the region for
+  // a beat between stops, and a content-sized one would collapse and re-grow,
   // forcing three.js to reallocate its drawing buffer on every single step.
   return (
     <section
       ref={deckRef}
       role="region"
       aria-roledescription="carousel"
-      aria-label="Portfolio tour — scroll, use arrow keys, or the dots to move between stops"
+      aria-label="Portfolio tour — scroll, use arrow keys, or the index strip to move between stops"
       className="relative h-[100svh] select-none overflow-hidden overscroll-none bg-[radial-gradient(120%_120%_at_50%_0%,#1a1f2e_0%,#10131c_55%,#0a0c12_100%)] max-sm:flex max-sm:flex-col"
       style={{ touchAction: phone ? undefined : "none" }}
     >
@@ -514,7 +544,7 @@ export function DeskScene() {
         {/* Loading label. Plain server-rendered HTML, so it is on screen with
             the first paint — long before three.js has downloaded, hydrated and
             compiled its shaders — and fades out the moment the canvas draws.
-            It only covers the empty canvas area; the copy card, dots and
+            It only covers the empty canvas area; the copy, the strip and the
             bottom links stay readable throughout. */}
         <div
           className={`pointer-events-none absolute inset-0 flex items-center justify-center transition-opacity duration-300 ease-out ${
@@ -528,62 +558,73 @@ export function DeskScene() {
             <span
               aria-hidden="true"
               className="block h-1.5 w-1.5 rounded-full motion-safe:animate-pulse"
-              style={{ backgroundColor: PALETTE.berryLight }}
+              style={{ backgroundColor: PALETTE.brandLight }}
             />
             Building the desk…
           </p>
         </div>
       </div>
 
+      {/* Scrim, not a panel — this is what replaces the copy card, so it is
+          load bearing rather than decoration.
+          The first cut was a corner wash anchored at the very bottom-left
+          (-8%, 100%) and it failed by eye: the headline sits around 40% UP the
+          frame, well outside a corner gradient's reach, so 60pt type ran
+          straight over the lit desk, the papers and the plant. The wash is now
+          centred on the copy itself (6%, 76%) and holds ~0.7 alpha out to the
+          headline before falling off, which keeps the desk's bright middle and
+          right — where every camera stop puts the subject — untouched.
+          Phones use the full-width fade behind the stacked copy instead. Both
+          are pointer-events-none, so drag-orbit still works through them. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(58%_66%_at_6%_76%,rgba(5,7,11,0.97)_0%,rgba(5,7,11,0.93)_38%,rgba(5,7,11,0.72)_58%,rgba(5,7,11,0.3)_80%,rgba(5,7,11,0)_100%)] max-sm:hidden"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-40 bg-gradient-to-t from-[#06080d] via-[#06080d]/70 to-transparent max-sm:hidden"
+      />
+
       <MotionConfig reducedMotion="user">
-        {/* copy card, sarastotey-style, left of center */}
-        {/* On phones the card's chrome (panel, blur, ring) moves up onto this
-            wrapper, so the dot row and the credit line below sit on the same
-            sheet as the copy instead of floating on the bare gradient. */}
+        {/* Copy block: bottom-left on desktop, above the index strip. On phones
+            it becomes the stacked region under the desk — same fixed-height
+            contract as before, but rendered as a scrimmed block rather than a
+            panel (no rounding, no ring, no backdrop blur). */}
         <div
           aria-live="polite"
-          className="pointer-events-none absolute left-5 top-1/2 w-[min(430px,88vw)] -translate-y-1/2 sm:left-10 lg:left-16 max-sm:relative max-sm:left-auto max-sm:top-auto max-sm:flex max-sm:h-[min(24.5rem,58svh)] max-sm:w-auto max-sm:shrink-0 max-sm:translate-y-0 max-sm:flex-col max-sm:justify-between max-sm:rounded-t-3xl max-sm:bg-[#141824]/85 max-sm:shadow-[0_-24px_60px_-28px_rgba(0,0,0,0.9)] max-sm:ring-1 max-sm:ring-white/10 max-sm:backdrop-blur-md"
+          className="pointer-events-none absolute bottom-24 left-0 z-20 w-full max-w-[40rem] px-5 sm:bottom-28 sm:px-9 lg:px-14 max-sm:relative max-sm:bottom-auto max-sm:left-auto max-sm:flex max-sm:h-[min(24.5rem,58svh)] max-sm:max-w-none max-sm:shrink-0 max-sm:flex-col max-sm:bg-gradient-to-t max-sm:from-[#06080d] max-sm:via-[#06080d]/95 max-sm:to-[#06080d]/70 max-sm:px-0 max-sm:pb-24"
         >
-          <StopDots
-            stop={stop}
-            goTo={goTo}
-            horizontal
-            className="pointer-events-auto hidden shrink-0 pt-1.5 max-sm:block"
-          />
-
           <AnimatePresence mode="wait">
             <motion.div
               key={stop}
-              initial={{ opacity: 0, y: 28, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -18, scale: 0.99 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -14 }}
               transition={{ duration: 0.45, ease: [0.22, 0.61, 0.36, 1] }}
-              // On phones the panel chrome moves to the wrapper and this
-              // becomes the sheet's scroll body — the safety valve for a long
-              // stop's card on a short phone. The swipe-to-step listener is
-              // bound to the desk above, so it never eats this scroll.
-              className="rounded-3xl bg-[#141824]/85 p-8 shadow-[0_28px_70px_-28px_rgba(0,0,0,0.85)] ring-1 ring-white/10 backdrop-blur-md sm:p-9 max-sm:min-h-0 max-sm:flex-1 max-sm:overflow-y-auto max-sm:overscroll-contain max-sm:rounded-none max-sm:bg-transparent max-sm:px-5 max-sm:pb-4 max-sm:pt-2 max-sm:shadow-none max-sm:ring-0 max-sm:backdrop-blur-none"
+              // On phones this is the region's scroll body — the safety valve
+              // for a long stop's copy on a short phone. The swipe-to-step
+              // listener is bound to the desk above, so it never eats this
+              // scroll.
+              // The scrim does most of the work, but the copy still sits on a
+              // lit 3D scene rather than a flat panel, and the camera moves
+              // under it at every stop — the shadow is the margin of safety for
+              // the frames where something bright lands behind a thin glyph.
+              className="[text-shadow:0_1px_14px_rgba(5,7,11,0.9)] max-sm:min-h-0 max-sm:flex-1 max-sm:overflow-y-auto max-sm:overscroll-contain max-sm:px-5 max-sm:pt-4"
             >
-              {/* Hidden on phones: the dot row sits directly above the card
-                  there and already says which stop this is. */}
-              <p className="font-mono text-[11px] tracking-[0.3em] text-neutral-500 max-sm:hidden">
-                {pad(stop + 1)} / {pad(STOPS)}
-              </p>
-
               {isContact ? (
                 <>
                   <p
-                    className="mt-4 text-xs font-bold uppercase tracking-[0.25em] max-sm:mt-2.5"
+                    className="font-mono text-[11px] uppercase tracking-[0.28em]"
                     style={{ color: accent }}
                   >
                     {SITE.location} to anywhere
                   </p>
-                  <h2 className="mt-3 text-4xl font-bold leading-[1.05] tracking-tight text-neutral-50 sm:text-5xl max-sm:mt-2 max-sm:text-[1.7rem]">
-                    Contact me.
+                  <h2 className="mt-3 font-serif text-5xl leading-[1.02] text-neutral-50 sm:text-6xl max-sm:mt-2 max-sm:text-[2.1rem]">
+                    Say hello.
                   </h2>
-                  <dl className="mt-5 space-y-2.5 text-sm max-sm:mt-3.5 max-sm:space-y-2">
-                    <div className="flex gap-3">
-                      <dt className="w-16 shrink-0 font-mono text-[11px] uppercase tracking-[0.2em] text-neutral-500">
+                  <dl className="mt-5 space-y-2 text-sm max-sm:mt-3.5">
+                    <div className="flex gap-4">
+                      <dt className="w-16 shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-500">
                         Email
                       </dt>
                       <dd>
@@ -595,8 +636,8 @@ export function DeskScene() {
                         </a>
                       </dd>
                     </div>
-                    <div className="flex gap-3">
-                      <dt className="w-16 shrink-0 font-mono text-[11px] uppercase tracking-[0.2em] text-neutral-500">
+                    <div className="flex gap-4">
+                      <dt className="w-16 shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-500">
                         Phone
                       </dt>
                       <dd>
@@ -608,14 +649,14 @@ export function DeskScene() {
                         </a>
                       </dd>
                     </div>
-                    <div className="flex gap-3">
-                      <dt className="w-16 shrink-0 font-mono text-[11px] uppercase tracking-[0.2em] text-neutral-500">
+                    <div className="flex gap-4">
+                      <dt className="w-16 shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-500">
                         Discord
                       </dt>
                       <dd className="text-neutral-200">{SITE.discord}</dd>
                     </div>
                   </dl>
-                  <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-semibold max-sm:mt-4">
+                  <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[11px] uppercase tracking-[0.18em] max-sm:mt-4">
                     {[
                       { label: "LinkedIn", href: SITE.linkedin },
                       { label: "GitHub", href: SITE.github },
@@ -626,8 +667,8 @@ export function DeskScene() {
                         href={l.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="pointer-events-auto underline decoration-2 underline-offset-4 transition hover:opacity-80"
-                        style={{ color: accent }}
+                        className="pointer-events-auto border-b pb-1 transition hover:opacity-80"
+                        style={{ color: accent, borderColor: accent }}
                       >
                         {l.label}
                       </a>
@@ -636,139 +677,117 @@ export function DeskScene() {
                 </>
               ) : section === null ? (
                 <>
-                  {/* Tighter tracking on phones only: this kicker carries the
-                      name AND the city, which wraps to a second line at 0.25em
-                      in a 375px sheet — and the sheet's height is fixed, so a
-                      wrapped line is 16px stolen from the copy below it. */}
                   <p
-                    className="mt-4 text-xs font-bold uppercase tracking-[0.25em] max-sm:mt-2.5 max-sm:tracking-[0.14em]"
+                    className="font-mono text-[11px] uppercase tracking-[0.28em] max-sm:tracking-[0.14em]"
                     style={{ color: accent }}
                   >
                     {DESK_INTRO.kicker}
                   </p>
-                  <h1 className="mt-3 text-4xl font-bold leading-[1.05] tracking-tight text-neutral-50 sm:text-5xl max-sm:mt-2 max-sm:text-[1.55rem]">
+                  {/* Fits on one line at lg; text-balance only matters at the
+                      widths where it does wrap, where the natural break is the
+                      weakest one in the line ("...read as a / résumé."). */}
+                  <h1 className="mt-3 text-balance font-serif text-[3rem] leading-[1] text-neutral-50 lg:text-[3.75rem] max-sm:mt-2 max-sm:text-[2.1rem]">
                     {DESK_INTRO.heading}
                   </h1>
-                  <p className="mt-4 text-base leading-relaxed text-neutral-300 sm:text-lg max-sm:mt-2.5 max-sm:text-[0.9375rem] max-sm:leading-normal">
+                  <p className="mt-4 max-w-md text-base leading-relaxed text-neutral-300 max-sm:mt-2.5 max-sm:text-[0.9375rem] max-sm:leading-normal">
                     {DESK_INTRO.body}
                   </p>
                   <DeskLegend
                     onSelect={(i) => goTo(i + 1)}
-                    className="mt-5 max-sm:mt-3"
+                    className="mt-6 max-sm:mt-3"
                   />
-                  <p className="mt-4 font-mono text-[11px] tracking-wide text-neutral-500 max-sm:mt-2.5">
+                  {/* Tracking is 0.14em, not the 0.2em the other labels use:
+                      this line is 67 characters and broke across two lines at
+                      0.2em, orphaning "dive in". */}
+                  <p className="mt-5 font-mono text-[10px] uppercase tracking-[0.14em] text-neutral-500 max-sm:mt-2.5 max-sm:tracking-[0.1em]">
                     <span className="max-sm:hidden">
                       scroll to travel · drag to look around · click an object
                       to dive in
                     </span>
                     {/* No hover and no drag-orbit on touch, so the phone hint
                         names the two gestures that actually do something. */}
+                    {/* Shorter than the desktop line by design: at 375px the
+                        full sentence wrapped and orphaned "dive in" directly
+                        above the credit line, so the two read as one block. */}
                     <span className="hidden max-sm:inline">
-                      swipe the desk to travel · tap an object to dive in
+                      swipe to travel · tap an object
                     </span>
                   </p>
                 </>
               ) : (
                 <>
                   <p
-                    className="mt-4 text-xs font-bold uppercase tracking-[0.25em] max-sm:mt-2.5"
+                    className="font-mono text-[11px] uppercase tracking-[0.28em]"
                     style={{ color: accent }}
                   >
                     {section.nav}
                   </p>
-                  <h2 className="mt-3 text-3xl font-bold leading-[1.08] tracking-tight text-neutral-50 sm:text-4xl max-sm:mt-2 max-sm:text-[1.55rem]">
+                  <h2 className="mt-3 font-serif text-[3.1rem] leading-[1] text-neutral-50 lg:text-6xl max-sm:mt-2 max-sm:text-[2rem]">
                     {section.title}
                   </h2>
-                  <p className="mt-3 text-base leading-relaxed text-neutral-300 max-sm:mt-2 max-sm:text-[0.9375rem] max-sm:leading-normal">
+                  <p className="mt-3 max-w-md text-base leading-relaxed text-neutral-300 max-sm:mt-2 max-sm:text-[0.9375rem] max-sm:leading-normal">
                     {section.tagline}
                   </p>
-                  <dl className="mt-5 flex flex-wrap gap-x-6 gap-y-3 max-sm:mt-3 max-sm:gap-x-5 max-sm:gap-y-1.5">
+                  <dl className="mt-5 flex flex-wrap gap-x-8 gap-y-3 border-t border-white/10 pt-4 max-sm:mt-3 max-sm:gap-x-6 max-sm:pt-3">
                     {section.stats.map((st) => (
                       <div key={st.label}>
                         <dt className="sr-only">{st.label}</dt>
-                        <dd className="text-sm font-bold text-neutral-100">
+                        <dd className="font-serif text-2xl leading-none text-neutral-50">
                           {st.value}
                         </dd>
-                        <dd className="text-[11px] text-neutral-500">{st.label}</dd>
+                        <dd className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-neutral-500">
+                          {st.label}
+                        </dd>
                       </div>
                     ))}
                   </dl>
                   <Link
                     href={`/${section.slug}`}
-                    className="pointer-events-auto mt-6 inline-block rounded-full px-6 py-2.5 text-sm font-semibold text-white shadow-md transition hover:scale-[1.03] hover:opacity-95 active:scale-100 max-sm:mt-3 max-sm:py-3"
-                    style={{ backgroundColor: accent }}
+                    className="pointer-events-auto mt-6 inline-flex items-center gap-2 border-b pb-1 font-mono text-[11px] uppercase tracking-[0.2em] transition hover:gap-3 max-sm:mt-4"
+                    style={{ color: accent, borderColor: accent }}
                   >
-                    Explore {section.nav} →
+                    Explore {section.nav}
+                    <span aria-hidden="true">→</span>
                   </Link>
                 </>
               )}
             </motion.div>
           </AnimatePresence>
-
-          {/* The deck's bottom chrome has nowhere to sit on a phone — it would
-              land on top of this sheet — so the credit line rides along the
-              sheet's bottom edge instead. */}
-          <p className="pointer-events-auto hidden shrink-0 flex-wrap items-center justify-center gap-x-2.5 gap-y-1 px-5 pb-3 pt-1 text-center font-mono text-[10px] tracking-wide text-neutral-500 max-sm:flex">
-            <a href={SITE.github} target="_blank" rel="noopener noreferrer">
-              GitHub
-            </a>
-            <span aria-hidden="true" className="text-neutral-700">
-              |
-            </span>
-            <a href={`mailto:${SITE.email}`}>Email</a>
-            <span aria-hidden="true" className="text-neutral-700">
-              |
-            </span>
-            <span>
-              Developed entirely by {SITE.name} {new Date().getFullYear()}
-            </span>
-          </p>
         </div>
 
-        {/* vertical stop dots, right edge (phones get the horizontal row that
-            sits at the top of the copy sheet instead) */}
-        <StopDots
-          stop={stop}
-          goTo={goTo}
-          className="absolute right-4 top-1/2 -translate-y-1/2 sm:right-7 max-sm:hidden"
-        />
-
-        {/* bottom chrome */}
-        <div className="pointer-events-none absolute inset-x-5 bottom-5 flex items-end justify-between sm:inset-x-10 sm:bottom-7 max-sm:hidden">
-          <p
-            aria-hidden="true"
-            className={`font-mono text-[11px] uppercase tracking-[0.3em] text-neutral-400 transition-opacity duration-500 motion-safe:animate-pulse ${
-              stop === 0 ? "opacity-100" : "opacity-0"
-            }`}
+        {/* Bottom-right chrome, riding the same baseline as the copy block.
+            On phones it sits inside the copy region's reserved bottom padding,
+            just above the index strip. */}
+        {/* Phones drop the uppercase + wide tracking: the same string is 54
+            characters, and at 0.16em tracked caps it is 380px wide inside a
+            335px sheet, so it wrapped onto the hint line above it. */}
+        <div className="pointer-events-auto absolute bottom-24 right-9 z-20 flex flex-wrap items-center justify-end gap-x-3 gap-y-1 font-mono text-[10px] uppercase tracking-[0.16em] text-neutral-500 sm:bottom-28 lg:right-14 max-sm:inset-x-0 max-sm:bottom-[3.55rem] max-sm:justify-center max-sm:px-5 max-sm:normal-case max-sm:tracking-[0.01em]">
+          <a
+            href={SITE.github}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="transition hover:text-neutral-200"
           >
-            Scroll to explore ↓
-          </p>
-          <div className="pointer-events-auto flex flex-wrap items-center justify-end gap-x-3 gap-y-1 font-mono text-[11px] tracking-wide text-neutral-400">
-            <a
-              href={SITE.github}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="transition hover:text-neutral-100"
-            >
-              GitHub
-            </a>
-            <span aria-hidden="true" className="text-neutral-600">
-              |
-            </span>
-            <a
-              href={`mailto:${SITE.email}`}
-              className="transition hover:text-neutral-100"
-            >
-              Email
-            </a>
-            <span aria-hidden="true" className="text-neutral-600">
-              |
-            </span>
-            <span>
-              Developed entirely by {SITE.name} {new Date().getFullYear()}
-            </span>
-          </div>
+            GitHub
+          </a>
+          <span aria-hidden="true" className="text-neutral-700">
+            /
+          </span>
+          <a
+            href={`mailto:${SITE.email}`}
+            className="transition hover:text-neutral-200"
+          >
+            Email
+          </a>
+          <span aria-hidden="true" className="text-neutral-700">
+            /
+          </span>
+          <span>
+            Developed entirely by {SITE.name} {new Date().getFullYear()}
+          </span>
         </div>
+
+        <IndexStrip stop={stop} goTo={goTo} />
       </MotionConfig>
     </section>
   );

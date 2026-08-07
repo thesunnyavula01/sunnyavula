@@ -86,8 +86,8 @@ export const laptopScreenTexture = once(() => {
   p.ctx.fillStyle = "#fbf8f1";
   p.ctx.fillRect(0, 0, 1024, 668);
 
-  // browser chrome: berry bar, traffic lights, URL pill
-  p.rect(0, 0.925, 1.38, 0.11, P.berry);
+  // browser chrome: brand bar, traffic lights, URL pill
+  p.rect(0, 0.925, 1.38, 0.11, P.brand);
   for (const x of [-0.62, -0.57, -0.52]) p.circle(x, 0.925, 0.013, "#fbf8f1");
   p.rect(0.02, 0.925, 0.52, 0.045, "#d24f80");
 
@@ -246,11 +246,11 @@ export const phoneScreenTexture = once(() => {
   p.rect(0.102, 0.253, 0.016, 0.008, "#c9d1e6");
 
   // "incoming call" kicker rule
-  p.rect(0, 0.163, 0.078, 0.011, P.berry);
+  p.rect(0, 0.163, 0.078, 0.011, P.brand);
 
-  // caller avatar: berry disc with a silhouette clipped inside it
+  // caller avatar: brand disc with a silhouette clipped inside it
   p.circle(0, 0.072, 0.058, "#2a1a2c");
-  p.circle(0, 0.072, 0.052, P.berry);
+  p.circle(0, 0.072, 0.052, P.brand);
   p.ctx.save();
   p.ctx.beginPath();
   p.ctx.ellipse(X(0), Y(0.072), 0.052 * sx, 0.052 * sy, 0, 0, Math.PI * 2);
@@ -322,9 +322,9 @@ export const paperPrintTexture = once(() => {
   // provides the paper colour and shading
   const p = painter(384, 529, -0.45, 0.45, -0.62, 0.62);
 
-  // title + berry rule
+  // title + brand rule
   p.rect(-0.14, 0.54, 0.56, 0.036, "#2e2a22");
-  p.rect(-0.02, 0.475, 0.8, 0.008, P.berry);
+  p.rect(-0.02, 0.475, 0.8, 0.008, P.brand);
 
   // two-column body text
   PAGE_COLUMNS.forEach((row, r) => {

@@ -78,7 +78,7 @@ export function Papers({ hovered }: { hovered: boolean }) {
         </mesh>
         {[
           { x: 0.2, h: 0.09, c: P.indigo },
-          { x: 0.3, h: 0.14, c: P.berry },
+          { x: 0.3, h: 0.14, c: P.brand },
           { x: 0.4, h: 0.2, c: P.sage },
         ].map((b, i) => (
           <mesh key={i} castShadow position={[b.x, b.h / 2, 0.31]}>
@@ -120,11 +120,11 @@ export function Papers({ hovered }: { hovered: boolean }) {
         <meshStandardMaterial color={P.blush} roughness={0.9} />
       </mesh>
 
-      {/* berry pen resting across the corner */}
+      {/* brand pen resting across the corner */}
       <group position={[0.28, stackTop + 0.033, 0.42]} rotation={[0, 0.85, Math.PI / 2]}>
         <mesh castShadow>
           <cylinderGeometry args={[0.024, 0.024, 0.72, 10]} />
-          <meshStandardMaterial color={P.berry} roughness={0.4} />
+          <meshStandardMaterial color={P.brand} roughness={0.4} />
         </mesh>
         <mesh position={[0, 0.39, 0]}>
           <cylinderGeometry args={[0.025, 0.012, 0.07, 10]} />
@@ -384,7 +384,7 @@ export function GavelMic({ hovered }: { hovered: boolean }) {
         ))}
         <mesh position={[0.095, 0.82, 0]} rotation={[Math.PI / 2.4, 0, 0]}>
           <torusGeometry args={[0.118, 0.014, 6, 20]} />
-          <meshStandardMaterial color={P.berry} roughness={0.5} />
+          <meshStandardMaterial color={P.brand} roughness={0.5} />
         </mesh>
       </group>
     </group>

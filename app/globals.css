@@ -21,6 +21,10 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  /* Headlines only — `font-serif` on an <h1>/<h2>. Body copy, labels and
+     numerals stay Geist/Geist Mono; the contrast between the two is the type
+     system. Falls back to the platform serif if the font never loads. */
+  --font-serif: var(--font-instrument-serif), ui-serif, Georgia, serif;
 }
 
 body {
@@ -39,7 +43,8 @@ body {
 }
 
 ::selection {
-  background: #b3265c;
+  /* PALETTE.brand */
+  background: #1d7f92;
   color: #fff;
 }
 

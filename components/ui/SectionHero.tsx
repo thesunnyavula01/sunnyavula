@@ -15,12 +15,12 @@ export function SectionHero({
   return (
     <header className="mt-8">
       <p
-        className="text-xs font-bold uppercase tracking-[0.25em]"
+        className="font-mono text-[11px] uppercase tracking-[0.28em]"
         style={{ color: accent }}
       >
         {section.deskObject}
       </p>
-      <h1 className="mt-3 text-4xl font-bold tracking-tight text-neutral-50 sm:text-5xl">
+      <h1 className="mt-4 font-serif text-5xl leading-[1.02] text-neutral-50 sm:text-6xl">
         {section.title}
       </h1>
       <p className="mt-4 text-lg text-neutral-300 sm:text-xl">

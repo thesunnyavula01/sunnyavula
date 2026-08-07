@@ -200,7 +200,7 @@ function Chair() {
       </mesh>
       {/* seat + backrest */}
       <SoftBox castShadow args={[0.88, 0.14, 0.82]} radius={0.06} smoothness={3} position={[0, 0.68, 0.02]}>
-        <meshStandardMaterial color={P.berry} roughness={0.75} />
+        <meshStandardMaterial color={P.brand} roughness={0.75} />
       </SoftBox>
       <SoftBox
         castShadow
@@ -210,7 +210,7 @@ function Chair() {
         position={[0, 1.28, 0.42]}
         rotation={[0.1, 0, 0]}
       >
-        <meshStandardMaterial color={P.berry} roughness={0.75} />
+        <meshStandardMaterial color={P.brand} roughness={0.75} />
       </SoftBox>
     </group>
   );
@@ -225,7 +225,7 @@ function Rug() {
       </mesh>
       <mesh receiveShadow position={[0, 0.02, 0]} scale={[1, 0.5, 1]}>
         <torusGeometry args={[2.32, 0.05, 6, 40]} />
-        <meshStandardMaterial color={P.berry} roughness={0.9} />
+        <meshStandardMaterial color={P.brand} roughness={0.9} />
       </mesh>
     </group>
   );
@@ -417,14 +417,14 @@ function Mug({ position }: { position: [number, number, number] }) {
       </mesh>
       <mesh castShadow receiveShadow>
         <latheGeometry args={[MUG_PROFILE, 18]} />
-        <meshStandardMaterial color={P.berry} roughness={0.38} metalness={0.04} />
+        <meshStandardMaterial color={P.brand} roughness={0.38} metalness={0.04} />
       </mesh>
       {/* C-handle: a 4.3rad arc spun back by half of it, so the opening faces
           the body and both cut ends finish ~0.02 INSIDE the wall where they
           cannot be seen. A full torus read as a ring stuck on the side. */}
       <mesh castShadow position={[0.168, 0.2, 0]} rotation={[0, 0, -2.15]}>
         <torusGeometry args={[0.085, 0.024, 8, 16, 4.3]} />
-        <meshStandardMaterial color={P.berry} roughness={0.38} metalness={0.04} />
+        <meshStandardMaterial color={P.brand} roughness={0.38} metalness={0.04} />
       </mesh>
       {/* Coffee, sitting 0.04 below the rim so the inner wall above it reads as
           depth. Glossy and faintly metallic so it catches the lamp as a liquid
@@ -487,7 +487,7 @@ function Books({ position }: { position: [number, number, number] }) {
 function PencilCup({ position }: { position: [number, number, number] }) {
   const pens: { color: string; rot: [number, number, number]; x: number }[] = [
     { color: P.charcoal, rot: [0.1, 0, 0.12], x: -0.03 },
-    { color: P.berry, rot: [-0.08, 0, -0.14], x: 0.04 },
+    { color: P.brand, rot: [-0.08, 0, -0.14], x: 0.04 },
     { color: P.sageDark, rot: [0.04, 0, 0.02], x: 0 },
   ];
   return (

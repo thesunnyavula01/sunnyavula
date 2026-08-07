@@ -85,7 +85,7 @@ export const SITE = {
     'Abhiram "Sunny" Avula — economics researcher, ATT Agency co-founder, investor, and NSDA debate co-captain in Longmont, Colorado.',
   // Sitemap <lastmod> for "/" — the desk scene's last real change. See the
   // `updated` note on the Section type for why these are not build timestamps.
-  updated: "2026-08-06",
+  updated: "2026-08-07",
   // Sitemap <lastmod> for the two PDFs under /papers.
   papersUpdated: "2026-07-22",
   // Canonical production origin — hardcoded on purpose. Metadata, sitemap,

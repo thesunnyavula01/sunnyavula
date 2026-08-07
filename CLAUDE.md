@@ -156,6 +156,71 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 
 ## Build phases
 
+> **Status (2026-08-07, latest+13): the deck's chrome was a clone of sarastotey.com — it
+> isn't any more.** Sunny put the two first screens side by side: the copy had already been
+> rewritten (latest+12) but the FURNITURE was identical — floating rounded glass card on the
+> left, `01 / 6` counter, vertical dot rail on the right, `SCROLL TO EXPLORE ↓` bottom-left,
+> centred pill nav. Five pieces of chrome, five matches. Copy was never the resemblance.
+> **(1) The card is gone, and nothing replaced it.** Type sits directly on the scene,
+> bottom-left, and legibility comes from a **scrim**. That scrim is load bearing, not
+> decoration: the first cut anchored it in the corner at `(-8%, 100%)` and failed by eye,
+> because the headline sits ~40% UP the frame where a corner gradient has already fallen off —
+> 60pt serif ran straight over the lit desk. It is now centred on the copy itself
+> (`58% 66% at 6% 76%`), holds ~0.7 alpha out to the headline, and clears by 80%, so the desk's
+> bright middle and right — where every camera stop puts its subject — stay untouched. A
+> `text-shadow` on the copy block is the second layer, for the frames where the camera parks
+> something bright behind a thin glyph.
+> **(2) `IndexStrip` replaces THREE controls at once** — the dot rail, the counter and the
+> scroll prompt: six ruled columns across the bottom edge, `00 START · 01 PAPERS · … · 05 SAY
+> HI`, active column ruled in that stop's accent. It states position, length and destination
+> together, which none of the three did alone. The four middle columns are named for the
+> OBJECT, not the section (the section name is already the heading above); screen readers get
+> "Stop 03 — go to Markets". **Phones drop the names and keep the numbers** — 62px will not
+> hold "MONITOR" at a legible size.
+> **(3) `Nav` is a masthead**: wordmark hard left, section links hard right, hairline under
+> both, scrim instead of a panel. **The wordmark is the home link**, so "Home" is no longer a
+> list item. Active link takes its own section's accent as colour AND underline.
+> **(4) Pink is gone sitewide.** `PALETTE.berry`/`berryLight` are now `brand`/`brandLight` =
+> **petrol teal `#1d7f92` / `#3fbfd4`**, the walnut desk's complement — which is why it can be
+> this saturated without fighting the scene, and why the chair, pen, sticky notes and laptop
+> browser bar all recoloured with it. ATT Agency's accent (which WAS `berryLight`) is now
+> **coral `#e8785a`**. `ACCENTS` is chosen for hue separation — indigo 232° / coral 14° /
+> green 160° / marigold 36°, with the brand teal at 190° deliberately outside the set because
+> it marks the two stops that are not sections. Also updated: `::selection`, and
+> `public/desk-poster.webp` — **recaptured, because the no-WebGL fallback was still showing the
+> pink chair** (2560×1080 → 1920×810 q76, 55 kB; its inlined 24px blur URI regenerated with
+> it).
+> **(5) Headlines are a display serif** (`Instrument_Serif`, one weight, `--font-serif` →
+> `font-serif`). Body and every label stay Geist / Geist Mono; the contrast between them IS the
+> type system. Subpage `<h1>`s and narrative `<h2>`s take it too, so the two halves of the site
+> don't drift apart.
+> **Verified by eye at 1280×800 and 375×812, plus /att-agency.** Caught that way and fixed: the
+> scrim miss above, `MONITOR` clipping in the strip on phones, an orphaned "DIVE IN" on both
+> the desktop and phone hint lines (desktop tracking 0.2em → 0.14em, phone line shortened), a
+> headline breaking as "…read as a / résumé." (`text-balance`), and a phone bottom edge where
+> the hint, the two-line credit and the strip were stacked with no gaps (copy region
+> `pb-14` → `pb-24`, credit to `bottom-[3.55rem]`). Measured overflow is 0 at 375×812 and
+> 375×667. Build + lint pass; `/` First Load JS unchanged at 422 kB.
+> **NEW verification trick — the pane could not composite this whole session**, so
+> `computer{screenshot}` timed out on every call and, worse, the frozen compositor silently
+> stops rAF: R3F never initialises (canvas stuck at 300×150), framer-motion's `AnimatePresence`
+> exits never finish, and CSS transitions read back their START value from
+> `getComputedStyle` — three ways to "find" bugs that do not exist. The workaround, from the
+> browser console alone: **(a)** shim `requestAnimationFrame` with `setTimeout` and
+> `delete Element.prototype.animate`, which restarts both framer and the R3F loop; **(b)**
+> dispatch a `window` `resize` event — react-use-measure listens for it, which is what makes
+> R3F finally size its canvas; **(c)** `st.gl.render(...)` then `toDataURL` in the SAME task
+> (there is no `preserveDrawingBuffer`); **(d)** clone `document.body`, swap each `<canvas>` for
+> an **absolutely positioned** `<img>` of those pixels (an in-flow `<img>` becomes a flex item
+> with intrinsic size and stretches the phone layout), serialize with **`XMLSerializer`** — not
+> `innerHTML`, which is not well-formed XML and makes `decode()` throw `EncodingError` — wrap in
+> an SVG `<foreignObject>`, rasterize via `Image` + `drawImage`, and POST the PNG to a throwaway
+> `localhost:3999` receiver. **Two traps in there:** every `url()` in the CSS must be inlined as
+> a data URI (a data: SVG has no base URL, so `/_next/...` fonts silently vanish), and the type
+> metrics must be **pinned inline from `getComputedStyle`** — collecting CSS text loses
+> Tailwind v4's `@layer` order once HMR appends a second sheet, at which point preflight's
+> `h1 { font-size: inherit }` beats the size utility and every heading renders at 16px.
+>
 > **Status (2026-08-06, latest+12): the landing card is a LEGEND, not a name card.** Stop 0 —
 > the first thing anyone sees — opened with "My name is Sunny Avula." plus a list of four job
 > titles, which is the one screen on the site that said nothing the `<title>` didn't. It now

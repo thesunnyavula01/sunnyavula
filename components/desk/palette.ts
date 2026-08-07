@@ -1,7 +1,12 @@
 // Shared palette for the desk scene + landing UI.
-// Dark, moody study at night: deep navy world, warm lamp-lit desk, berry
-// accent, indigo/sage/marigold/terracotta props — every 3D material and hover
-// accent reads from here so the scene stays coherent.
+// Dark, moody study at night: deep navy world, warm lamp-lit desk, petrol-teal
+// brand accent, indigo/sage/marigold/terracotta props — every 3D material and
+// hover accent reads from here so the scene stays coherent.
+//
+// The brand accent is the walnut desk's COMPLEMENT (teal against warm wood),
+// which is why it can be this saturated without fighting the scene. It was a
+// berry pink through 2026-08-06; nothing here is named for a fruit any more,
+// so a stray `berry` in a diff is stale code, not a variant.
 
 export const PALETTE = {
   bg: "#10131c",
@@ -13,8 +18,9 @@ export const PALETTE = {
   blotter: "#3c4770",
   paper: "#faf7f0",
   ink: "#4a453b",
-  berry: "#b3265c",
-  berryLight: "#e8548a",
+  brand: "#1d7f92",
+  brandLight: "#3fbfd4",
+  coral: "#e8785a",
   indigo: "#4a5688",
   indigoLight: "#8b9be8",
   navy: "#141a2e",
@@ -37,9 +43,16 @@ export const PALETTE = {
 // Per-section accent, indexed like `sections`:
 // research, att-agency, markets, leadership.
 // Brightened variants so kickers/rings/CTAs pop against the dark backdrop.
+//
+// These four sit next to each other in the deck's index strip and in the
+// landing legend, so they are chosen for HUE SEPARATION, not just for looking
+// nice alone: indigo 232° / coral 14° / green 160° / marigold 36°. The brand
+// teal (190°) is deliberately not in this set — it marks the two stops that
+// are not sections (Home and Contact), so it has to stay distinct from all
+// four. Check the spacing before swapping any of them.
 export const ACCENTS = [
   PALETTE.indigoLight,
-  PALETTE.berryLight,
+  PALETTE.coral,
   PALETTE.green,
   PALETTE.marigold,
 ] as const;

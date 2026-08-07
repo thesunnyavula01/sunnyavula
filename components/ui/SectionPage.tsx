@@ -75,7 +75,7 @@ export function SectionPage({ section }: { section: Section }) {
                   {block.kicker}
                 </p>
               )}
-              <h2 className="mt-2 text-2xl font-semibold tracking-tight text-neutral-50">
+              <h2 className="mt-2 font-serif text-[1.7rem] leading-tight text-neutral-50">
                 {block.heading}
               </h2>
               <p className="mt-3 leading-relaxed text-neutral-300">
