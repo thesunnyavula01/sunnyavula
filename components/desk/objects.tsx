@@ -25,8 +25,46 @@ import {
 
 /* ------------------------------ Research ------------------------------ */
 
+// The stack. Sheets used to be 2.4cm slabs stepped 2.8cm apart and fanned
+// 0.045rad each — a 4mm air gap between every pair, a 13° total spread, and a
+// stack 16cm tall on a 90cm page. From the left-hand camera stop that edge-on
+// fan was the largest thing in frame, and the key light is on the RIGHT, so the
+// edges took only the scene's cool fill (ambient #c9d2ff + hemi #aebaff + rim
+// #7f8dff) and white paper rendered as a comb of periwinkle slats.
+//
+// Half the thickness, near-flush spacing and a third of the fan leave far less
+// edge to catch that fill; the colours below then grade the ream warmer and
+// darker toward the bottom (the top sheet stays the brightest), which is both
+// how a real ream reads and what keeps the remaining edge pixels off blue.
+const SHEET_T = 0.012;
+const SHEET_STEP = 0.014;
+// Graded warm so the EDGES cannot go blue. Measured: with a near-neutral paper
+// the side faces rendered (165,157,179) — blue 14 above red — against tops at
+// (226,218,213). The fix has to live in the material, not the lights, or every
+// other stop moves with it: a cream whose blue is ~0.72 of its red reflects
+// much less of the cool fill, and only the TOP sheet is seen face-on, so the
+// ream can be this warm without the printed page reading yellow.
+const SHEET_TINTS = ["#dcc49f", "#e2cdac", "#e8d7bd", "#eee2ce", "#f5ecdf", P.paper];
+const TOP_SHEET = SHEET_TINTS.length - 1;
+const STACK_TOP = 0.012 + TOP_SHEET * SHEET_STEP + SHEET_T / 2;
+
+// Per-sheet skew. The stack sits askew on the folder (SKEW, against the
+// folder's own -0.09) and each sheet turns a little more than the one below —
+// but only a little: the old 0.045/sheet opened a 13° fan, which is what turned
+// the edge into a comb in the first place.
+const SKEW = 0.09;
+const SHEET_DX = 0.006;
+const SHEET_DZ = -0.005;
+const SHEET_RY = 0.014;
+const sheetAt = (i: number) => ({
+  position: [i * SHEET_DX, 0.012 + i * SHEET_STEP, i * SHEET_DZ] as [number, number, number],
+  rotationY: SKEW + (i - 2.5) * SHEET_RY,
+});
+
+// Manila folder under the stack: 2cm slab, top face at y = 0.02.
+const FOLDER_TOP = 0.02;
+
 export function Papers({ hovered }: { hovered: boolean }) {
-  const stackTop = 0.02 + 5 * 0.028;
   return (
     <group>
       {/* manila folder peeking out under the stack — 8mm corner radius on a
@@ -34,34 +72,48 @@ export function Papers({ hovered }: { hovered: boolean }) {
       <mesh
         castShadow
         receiveShadow
-        position={[-0.06, 0.006, 0.05]}
+        position={[-0.06, FOLDER_TOP / 2, 0.05]}
         rotation={[0, -0.09, 0]}
       >
-        <boxGeometry args={[1.12, 0.02, 1.42]} />
+        <boxGeometry args={[1.12, FOLDER_TOP, 1.42]} />
         <meshStandardMaterial color="#d9b06a" roughness={0.9} />
       </mesh>
 
-      {[0, 1, 2, 3, 4, 5].map((i) => (
-        <mesh
-          key={i}
-          castShadow
-          receiveShadow
-          position={[i * 0.015, 0.012 + i * 0.028, -i * 0.012]}
-          rotation={[0, (i - 2.5) * 0.045, 0]}
-        >
-          <boxGeometry args={[0.98, 0.024, 1.3]} />
-          <meshStandardMaterial
-            color={i % 2 ? "#f4efe4" : P.paper}
-            emissive={P.indigo}
-            emissiveIntensity={hovered ? 0.12 : 0}
-            roughness={0.95}
-          />
-        </mesh>
-      ))}
+      {SHEET_TINTS.map((tint, i) => {
+        const s = sheetAt(i);
+        return (
+          <mesh
+            key={i}
+            castShadow
+            receiveShadow
+            position={s.position}
+            rotation={[0, s.rotationY, 0]}
+          >
+            <boxGeometry args={[0.98, SHEET_T, 1.3]} />
+            <meshStandardMaterial
+              color={tint}
+              emissive="#e8c89a"
+              emissiveIntensity={hovered ? 0.32 : 0.18}
+              roughness={0.95}
+            />
+          </mesh>
+        );
+      })}
 
-      {/* printed top sheet: title, rule, two-column body, chart */}
-      <group position={[0.075, stackTop + 0.014, -0.06]} rotation={[0, 0.11, 0]}>
-        {/* the printing itself — one transparent map over the lit sheet */}
+      {/* Printed top sheet: title, rule, two-column body, figure — all of it
+          ink on the page, nothing standing up off it (see screens.ts).
+          It has to ride the TOP SHEET's own transform, not a hand-copied pair
+          of numbers: the two were coincidentally in sync while the stack used
+          the old step/fan, and the printing slid off square the moment those
+          changed. */}
+      <group
+        position={[
+          TOP_SHEET * SHEET_DX,
+          STACK_TOP + 0.007,
+          TOP_SHEET * SHEET_DZ,
+        ]}
+        rotation={[0, sheetAt(TOP_SHEET).rotationY, 0]}
+      >
         <mesh rotation={[-Math.PI / 2, 0, 0]}>
           <planeGeometry args={[PAPER_SHEET.w, PAPER_SHEET.d]} />
           <meshStandardMaterial
@@ -71,39 +123,23 @@ export function Papers({ hovered }: { hovered: boolean }) {
           />
         </mesh>
 
-        {/* figure: upright axis + bars + trend line all stand off the page */}
-        <mesh position={[0.135, 0.11, 0.31]}>
-          <boxGeometry args={[0.006, 0.22, 0.006]} />
-          <meshBasicMaterial color={P.ink} />
-        </mesh>
-        {[
-          { x: 0.2, h: 0.09, c: P.indigo },
-          { x: 0.3, h: 0.14, c: P.brand },
-          { x: 0.4, h: 0.2, c: P.sage },
-        ].map((b, i) => (
-          <mesh key={i} castShadow position={[b.x, b.h / 2, 0.31]}>
-            <boxGeometry args={[0.055, b.h, 0.03]} />
-            <meshStandardMaterial color={b.c} roughness={0.7} />
-          </mesh>
-        ))}
-        <mesh position={[0.3, 0.19, 0.295]} rotation={[0, 0, 0.5]}>
-          <planeGeometry args={[0.26, 0.008]} />
-          <meshBasicMaterial color={P.marigold} />
-        </mesh>
-
-        {/* paperclip on the corner */}
+        {/* paperclip over the far-left corner — pushed out so a third of it
+            hangs past the page edge and it visibly holds the sheets, and in
+            steel rather than the old near-white chrome, which at 0.85 metalness
+            caught the environment and read as an oval printed on the page */}
         <mesh
-          position={[-0.36, 0.004, -0.55]}
+          position={[-0.35, 0.006, -0.595]}
           rotation={[-Math.PI / 2, 0, 0.3]}
           scale={[1, 1.9, 1]}
         >
-          <torusGeometry args={[0.045, 0.007, 6, 16]} />
-          <meshStandardMaterial color="#c9c9cf" roughness={0.25} metalness={0.85} />
+          <torusGeometry args={[0.045, 0.008, 8, 20]} />
+          <meshStandardMaterial color="#9aa0ac" roughness={0.35} metalness={0.55} />
         </mesh>
       </group>
 
-      {/* sticky notes — the marigold one has a scribble */}
-      <group position={[-0.62, stackTop - 0.05, 0.52]} rotation={[-Math.PI / 2, 0, 0.4]}>
+      {/* sticky note on the folder — its y used to ride STACK_TOP, so it hung
+          11cm above the desk with nothing under it */}
+      <group position={[-0.58, FOLDER_TOP + 0.002, 0.52]} rotation={[-Math.PI / 2, 0, 0.4]}>
         <mesh>
           <planeGeometry args={[0.3, 0.3]} />
           <meshStandardMaterial color={P.marigold} roughness={0.9} />
@@ -115,29 +151,27 @@ export function Papers({ hovered }: { hovered: boolean }) {
           </mesh>
         ))}
       </group>
-      <mesh position={[0.66, 0.002, 0.58]} rotation={[-Math.PI / 2, 0, -0.3]}>
-        <planeGeometry args={[0.28, 0.28]} />
-        <meshStandardMaterial color={P.blush} roughness={0.9} />
-      </mesh>
 
-      {/* brand pen resting across the corner */}
-      <group position={[0.28, stackTop + 0.033, 0.42]} rotation={[0, 0.85, Math.PI / 2]}>
+      {/* brand pen lying down the right-hand column. Both ends have to land on
+          the sheet: the old one was 0.72 long on a 0.9-wide page and its tip
+          finished past the near edge, hanging in mid-air. */}
+      <group position={[0.32, STACK_TOP + 0.029, 0.22]} rotation={[0, 1.3, Math.PI / 2]}>
         <mesh castShadow>
-          <cylinderGeometry args={[0.024, 0.024, 0.72, 10]} />
+          <cylinderGeometry args={[0.022, 0.022, 0.5, 10]} />
           <meshStandardMaterial color={P.brand} roughness={0.4} />
         </mesh>
-        <mesh position={[0, 0.39, 0]}>
-          <cylinderGeometry args={[0.025, 0.012, 0.07, 10]} />
+        <mesh position={[0, 0.275, 0]}>
+          <cylinderGeometry args={[0.023, 0.011, 0.06, 10]} />
           <meshStandardMaterial color={P.charcoal} roughness={0.4} />
         </mesh>
-        <mesh position={[0, -0.37, 0]}>
-          <cylinderGeometry args={[0.025, 0.025, 0.05, 10]} />
+        <mesh position={[0, -0.265, 0]}>
+          <cylinderGeometry args={[0.023, 0.023, 0.05, 10]} />
           <meshStandardMaterial color={P.charcoal} roughness={0.4} />
         </mesh>
         {/* clip */}
-        <mesh position={[0.026, 0.3, 0]}>
-          <boxGeometry args={[0.008, 0.12, 0.014]} />
-          <meshStandardMaterial color="#c9c9cf" roughness={0.3} metalness={0.7} />
+        <mesh position={[0.024, 0.205, 0]}>
+          <boxGeometry args={[0.008, 0.11, 0.014]} />
+          <meshStandardMaterial color="#9aa0ac" roughness={0.3} metalness={0.6} />
         </mesh>
       </group>
     </group>

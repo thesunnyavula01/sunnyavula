@@ -317,10 +317,28 @@ const PAGE_COLUMNS: [number, number][][] = [
   ],
 ];
 
+// The figure at the foot of the page. Bars are a fraction of the plot height.
+const FIG = { ax: -0.345, base: -0.42, top: -0.06, x0: -0.3, step: 0.075, w: 0.052 };
+const FIG_BARS = [0.2, 0.29, 0.24, 0.46, 0.63, 0.88];
+
+// Column that runs beside the figure, so the lower half is not half-empty.
+const FIG_ASIDE: [number, number][] = [
+  [-0.075, 0.22],
+  [-0.15, 0.18],
+  [-0.225, 0.22],
+  [-0.3, 0.14],
+];
+
 export const paperPrintTexture = once(() => {
   // transparent: only the marks are drawn, so the lit sheet underneath still
   // provides the paper colour and shading
-  const p = painter(384, 529, -0.45, 0.45, -0.62, 0.62);
+  const W = 384;
+  const H = 529;
+  const p = painter(W, H, -0.45, 0.45, -0.62, 0.62);
+  const sx = W / 0.9;
+  const sy = H / 1.24;
+  const X = (x: number) => (x + 0.45) * sx;
+  const Y = (y: number) => (0.62 - y) * sy;
 
   // title + brand rule
   p.rect(-0.14, 0.54, 0.56, 0.036, "#2e2a22");
@@ -331,9 +349,44 @@ export const paperPrintTexture = once(() => {
     for (const [x, w] of row) p.rect(x + w / 2, 0.4 - r * 0.075, w, 0.016, P.ink);
   });
 
-  // horizontal axis of the little figure (the bars, upright axis and trend
-  // line stay as real geometry — they stand up off the page)
-  p.rect(0.3, -0.31, 0.34, 0.006, P.ink);
+  // The figure is PRINTED, not built from standing geometry. It used to be an
+  // upright axis, three chunky bars and a trend line that was a plane standing
+  // on edge: at the close camera stops the bars read as toy blocks left on a
+  // sheet of paper, the trend line as a stray orange stick floating clear of
+  // them, and whatever else lay on the page (the pen) collided with all four.
+  // Flat art on a flat surface is the same rule the rest of this file follows.
+  const { ax, base, top, x0, step, w } = FIG;
+  const span = top - base;
+  const cx = (i: number) => x0 + i * step;
+
+  p.rect(ax, (base + top) / 2, 0.005, span, P.ink);
+  p.rect(ax + 0.2375, base, 0.475, 0.005, P.ink);
+
+  FIG_BARS.forEach((f, i) => {
+    const h = f * span;
+    p.rect(cx(i), base + h / 2, w, h, P.indigo);
+  });
+
+  // trend line over the bar tops, with a marker on each
+  p.ctx.strokeStyle = P.marigold;
+  p.ctx.lineWidth = 0.009 * sy;
+  p.ctx.lineJoin = "round";
+  p.ctx.lineCap = "round";
+  p.ctx.beginPath();
+  FIG_BARS.forEach((f, i) => {
+    const y = Y(base + f * span + 0.02);
+    if (i === 0) p.ctx.moveTo(X(cx(i)), y);
+    else p.ctx.lineTo(X(cx(i)), y);
+  });
+  p.ctx.stroke();
+  FIG_BARS.forEach((f, i) => p.circle(cx(i), base + f * span + 0.02, 0.011, P.marigold));
+
+  // caption under the figure
+  p.rect(ax + 0.21, -0.485, 0.42, 0.013, "#8d8578");
+  p.rect(ax + 0.15, -0.517, 0.3, 0.013, "#8d8578");
+
+  // text column beside the figure
+  for (const [y, cw] of FIG_ASIDE) p.rect(0.16 + cw / 2, y, cw, 0.016, P.ink);
 
   return p.finish();
 });

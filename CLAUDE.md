@@ -156,6 +156,50 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 
 ## Build phases
 
+> **Status (2026-08-07, latest+14): the papers stop was the ugliest object on the desk —
+> rebuilt.** Sunny sent a crop of the Research stop; it was a mess of six defects with two root
+> causes.
+> **(1) Flat artwork had been built as STANDING GEOMETRY.** The little figure on the top sheet
+> was an upright axis box, three chunky bars in three different hues (indigo/teal/sage) and a
+> "trend line" that was a `planeGeometry` standing on edge at `rotation z 0.5`, touching nothing.
+> At the close stops the bars read as toy blocks left on a sheet of paper and the trend line as a
+> stray orange stick floating clear of them — and because they occupied real space, the pen
+> collided with all four, running straight through the tallest bar. **It is now printed into
+> `paperPrintTexture`**, which is the rule `screens.ts` already states in its own header comment
+> and the figure just never followed. Six indigo bars, a marigold polyline that actually touches
+> the bar tops with a marker on each, a caption, and a text column beside it. Once the chart is
+> ink, a pen lying across it is just a pen on a page — one change closed three defects and
+> removed five meshes.
+> **(2) White paper was rendering PERIWINKLE.** The stack was six 2.4cm slabs stepped 2.8cm
+> apart and fanned 0.045rad each — a 4mm air gap between every pair and a 13° spread, i.e. a
+> comb of edge faces pointed at the camera at the left-hand stop. The key light is on the RIGHT,
+> so those faces took only the scene's cool fill (ambient `#c9d2ff` + hemi `#aebaff` + rim
+> `#7f8dff` @ 0.7) and white paper rendered as blue plastic slats. **Measured, not eyeballed:**
+> a scanline across the edge read the side faces at **(165,157,179)** — blue 14 above red —
+> against tops at (226,218,213). **The fix is in the MATERIAL, not the lights**, because the
+> lights are shared by all six stops: half the thickness, near-flush spacing, a third of the fan,
+> and `SHEET_TINTS` graded warm down the ream (blue ≈ 0.72 of red at the bottom, so far less of
+> the cool fill comes back) plus a warm `emissive` at 0.18. Re-measured after: the edges land
+> warm-neutral. **Only the TOP sheet is ever seen face-on, which is why the ream can be this
+> warm without the printed page reading yellow** — do not "correct" the lower tints back toward
+> white. The hover emissive went warm too; it used to be `P.indigo`, i.e. it made the blue worse.
+> **(3) A coupling that was implicit is now derived.** The print group's transform
+> (`[0.075, ·, -0.06]`, `ry 0.11`) was hand-written to coincide with top-sheet's
+> `i*0.015 / -i*0.012 / (i-2.5)*0.045` at `i = 5`. Nothing said so, and the printing slid off
+> square the instant the step and fan changed. Sheets now come from `sheetAt(i)` and the print
+> group reads `sheetAt(TOP_SHEET)`.
+> Also: the pen is shorter and reseated down the right-hand column (the old one was 0.72 long on
+> a 0.9-wide page and its tip finished at page-y −0.75 against a −0.62 edge — it hung in mid
+> air); the paperclip is steel instead of near-white chrome at 0.85 metalness, which caught the
+> environment and read as an oval printed on the page, and is pushed out so a third of it
+> overhangs and it visibly grips; the `blush` sticky is deleted (80% occluded by the stack, and
+> the last pink on the desk); and the marigold sticky is pinned to the folder — its y rode
+> `stackTop`, so it hung 11cm above the desk with nothing under it.
+> **Verified by eye on a running dev server** at the overview, the papers stop and a close-up,
+> via the render-and-POST trick below. `public/desk-poster.webp` recaptured (57 kB) and its
+> inlined 24px blur URI regenerated with it. Build + lint pass; `/` First Load JS unchanged at
+> 422 kB.
+>
 > **Status (2026-08-07, latest+13): the deck's chrome was a clone of sarastotey.com — it
 > isn't any more.** Sunny put the two first screens side by side: the copy had already been
 > rewritten (latest+12) but the FURNITURE was identical — floating rounded glass card on the
