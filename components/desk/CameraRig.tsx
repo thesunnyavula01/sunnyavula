@@ -10,39 +10,71 @@ import * as THREE from "three";
 // tour travels around the island. Stop 5 closes on the phone lying at the near
 // right corner of the desk (Desk.tsx: `<Phone position={[2.65, 0, 1.5]} />`)
 // and carries the contact card; the phone is deliberately NOT a hotspot, since
-// contact is a slide on this page, not a route. Targets sit slightly LEFT of
-// each object so the object renders right-of-center, clear of the copy card.
+// contact is a slide on this page, not a route.
+//
+// FRAMING IS SOLVED, NOT EYEBALLED — stops 1..5 were hand-placed and every one
+// of them put its subject partly under the page chrome. The gavel was the worst
+// (its projected box ran to y = 957 in an 800px viewport, i.e. the head and
+// handle were off-screen and what remained sat in the bottom scrim), the laptop
+// overflowed the right edge by 52px, and the phone sat 70px inside the scrim.
+// The keys below place each subject inside a SAFE RECT measured against the
+// chrome at 1280x800 — masthead 0..87, copy block x 0..640, credit y 673..688,
+// index strip 743..800, bottom scrim from 688 — leaving
+//
+//     x 666..1235   y 108..652
+//
+// with each object's projected silhouette filling ~0.88 of it (0.78 papers,
+// 0.48 phone — those two already read at a good size and only needed re-aiming)
+// and centred in it. Each stop KEEPS its original viewing direction, so the
+// tour's swing around the island is unchanged; only the distance and the aim
+// moved, and three of the five distances barely moved at all — the defect was
+// mostly aim, not zoom. Worst case over the pointer-parallax box (±0.35, ±0.18)
+// and the island's ±0.05 idle bob still fits.
+//
+// Fit against the SILHOUETTE (every mesh's own box, projected), not one AABB
+// around the whole object: the gavel stop is a mic at one end and a gavel at
+// the other with nothing between them, so its group box is half empty air and
+// fitting that box pushes the camera back far enough to turn a close-up into a
+// wide shot of the whole desk.
+//
+// Consequence worth stating: the targets no longer sit a flat ~0.75 left of
+// their object — the offset is whatever centres the subject in that rect, which
+// is why COMPACT_PAN below had to be re-derived rather than kept.
 type Key = { pos: [number, number, number]; target: [number, number, number] };
 
 export const KEYS: Key[] = [
-  { pos: [1.0, 8.6, 10.2], target: [-1.3, -0.9, 0] }, // island overview
-  { pos: [-4.7, 2.5, 3.1], target: [-3.95, 0.15, -0.5] }, // papers, from the left
-  { pos: [-0.5, 2.3, 3.6], target: [-1.65, 0.4, 0.3] }, // laptop, from the front
-  // monitor, front-right — moved back with the monitor (POSITIONS[2] z -0.8 →
-  // -1.6); pos keeps the old target→camera offset [2.05, 1.9, 3.5] so the
-  // framing of the screen is unchanged.
-  { pos: [2.9, 2.7, 1.9], target: [0.85, 0.8, -1.6] },
-  { pos: [4.7, 2.2, 2.9], target: [2.55, 0.3, 0.3] }, // gavel + mic, right end
-  { pos: [3.15, 1.55, 3.4], target: [2.1, 0.1, 1.4] }, // phone, near corner — contact
+  // Overview — unchanged: the whole island is the subject, and it already sits
+  // clear of the chrome.
+  { pos: [1.0, 8.6, 10.2], target: [-1.3, -0.9, 0] },
+  { pos: [-5.01, 2.35, 3.19], target: [-4.26, -0.01, -0.41] }, // papers, from the left
+  { pos: [-0.48, 2.92, 5.07], target: [-2.07, 0.3, 0.51] }, // laptop, from the front
+  { pos: [2.85, 2.7, 2.71], target: [0.66, 0.67, -1.04] }, // monitor, front-right
+  { pos: [4.9, 2.33, 4.04], target: [2.58, 0.28, 1.24] }, // gavel + mic, right end
+  { pos: [3.01, 0.99, 3.13], target: [2.27, -0.04, 1.71] }, // phone, near corner — contact
 ];
 
 export const STOP_COUNT = KEYS.length;
 
-/* ----------------------------- portrait framing ----------------------------- */
+/* ------------------------------ aspect framing ------------------------------ */
 
-// KEYS above are hand-tuned for the DESKTOP canvas: a wide viewport whose left
-// third is covered by the copy card, which is why every target sits ~0.75 world
-// units LEFT of its object (so the object lands right-of-center, clear of the
-// card). A phone canvas is roughly square-to-portrait and stacks the copy card
-// BELOW the desk instead, so replaying those keys unchanged would crop the
-// subject horizontally and shove it toward the right edge.
+// KEYS above are solved for the DESKTOP canvas at REF_ASPECT: a wide viewport
+// whose left third is covered by the copy block, which is why every target sits
+// well LEFT of its object (so the object lands right-of-center, clear of the
+// copy). Two things break that framing, and both are handled by holding the
+// HORIZONTAL field the keys were framed against:
 //
-// `compact` re-frames without a second set of keyframes:
-//   * the vertical fov widens as the canvas narrows, so the same HORIZONTAL
-//     slice of the world stays in frame — clamped at MAX_FOV, past which the
-//     perspective goes fish-eye, with the remainder made up by dollying back;
-//   * the whole shot pans right by COMPACT_PAN, cancelling the copy-card
-//     offset so the object lands centered.
+//   * any canvas NARROWER than REF_ASPECT crops the subject sideways. That is
+//     always true on a phone, and also true of a portrait tablet or a short
+//     narrow desktop window — which is why this is no longer gated on
+//     `compact`. The vertical fov widens until the same horizontal slice is
+//     back in frame, clamped at MAX_FOV (past which the perspective goes
+//     fish-eye), with the remainder bought by dollying back.
+//   * a WIDER canvas needs nothing: it keeps the authored vertical fov and
+//     simply sees more to the sides, which is pure headroom.
+//
+// `compact` then adds what is specific to the stacked phone layout: the shot
+// pans right by COMPACT_PAN, cancelling the copy-card offset so the object
+// lands centered, and tightens by COMPACT_ZOOM.
 const BASE_FOV = 35; // matches the <Canvas camera> fov in DeskCanvas
 const REF_ASPECT = 1.6; // the desktop canvas KEYS were framed against
 const MAX_FOV = 60;
@@ -50,6 +82,7 @@ const MAX_FOV = 60;
 // tan of half the desktop HORIZONTAL fov — the quantity held constant.
 const REF_TAN_HALF_H =
   Math.tan(THREE.MathUtils.degToRad(BASE_FOV / 2)) * REF_ASPECT;
+const BASE_HALF_FOV = THREE.MathUtils.degToRad(BASE_FOV / 2);
 const MAX_HALF_FOV = THREE.MathUtils.degToRad(MAX_FOV / 2);
 
 // Per-stop zoom, applied on top of the fov/dolly fit. Everything is a little
@@ -57,22 +90,36 @@ const MAX_HALF_FOV = THREE.MathUtils.degToRad(MAX_FOV / 2);
 // frame free for the copy card. The last stop is tighter still: the phone is
 // the smallest object on the desk and lies flat, so at the shared zoom it read
 // as a speck adrift in bare wood.
-const COMPACT_ZOOM = [0.92, 0.92, 0.92, 0.92, 0.92, 0.7];
+//
+// These are NOT one constant any more, and the spread is not a style choice:
+// the framing solve moved the desktop camera by a different factor at every
+// stop (papers 1.00x, laptop 1.38x, monitor 1.07x, gavel 1.08x, phone 0.71x),
+// and the compact shot dollies off that same distance. Each entry is the old
+// zoom divided by its stop's pull-back, so the PHONE framing — which was
+// verified by eye at 375x812 and 375x667 — comes out where it already was.
+// Re-derive them the same way if a key moves again.
+const COMPACT_ZOOM = [0.92, 0.92, 0.67, 0.86, 0.85, 0.99];
 
 // How far to pan each stop right (world units along the camera's own right
-// vector) to undo the copy-card offset. Not one constant: every target is a
-// flat ~0.75 world units left of its object, but the stops view the desk from
-// different azimuths and distances, so the same world offset projects to a
+// vector) to undo the copy-card offset — which is what centres the subject on a
+// canvas that has no copy beside it. Not one constant: the stops view the desk
+// from different azimuths and distances, so the same world offset projects to a
 // different fraction of the screen at each one. These are that projection —
 // (object − target) · right, with the object positions from POSITIONS in
-// DeskCanvas — which lands each subject on the centre line.
-const COMPACT_PAN = [0.75, 0.76, 0.69, 0.6, 0.48, 0.44];
+// DeskCanvas.
+const COMPACT_PAN = [0.75, 1.04, 1.16, 1.05, 1.06, 0.43];
 
 // Vertical trim, same units, along the camera's up vector. Positive pushes the
 // subject DOWN in frame. Portrait sees far more vertically than the wide
 // desktop canvas does, and the phone at the last stop is small and lies flat,
 // so it otherwise sinks into a large empty foreground.
-const COMPACT_LIFT = [0, 0, 0, 0, 0, -0.5];
+//
+// Stops 0..4 take none: (object − target) · up is now +0.12..−0.59, i.e. the
+// solved desktop keys already leave each subject near the centre line, which is
+// where the portrait shot wants it. Stop 5 keeps its subject ~0.23 ABOVE
+// centre, as before — but the value that buys it changed with the key (it was
+// −0.5 against an offset of −0.27; the offset is now +0.04).
+const COMPACT_LIFT = [0, 0, 0, 0, 0, -0.19];
 
 const lerpAt = (table: number[], u: number) => {
   const x = THREE.MathUtils.clamp(u, 0, 1) * (table.length - 1);
@@ -134,27 +181,21 @@ export function CameraRig({
     posCurve.getPoint(p.current, wantPos.current);
     tgtCurve.getPoint(p.current, wantTgt.current);
 
-    // Portrait re-framing. `compact` is false on desktop, so this whole branch
-    // is dead there and the fov stays exactly as <Canvas> declared it.
+    // Aspect fit — see the note above KEYS. At REF_ASPECT and wider this is an
+    // exact no-op: `wantHalf` collapses to BASE_HALF_FOV and `dolly` to 1, so
+    // an ordinary desktop canvas renders from the keys untouched.
     const cam = camera as THREE.PerspectiveCamera;
-    let dolly = 1;
-    if (compact) {
-      const aspect = size.width / Math.max(1, size.height);
-      const wantHalf = Math.atan(REF_TAN_HALF_H / aspect);
-      const half = Math.min(wantHalf, MAX_HALF_FOV);
-      const fov = THREE.MathUtils.radToDeg(half) * 2;
-      if (Math.abs(cam.fov - fov) > 0.05) {
-        cam.fov = fov;
-        cam.updateProjectionMatrix();
-      }
-      // Whatever widening the clamp refused, buy with distance instead.
-      dolly =
-        (Math.tan(wantHalf) / Math.tan(half)) * lerpAt(COMPACT_ZOOM, p.current);
-    } else if (cam.fov !== BASE_FOV) {
-      // Only reachable by dragging a desktop window across the breakpoint.
-      cam.fov = BASE_FOV;
+    const aspect = size.width / Math.max(1, size.height);
+    const wantHalf = Math.max(Math.atan(REF_TAN_HALF_H / aspect), BASE_HALF_FOV);
+    const half = Math.min(wantHalf, MAX_HALF_FOV);
+    const fov = THREE.MathUtils.radToDeg(half) * 2;
+    if (Math.abs(cam.fov - fov) > 0.05) {
+      cam.fov = fov;
       cam.updateProjectionMatrix();
     }
+    // Whatever widening the clamp refused, buy with distance instead.
+    let dolly = Math.tan(wantHalf) / Math.tan(half);
+    if (compact) dolly *= lerpAt(COMPACT_ZOOM, p.current);
 
     // drag-orbit: released drags ease back home; motion is damped either way
     const o = orbit.current;
@@ -177,8 +218,8 @@ export function CameraRig({
     right.current.crossVectors(UP, off.current).normalize();
     off.current.applyAxisAngle(right.current, pitCur.current);
 
+    off.current.multiplyScalar(dolly);
     if (compact) {
-      off.current.multiplyScalar(dolly);
       // Pan the shot — target AND camera move together, so the view direction
       // is untouched — along the camera's own right/up axes, which keeps the
       // correction reading as "shift on screen" at every stop's azimuth.

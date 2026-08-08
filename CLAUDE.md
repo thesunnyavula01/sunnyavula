@@ -156,6 +156,65 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 
 ## Build phases
 
+> **Status (2026-08-08, latest+15): every camera stop was framing its subject into the page
+> chrome — the stops are now SOLVED against a safe rect, and the bottom scrim is 48px shorter.**
+> Sunny sent a crop of the Leadership stop: the gavel's lower half was under the bottom gradient
+> and the rest of it was off the bottom edge. Measured, not guessed — each object's projected
+> silhouette at 1280×800 against the chrome (`masthead 0..87`, `copy block x 0..640`,
+> `credit 673..688`, `index strip 743..800`, `bottom scrim from 640`):
+>
+> | stop | before | after |
+> | ---- | ------ | ----- |
+> | 1 papers | `600,283 → 1135,610` | `729,247 → 1173,510` |
+> | 2 laptop | `497,100 → 1332,785` (52px off the right edge) | `701,161 → 1202,599` |
+> | 3 monitor | `534,172 → 1158,798` | `701,140 → 1207,600` |
+> | 4 gavel | `370,185 → 1216,957` (**157px below the viewport**) | `753,121 → 1153,600` |
+> | 5 phone | `664,396 → 1051,710` (70px inside the scrim) | `820,242 → 1082,502` |
+>
+> **(1) `KEYS` are now derived, and the derivation is in the header comment.** Safe rect
+> `x 666..1235, y 108..652`; each subject fills ~0.88 of it (0.78 papers, 0.48 phone — those two
+> already read at a good size and only needed re-aiming) and is centred in it. **Every stop keeps
+> its original viewing direction** — the tour's swing around the island is untouched; three of the
+> five distances barely moved. The defect was aim, not zoom.
+> **(2) Fit the SILHOUETTE, not one AABB round the object.** The first cut fitted a box around
+> the whole gavel group and pulled the camera back 1.30× — the gavel stop became a wide shot of
+> the entire desk. The group is a mic at one end and a gavel at the other with nothing between
+> them, so half that box is air. Fitting every mesh's own box brought the pull-back to 1.08×.
+> **(3) The compact tables had to be RE-DERIVED, all three.** `COMPACT_PAN` is documented as
+> `(object − target) · right` and the targets all moved. `COMPACT_ZOOM` is no longer one constant:
+> each entry is the old zoom ÷ that stop's pull-back, so the phone framing — verified by eye at
+> 375×812 / 375×667 in an earlier pass — comes out where it already was. `COMPACT_LIFT[5]` was
+> −0.5 against an offset of −0.27 (i.e. "0.23 above centre"); the offset is now +0.04, so the
+> value is −0.19.
+> **(4) The aspect fit is no longer gated on `compact`.** Holding the horizontal field is the
+> right behaviour for *any* canvas narrower than `REF_ASPECT` — a portrait tablet or a short
+> narrow desktop window, not just a phone. At 1.6 and wider it is an exact no-op (`wantHalf`
+> collapses to `BASE_HALF_FOV`, `dolly` to 1), so an ordinary desktop renders from the keys
+> untouched. Before this, a 900×1000 window magnified the shot until the subject flew off the
+> right edge; it now fits.
+> **(5) The bottom scrim is `h-28`, not `h-40`** — 112px, exactly the index strip plus a fade,
+> against 160px that dimmed a fifth of the frame. Explicit stops (0.97 / 0.82@34% / 0.36@66% / 0)
+> keep the strip's labels at the contrast they had. **The credit line had to move with it**: at
+> `bottom-28` it now falls *outside* the gradient, where 10px `neutral-500` on lit wood measures
+> **1.2:1**. At `bottom-[4.25rem]` it sits back under ~0.35 alpha — the coverage it had before —
+> and it gained a `text-shadow`. It no longer shares the copy block's baseline; that alignment
+> was only affordable while the scrim was tall.
+> **Verified on a running dev server** at 1280×800, 1920×1080, 900×1000 and 375×812, via the
+> render-and-POST trick below with the two scrims repainted onto the capture with the canvas API
+> and the chrome rects stroked over it. Also checked: the camera never dips below y = 0.84 or
+> enters the desk footprint anywhere along the catmull-rom path (sampled forward and back through
+> all six stops), and there is no page overflow at any of those sizes. `KEYS[0]` is unchanged, so
+> `public/desk-poster.webp` still matches. Build + lint pass; `/` First Load JS unchanged at
+> 422 kB.
+> **Gotcha re-confirmed the hard way:** `npm run build` while `next dev` is running corrupts
+> `.next` and the dev server starts returning a 500 `__webpack` error — `rm -rf .next` and
+> restart. Also: `state.size` captured in `onCreated` (which is what `window.__deskState` holds)
+> goes **stale on resize** while `camera.aspect` stays live, so a measurement that divides by
+> `st.size.width` silently reports screen coordinates in the OLD viewport's scale. Read
+> `gl.domElement.clientWidth`. And a CDP viewport resize does not always fire the `matchMedia`
+> change listener, so `phone` state stays false while the `max-sm:` CSS has already restacked —
+> **reload** after resizing across the breakpoint or the compact camera branch never runs.
+>
 > **Status (2026-08-07, latest+14): the papers stop was the ugliest object on the desk —
 > rebuilt.** Sunny sent a crop of the Research stop; it was a mess of six defects with two root
 > causes.

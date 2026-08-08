@@ -580,9 +580,19 @@ export function DeskScene() {
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(58%_66%_at_6%_76%,rgba(5,7,11,0.97)_0%,rgba(5,7,11,0.93)_38%,rgba(5,7,11,0.72)_58%,rgba(5,7,11,0.3)_80%,rgba(5,7,11,0)_100%)] max-sm:hidden"
       />
+      {/* Bottom band, sized to the chrome it protects and nothing more.
+          It used to be h-40 — 160px, reaching y = 640 in an 800px viewport —
+          fading from opaque at the bottom edge to 0.7 alpha at its midpoint.
+          That is a fifth of the frame dimmed, and the camera stops were parking
+          their subject inside it: the gavel's lower half read as a silhouette
+          behind smoked glass. The band is now h-28 (112px), which is exactly
+          the index strip (bottom 57px) plus a fade above it, and the stops have
+          been reframed to finish above its top edge — worst case y = 600 at
+          1280x800, so 88px of clear scene between the subject and the band.
+          The credit line moved down into the band to keep its old coverage. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-40 bg-gradient-to-t from-[#06080d] via-[#06080d]/70 to-transparent max-sm:hidden"
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-28 bg-[linear-gradient(to_top,rgba(6,8,13,0.97)_0%,rgba(6,8,13,0.82)_34%,rgba(6,8,13,0.36)_66%,rgba(6,8,13,0)_100%)] max-sm:hidden"
       />
 
       <MotionConfig reducedMotion="user">
@@ -755,13 +765,18 @@ export function DeskScene() {
           </AnimatePresence>
         </div>
 
-        {/* Bottom-right chrome, riding the same baseline as the copy block.
-            On phones it sits inside the copy region's reserved bottom padding,
-            just above the index strip. */}
+        {/* Bottom-right chrome. It used to ride the copy block's baseline, and
+            it could only do that because the old h-40 scrim reached that high:
+            at bottom-28 under the SHORT band it falls outside the gradient
+            entirely, and 10px neutral-500 on lit wood measures 1.2:1. Moving it
+            to 4.25rem puts it back under ~0.35 alpha — the exact coverage it
+            had before — while the band above it got 48px shorter. That is also
+            where the phone has always put it. The text-shadow is new, and is
+            the part that is strictly better than before. */}
         {/* Phones drop the uppercase + wide tracking: the same string is 54
             characters, and at 0.16em tracked caps it is 380px wide inside a
             335px sheet, so it wrapped onto the hint line above it. */}
-        <div className="pointer-events-auto absolute bottom-24 right-9 z-20 flex flex-wrap items-center justify-end gap-x-3 gap-y-1 font-mono text-[10px] uppercase tracking-[0.16em] text-neutral-500 sm:bottom-28 lg:right-14 max-sm:inset-x-0 max-sm:bottom-[3.55rem] max-sm:justify-center max-sm:px-5 max-sm:normal-case max-sm:tracking-[0.01em]">
+        <div className="pointer-events-auto absolute bottom-[4.25rem] right-9 z-20 flex flex-wrap items-center justify-end gap-x-3 gap-y-1 font-mono text-[10px] uppercase tracking-[0.16em] text-neutral-500 [text-shadow:0_1px_10px_rgba(5,7,11,0.95),0_0_3px_rgba(5,7,11,0.9)] lg:right-14 max-sm:inset-x-0 max-sm:bottom-[3.55rem] max-sm:justify-center max-sm:px-5 max-sm:normal-case max-sm:tracking-[0.01em]">
           <a
             href={SITE.github}
             target="_blank"
