@@ -156,6 +156,59 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 
 ## Build phases
 
+> **Status (2026-08-11, latest+17): BOTH DECK SCRIMS ARE GONE — and the honest cost is that
+> 10px meta type over the lit scene cannot be fully rescued.** Sunny asked for the gradient
+> removed outright: it distracted from the scene the landing page exists to show. The radial wash
+> and the bottom band are both deleted; `DeskScene` renders zero overlay gradients now (verified —
+> the deck's `[aria-hidden]` overlay list is empty). The desk reads at full contrast for the first
+> time and it is a large visual improvement.
+> **(1) Legibility moved from an area wash to PER-GLYPH shadows,** in two weights.
+> `TYPE_SHADOW` (1px edge + 4px core + 14px pool) is for the 60px serif headline and 16px body;
+> `META_SHADOW` (3px + 7px near-opaque + 12px) is for 10px mono. They must stay separate — META on
+> a 60px serif reads as embossed, TYPE on tracked mono disappears over the plant.
+> `META_SHADOW_MONO` applies the same value to every `.font-mono` descendant of the copy block, so
+> a label added later cannot silently ship without it. **All three must be written as LITERAL
+> strings** — Tailwind scans source text, so a class assembled at runtime generates no CSS.
+> **(2) The deck's meta type went neutral-500 → neutral-400.** That grey was chosen to sit on a
+> dark panel; over sunlit wood it stayed dim even with an opaque halo. `FallbackHero` keeps
+> neutral-500 (nothing renders behind it).
+> **(3) What the shadow CANNOT do, measured — do not re-litigate this without new numbers.**
+> The real CSS shadow was rasterised through an SVG `foreignObject` (so the browser's own shadow
+> renderer produced it) over the worst backgrounds the tour creates, and the composited pixels
+> next to the glyphs were read back:
+>
+> | 10px mono, 0.16em | no shadow | + META_SHADOW |
+> | --- | --- | --- |
+> | lit wood (gavel/contact) | 2.15:1 | **2.71:1** |
+> | lit plant (papers) | 1.25:1 | **1.66:1** |
+> | white paper | ~1.1:1 | **1.45:1** |
+>
+> The shadow buys about half a point and no more. **The reason is structural:** at 10px with wide
+> tracking the strokes are ~1px and the letters are far apart, so a blur has nothing to build
+> density against — it tints the background instead of replacing it. Larger radii or more layers
+> do not help; they just become the scrim again. So the four small-chrome runs — the gesture hint,
+> the stat labels, the credit line and the index strip — are **legible over dark parts of the
+> scene and weak over bright ones**, and that is a known, accepted state, not an oversight. The
+> headline and body are unaffected (near-white and large: 5:1+ unaided).
+> **If it ever needs fixing, only two things actually work:** a local backdrop behind those four
+> runs (i.e. a small scrim, which is what was just removed), or near-white meta type (~4:1 over
+> wood and plant, but still ~1.05:1 over the white paper, and it flattens the type ramp).
+> **(4) Trap worth keeping: the UA stylesheet resets `text-shadow` on form controls.**
+> `text-shadow` is inherited, so putting META_SHADOW on the index strip's `<nav>` looked right and
+> computed to `none` on every `<button>` inside it. It has to go on the button. Caught by reading
+> computed styles, invisible in the source.
+> **(5) Verification note:** the preview pane still cannot composite, so the full-page captures
+> here draw the real text — fonts, tracking, colour and the parsed shadow stack read from
+> `getComputedStyle` — onto the real WebGL pixels with the canvas 2D API. **That composite
+> UNDERSTATES CSS shadows** (canvas `shadowBlur` is a different scale and single-pass), so judge
+> shadow strength with the `foreignObject` measurement above, not from those images. The captures
+> also draw each wrapped line's full text per client rect, so wrapped paragraphs appear duplicated
+> — an artifact of the capture, not the page.
+> Build + lint pass; `/` First Load JS unchanged at 422 kB. Phones are untouched: both scrims were
+> `max-sm:hidden` and the phone copy is a stacked sheet with its own solid background.
+> The masthead keeps its small top fade — the nav links sit over lit desk at several stops, and
+> `Nav` is shared with the four subpages.
+>
 > **Status (2026-08-11, latest+16): the copy scrim is 30% lighter, and it cost nothing —
 > the lightening came from SHAPE, not from trading contrast away.** Sunny asked for the landing
 > gradient to be lightened for visibility. The left wash was the dark mass, not the bottom band:

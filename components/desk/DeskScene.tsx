@@ -24,6 +24,50 @@ const CONTACT = STOPS - 1;
 const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
 const pad = (n: number) => String(n).padStart(2, "0");
 
+// There are no scrims on the deck — the desk is the point of the page, and a
+// wash over it was the biggest thing between the viewer and the scene. Every
+// piece of type therefore carries its own shadow, and it comes in two weights
+// because the two problems are not the same size.
+//
+// TYPE_SHADOW is for the big stuff: 60px serif headlines and 16px body, in
+// near-white. Those are wide, solid shapes and already read at 5:1 on lit wood
+// unaided; they need an edge, not a backdrop.
+//
+// META_SHADOW is for 10px mono at 0.16–0.28em tracking — the legend labels, the
+// hint line, the credit and the index strip. That type is the hard case and it
+// is worth understanding why: the strokes are about a pixel wide and the
+// tracking pulls the letters apart, so there is far more background than glyph
+// inside the word, and a soft halo has nothing to build density against. It
+// needs two near-OPAQUE blurs that overlap between the letters. Verified by eye
+// over the worst backgrounds the tour produces — the lit plant at the papers
+// stop and bare sunlit wood at the gavel and contact stops.
+//
+// Do not merge these into one value. Putting META on the headline makes 60px
+// serif look embossed; putting TYPE on the mono makes it vanish over the plant.
+//
+// The shadow was not enough on its own: the deck's quiet meta type was
+// neutral-500, a grey picked to sit on a DARK PANEL, and over sunlit wood it
+// stayed dim even with an opaque halo behind it. Every meta run that overlays
+// the scene — the gesture hint, the stat labels, the contact labels, the credit
+// and the index strip — is one step brighter (neutral-400) as a result. That is
+// the real price of dropping the scrims, and it is a fair one: the type ramp
+// still descends accent → 50 → 300 → 400, it just no longer bottoms out at a
+// value that only worked behind a wash. FallbackHero keeps neutral-500, since
+// nothing renders behind it.
+// Both must be written as LITERAL strings — Tailwind scans source text for
+// class candidates, so a value assembled at runtime generates no CSS at all.
+// META_SHADOW_MONO is the same value as META_SHADOW, applied to every mono
+// descendant of the copy block: the copy is rebuilt per stop and gains labels
+// over time, and "someone added a 10px label and forgot the shadow" is a defect
+// that only shows up on one camera stop over one bright object. Keep the two
+// META values identical.
+const TYPE_SHADOW =
+  "[text-shadow:0_1px_1px_rgba(5,7,11,0.98),0_0_4px_rgba(5,7,11,0.95),0_1px_14px_rgba(5,7,11,0.7)]";
+const META_SHADOW =
+  "[text-shadow:0_0_3px_rgba(5,7,11,1),0_0_7px_rgba(5,7,11,0.98),0_1px_12px_rgba(5,7,11,0.88)]";
+const META_SHADOW_MONO =
+  "[&_.font-mono]:[text-shadow:0_0_3px_rgba(5,7,11,1),0_0_7px_rgba(5,7,11,0.98),0_1px_12px_rgba(5,7,11,0.88)]";
+
 // Labels for the index strip along the bottom edge. The four middle stops are
 // named for the OBJECT, not the section — the strip is a key to the desk, and
 // the section name is already the heading of the stop it lands on. Screen
@@ -95,7 +139,9 @@ function DeskLegend({
           // trailing gap after the last letter, so a snug column collides with
           // the phrase beside it. Same width at every size; the phrase column
           // has room to spare even on a 375px phone.
-          <span className="w-20 shrink-0 font-mono text-[10px] uppercase tracking-[0.18em] text-neutral-400 transition-colors group-hover:text-neutral-200">
+          <span
+            className={`w-20 shrink-0 font-mono text-[10px] uppercase tracking-[0.18em] text-neutral-400 transition-colors group-hover:text-neutral-200 ${META_SHADOW}`}
+          >
             {row.object}
           </span>
         );
@@ -241,6 +287,12 @@ function FallbackHero() {
 // Phones keep the same six columns but drop the names: 62px is not enough for
 // "MONITOR" at a legible size, and the active stop's name is the heading
 // directly above it either way.
+//
+// The strip used to sit inside a bottom scrim, which is what its 10px labels
+// read against. With the scrim gone the shadow is theirs — same three-layer
+// build as the copy block, and for the same reason: these are the smallest
+// glyphs on the page and they sit over whatever the camera has parked at the
+// bottom edge, which at the gavel and contact stops is bright lit wood.
 function IndexStrip({ stop, goTo }: { stop: number; goTo: (n: number) => void }) {
   return (
     <nav
@@ -257,7 +309,12 @@ function IndexStrip({ stop, goTo }: { stop: number; goTo: (n: number) => void })
             onClick={() => goTo(i)}
             aria-label={`Stop ${pad(i)} — go to ${stopTarget(i)}`}
             aria-current={active ? "true" : undefined}
-            className="group flex flex-col items-start gap-2 px-3 pb-4 pt-3 text-left sm:px-5 sm:pb-5"
+            // The shadow has to live on the BUTTON, not on the <nav> above it:
+            // text-shadow is an inherited property, but the UA stylesheet
+            // resets it on form controls, so a value set on the nav computes to
+            // `none` on every button inside it. Verified in the browser — the
+            // nav reported the shadow and its buttons reported none.
+            className={`group flex flex-col items-start gap-2 px-3 pb-4 pt-3 text-left sm:px-5 sm:pb-5 ${META_SHADOW}`}
           >
             <span
               aria-hidden="true"
@@ -271,13 +328,13 @@ function IndexStrip({ stop, goTo }: { stop: number; goTo: (n: number) => void })
                 className="transition-colors"
                 style={{ color: active ? accent : undefined }}
               >
-                <span className={active ? "" : "text-neutral-600"}>{pad(i)}</span>
+                <span className={active ? "" : "text-neutral-500"}>{pad(i)}</span>
               </span>
               <span
                 className={`transition-colors max-sm:hidden ${
                   active
                     ? "text-neutral-200"
-                    : "text-neutral-500 group-hover:text-neutral-300"
+                    : "text-neutral-400 group-hover:text-neutral-200"
                 }`}
               >
                 {label}
@@ -565,60 +622,27 @@ export function DeskScene() {
         </div>
       </div>
 
-      {/* Scrim, not a panel — this is what replaces the copy card, so it is
-          load bearing rather than decoration.
-          The first cut was a corner wash anchored at the very bottom-left
-          (-8%, 100%) and it failed by eye: the headline sits around 40% UP the
-          frame, well outside a corner gradient's reach, so 60pt type ran
-          straight over the lit desk, the papers and the plant. The wash is
-          therefore centred on the copy itself, not on the corner.
+      {/* NO SCRIMS ON THE DESKTOP DECK — deliberate, and the deck is designed
+          around their absence rather than merely missing them.
 
-          It is also much LIGHTER than it was, and the lightening was free —
-          it came from SHAPE, not from trading contrast away. The old wash was
-          a 58%x66% ellipse pinned near the corner at (6%, 76%), so it spent
-          most of its alpha on empty lower-left frame and still had to be huge
-          to reach the headline's right end at x = 562. Recentred on the copy's
-          actual centroid (16%, 72%) it covers the same type from a third less
-          area. Measured over 408 ink samples across all six stops:
+          There used to be two: a radial wash under the copy and a band along
+          the bottom edge. Both were removed because they were the single
+          biggest thing standing between the viewer and the 3D scene the whole
+          landing page exists to show — even at their lightest, the radial alone
+          dimmed a quarter of the frame.
 
-                        mean alpha   >0.25 alpha   large   body   small
-              before        0.277        36.8%      5.12   7.32    3.01
-              after         0.193        26.4%      4.64   8.50    3.04
+          Everything the scrims used to do is now done PER GLYPH instead, by the
+          text-shadow on the copy block, on the index strip and on the credit
+          line. That is the trade: a halo a few pixels wide around each letter
+          costs the scene essentially nothing, where a wash costs it by the
+          hundred thousand pixels. See the shadow note on the copy block for
+          what it has to be to carry 10px type over lit wood.
 
-          i.e. 30% less dimming with every contrast floor held. The small type
-          also gained a tight text-shadow core (see the copy block below), which
-          is the part that costs the scene nothing.
-
-          MEASURE, do not eyeball, if you touch this again. A first attempt at
-          lightening looked reasonable and put the headline at 2.4:1 over the
-          white paper at stop 0 and the 10px hint at 1.9:1 over lit wood — the
-          copy's own element boxes are far wider than their ink, so sampling the
-          box instead of Range.getClientRects() hides exactly the runs that
-          break. The hint line is always the first thing to go.
-          Phones use the full-width fade behind the stacked copy instead. Both
-          are pointer-events-none, so drag-orbit still works through them. */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(40%_32%_at_16%_72%,rgba(5,7,11,0.86)_0%,rgba(5,7,11,0.82)_55%,rgba(5,7,11,0.67)_78%,rgba(5,7,11,0.36)_90%,rgba(5,7,11,0)_100%)] max-sm:hidden"
-      />
-      {/* Bottom band, sized to the chrome it protects and nothing more.
-          It used to be h-40 — 160px, reaching y = 640 in an 800px viewport —
-          fading from opaque at the bottom edge to 0.7 alpha at its midpoint.
-          That is a fifth of the frame dimmed, and the camera stops were parking
-          their subject inside it: the gavel's lower half read as a silhouette
-          behind smoked glass. The band is now h-28 (112px), which is exactly
-          the index strip (bottom 57px) plus a fade above it, and the stops have
-          been reframed to finish above its top edge — worst case y = 600 at
-          1280x800, so 88px of clear scene between the subject and the band.
-          The credit line moved down into the band to keep its old coverage.
-          The two low stops are pinned: they are what the index strip's own
-          labels read against (0.84 at the label row, measured). Everything
-          ABOVE the labels falls off faster than it used to, so the band reads
-          as an edge treatment rather than a dark shelf. */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-28 bg-[linear-gradient(to_top,rgba(6,8,13,0.97)_0%,rgba(6,8,13,0.84)_32%,rgba(6,8,13,0.28)_62%,rgba(6,8,13,0)_100%)] max-sm:hidden"
-      />
+          If a future pass wants a scrim back, MEASURE FIRST — the honest
+          numbers for the type over the bare scene are in that note, and they
+          are the reason the shadow is as heavy as it is. Phones are unaffected:
+          their copy is a stacked sheet below the desk with its own solid
+          background, never an overlay on it. */}
 
       <MotionConfig reducedMotion="user">
         {/* Copy block: bottom-left on desktop, above the index strip. On phones
@@ -640,16 +664,28 @@ export function DeskScene() {
               // for a long stop's copy on a short phone. The swipe-to-step
               // listener is bound to the desk above, so it never eats this
               // scroll.
-              // The copy sits on a lit 3D scene rather than a flat panel, and
-              // the camera moves under it at every stop. This used to be a
-              // single soft 14px halo — a margin of safety behind the scrim.
-              // Now that the scrim is much lighter it is doing real work, so it
-              // gained a TIGHT 2px core: a wide blur spreads its alpha over
-              // hundreds of px² and barely darkens the pixel next to a 10px
-              // glyph, which is exactly where the contrast has to come from.
-              // The two together read as one shadow and cost the scene nothing
-              // outside the type itself.
-              className="[text-shadow:0_1px_2px_rgba(5,7,11,0.95),0_1px_16px_rgba(5,7,11,0.9)] max-sm:min-h-0 max-sm:flex-1 max-sm:overflow-y-auto max-sm:overscroll-contain max-sm:px-5 max-sm:pt-4"
+              // THIS SHADOW IS THE ONLY THING KEEPING THE COPY READABLE — the
+              // scrims are gone (see the note where they used to be), so the
+              // type sits directly on a lit 3D scene that changes under it at
+              // every stop. Measured over the bare scene, the copy runs at
+              // 1.2:1 (10px hint over lit wood) to 1.5:1 (headline over the
+              // white paper) with no shadow at all. Do not weaken it.
+              //
+              // Three layers, and each one has a job:
+              //   1px  — a hard edge, so glyph boundaries stay crisp on busy
+              //          wood grain rather than dissolving into it;
+              //   4px  — the load bearer. It fills the pixels immediately
+              //          around a stroke, which is where contrast is actually
+              //          read, and it is near-opaque for that reason: it has to
+              //          WIN against whatever is behind, not tint it;
+              //   14px — a soft pool that hugs the text block, so a run of
+              //          small type reads as a unit instead of each letter
+              //          fighting the scene alone.
+              // The wide layer is deliberately the weak one. Blur spreads a
+              // fixed amount of alpha over area, so a wide radius is nearly
+              // useless next to a 10px glyph and, pushed hard, just becomes the
+              // scrim again by another name.
+              className={`${TYPE_SHADOW} ${META_SHADOW_MONO} max-sm:min-h-0 max-sm:flex-1 max-sm:overflow-y-auto max-sm:overscroll-contain max-sm:px-5 max-sm:pt-4`}
             >
               {isContact ? (
                 <>
@@ -664,7 +700,7 @@ export function DeskScene() {
                   </h2>
                   <dl className="mt-5 space-y-2 text-sm max-sm:mt-3.5">
                     <div className="flex gap-4">
-                      <dt className="w-16 shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-500">
+                      <dt className="w-16 shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-400">
                         Email
                       </dt>
                       <dd>
@@ -677,7 +713,7 @@ export function DeskScene() {
                       </dd>
                     </div>
                     <div className="flex gap-4">
-                      <dt className="w-16 shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-500">
+                      <dt className="w-16 shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-400">
                         Phone
                       </dt>
                       <dd>
@@ -690,7 +726,7 @@ export function DeskScene() {
                       </dd>
                     </div>
                     <div className="flex gap-4">
-                      <dt className="w-16 shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-500">
+                      <dt className="w-16 shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-400">
                         Discord
                       </dt>
                       <dd className="text-neutral-200">{SITE.discord}</dd>
@@ -739,7 +775,7 @@ export function DeskScene() {
                   {/* Tracking is 0.14em, not the 0.2em the other labels use:
                       this line is 67 characters and broke across two lines at
                       0.2em, orphaning "dive in". */}
-                  <p className="mt-5 font-mono text-[10px] uppercase tracking-[0.14em] text-neutral-500 max-sm:mt-2.5 max-sm:tracking-[0.1em]">
+                  <p className="mt-5 font-mono text-[10px] uppercase tracking-[0.14em] text-neutral-400 max-sm:mt-2.5 max-sm:tracking-[0.1em]">
                     <span className="max-sm:hidden">
                       scroll to travel · drag to look around · click an object
                       to dive in
@@ -775,7 +811,7 @@ export function DeskScene() {
                         <dd className="font-serif text-2xl leading-none text-neutral-50">
                           {st.value}
                         </dd>
-                        <dd className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-neutral-500">
+                        <dd className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-neutral-400">
                           {st.label}
                         </dd>
                       </div>
@@ -795,18 +831,16 @@ export function DeskScene() {
           </AnimatePresence>
         </div>
 
-        {/* Bottom-right chrome. It used to ride the copy block's baseline, and
-            it could only do that because the old h-40 scrim reached that high:
-            at bottom-28 under the SHORT band it falls outside the gradient
-            entirely, and 10px neutral-500 on lit wood measures 1.2:1. Moving it
-            to 4.25rem puts it back under ~0.35 alpha — the exact coverage it
-            had before — while the band above it got 48px shorter. That is also
-            where the phone has always put it. The text-shadow is new, and is
-            the part that is strictly better than before. */}
+        {/* Bottom-right chrome, back on the copy block's baseline. It was
+            pushed down to 4.25rem for one reason — to sit inside the bottom
+            scrim, which was the only thing giving 10px neutral-500 any contrast
+            over lit wood. With no scrim there is nothing down there to sit
+            inside, so it returns to the baseline it was designed on and takes
+            the same per-glyph shadow as everything else. */}
         {/* Phones drop the uppercase + wide tracking: the same string is 54
             characters, and at 0.16em tracked caps it is 380px wide inside a
             335px sheet, so it wrapped onto the hint line above it. */}
-        <div className="pointer-events-auto absolute bottom-[4.25rem] right-9 z-20 flex flex-wrap items-center justify-end gap-x-3 gap-y-1 font-mono text-[10px] uppercase tracking-[0.16em] text-neutral-500 [text-shadow:0_1px_10px_rgba(5,7,11,0.95),0_0_3px_rgba(5,7,11,0.9)] lg:right-14 max-sm:inset-x-0 max-sm:bottom-[3.55rem] max-sm:justify-center max-sm:px-5 max-sm:normal-case max-sm:tracking-[0.01em]">
+        <div className={`pointer-events-auto absolute bottom-24 right-9 z-20 flex flex-wrap items-center justify-end gap-x-3 gap-y-1 font-mono text-[10px] uppercase tracking-[0.16em] text-neutral-400 ${META_SHADOW} sm:bottom-28 lg:right-14 max-sm:inset-x-0 max-sm:bottom-[3.55rem] max-sm:justify-center max-sm:px-5 max-sm:normal-case max-sm:tracking-[0.01em]`}>
           <a
             href={SITE.github}
             target="_blank"
