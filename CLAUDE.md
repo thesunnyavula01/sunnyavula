@@ -156,6 +156,48 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 
 ## Build phases
 
+> **Status (2026-08-11, latest+16): the copy scrim is 30% lighter, and it cost nothing —
+> the lightening came from SHAPE, not from trading contrast away.** Sunny asked for the landing
+> gradient to be lightened for visibility. The left wash was the dark mass, not the bottom band:
+> a `58%×66%` ellipse pinned near the corner at `(6%, 76%)`, holding **0.80–0.96 alpha across
+> every line of the copy** and reaching x = 748 at mid-height. It was oversized because a corner
+> anchor has to be huge to reach the headline's right end at x = 562, so most of its alpha landed
+> on empty lower-left frame where no glyph ever goes. Recentred on the copy's **actual centroid**
+> (`40% 32% at 16% 72%`) it covers the same type from a third less area:
+>
+> | | mean alpha | frame >0.25 alpha | large | body | small |
+> | --- | --- | --- | --- | --- | --- |
+> | before | 0.277 | 36.8% | 5.12 | 7.32 | 3.01 |
+> | after | **0.193** | **26.4%** | 4.64 | 8.50 | 3.04 |
+>
+> **(1) Measured over 408 ink samples across all six stops, not eyeballed.** The scene was
+> sampled per text run and the candidate gradients scored numerically, then a grid search took the
+> lightest one meeting `large ≥ 4.5 / body ≥ 4.5 / small ≥ 3.0`. **Sample the INK, not the element
+> box** — `<p>` is 528px wide where its text is 310, and the empty tail sits over lit desk, so
+> box-sampling reports failures that do not exist and hides the runs that do. Use
+> `Range.getClientRects()`. Sample the **p90** pixel, not the mean: the worst pixel behind a glyph
+> is what breaks. And resolve colours through a canvas — `getComputedStyle` returns `oklch()` here
+> and a naive digit-scrape turns `oklch(0.87 0 none)` into `rgb(0,87,0)`.
+> **(2) A first cut failed exactly the way the 2026-08-06 one did.** `52%×58% at 4%` looked
+> plausible and measured **2.42:1 on the headline** (over the white paper at stop 0) and
+> **1.93:1 on the 10px hint** (over lit wood at stop 4). **The hint line is always the first thing
+> to go** — check it before anything else.
+> **(3) Brightening the meta type was considered and REJECTED on the numbers.** Bumping
+> `neutral-500` → `neutral-400` lets the hint reach full AA (4.6:1) but buys only 0.005 of mean
+> alpha (0.208 → 0.203) — it does not make the scene lighter, so the type ramp stays as it is.
+> **(4) The copy's text-shadow gained a tight 2px core** alongside the existing 16px halo. A wide
+> blur spreads its alpha over hundreds of px² and barely darkens the pixel next to a 10px glyph,
+> which is exactly where the contrast has to come from; the tight one is what actually carries
+> small type once the wash is light. Costs the scene nothing outside the glyphs.
+> **(5) The bottom band's two low stops are PINNED** at `0.97 / 0.84@32%` — that is what the index
+> strip's own labels read against (0.84 at the label row, measured). Only the part above the
+> labels was lightened (`0.36@66%` → `0.28@62%`), so the band reads as an edge treatment rather
+> than a dark shelf. Its height and the credit line are unchanged from latest+15.
+> Verified by eye at stops 0, 1 and 4 with the scrims composited from the LIVE computed
+> `backgroundImage`, so the capture cannot drift from the CSS; all three arbitrary values confirmed
+> to parse. Phones are untouched — both scrims are `max-sm:hidden`. Build + lint pass; `/` First
+> Load JS unchanged at 422 kB.
+>
 > **Status (2026-08-08, latest+15): every camera stop was framing its subject into the page
 > chrome — the stops are now SOLVED against a safe rect, and the bottom scrim is 48px shorter.**
 > Sunny sent a crop of the Leadership stop: the gavel's lower half was under the bottom gradient

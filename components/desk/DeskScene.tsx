@@ -570,15 +570,36 @@ export function DeskScene() {
           The first cut was a corner wash anchored at the very bottom-left
           (-8%, 100%) and it failed by eye: the headline sits around 40% UP the
           frame, well outside a corner gradient's reach, so 60pt type ran
-          straight over the lit desk, the papers and the plant. The wash is now
-          centred on the copy itself (6%, 76%) and holds ~0.7 alpha out to the
-          headline before falling off, which keeps the desk's bright middle and
-          right — where every camera stop puts the subject — untouched.
+          straight over the lit desk, the papers and the plant. The wash is
+          therefore centred on the copy itself, not on the corner.
+
+          It is also much LIGHTER than it was, and the lightening was free —
+          it came from SHAPE, not from trading contrast away. The old wash was
+          a 58%x66% ellipse pinned near the corner at (6%, 76%), so it spent
+          most of its alpha on empty lower-left frame and still had to be huge
+          to reach the headline's right end at x = 562. Recentred on the copy's
+          actual centroid (16%, 72%) it covers the same type from a third less
+          area. Measured over 408 ink samples across all six stops:
+
+                        mean alpha   >0.25 alpha   large   body   small
+              before        0.277        36.8%      5.12   7.32    3.01
+              after         0.193        26.4%      4.64   8.50    3.04
+
+          i.e. 30% less dimming with every contrast floor held. The small type
+          also gained a tight text-shadow core (see the copy block below), which
+          is the part that costs the scene nothing.
+
+          MEASURE, do not eyeball, if you touch this again. A first attempt at
+          lightening looked reasonable and put the headline at 2.4:1 over the
+          white paper at stop 0 and the 10px hint at 1.9:1 over lit wood — the
+          copy's own element boxes are far wider than their ink, so sampling the
+          box instead of Range.getClientRects() hides exactly the runs that
+          break. The hint line is always the first thing to go.
           Phones use the full-width fade behind the stacked copy instead. Both
           are pointer-events-none, so drag-orbit still works through them. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(58%_66%_at_6%_76%,rgba(5,7,11,0.97)_0%,rgba(5,7,11,0.93)_38%,rgba(5,7,11,0.72)_58%,rgba(5,7,11,0.3)_80%,rgba(5,7,11,0)_100%)] max-sm:hidden"
+        className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(40%_32%_at_16%_72%,rgba(5,7,11,0.86)_0%,rgba(5,7,11,0.82)_55%,rgba(5,7,11,0.67)_78%,rgba(5,7,11,0.36)_90%,rgba(5,7,11,0)_100%)] max-sm:hidden"
       />
       {/* Bottom band, sized to the chrome it protects and nothing more.
           It used to be h-40 — 160px, reaching y = 640 in an 800px viewport —
@@ -589,10 +610,14 @@ export function DeskScene() {
           the index strip (bottom 57px) plus a fade above it, and the stops have
           been reframed to finish above its top edge — worst case y = 600 at
           1280x800, so 88px of clear scene between the subject and the band.
-          The credit line moved down into the band to keep its old coverage. */}
+          The credit line moved down into the band to keep its old coverage.
+          The two low stops are pinned: they are what the index strip's own
+          labels read against (0.84 at the label row, measured). Everything
+          ABOVE the labels falls off faster than it used to, so the band reads
+          as an edge treatment rather than a dark shelf. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-28 bg-[linear-gradient(to_top,rgba(6,8,13,0.97)_0%,rgba(6,8,13,0.82)_34%,rgba(6,8,13,0.36)_66%,rgba(6,8,13,0)_100%)] max-sm:hidden"
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-28 bg-[linear-gradient(to_top,rgba(6,8,13,0.97)_0%,rgba(6,8,13,0.84)_32%,rgba(6,8,13,0.28)_62%,rgba(6,8,13,0)_100%)] max-sm:hidden"
       />
 
       <MotionConfig reducedMotion="user">
@@ -615,11 +640,16 @@ export function DeskScene() {
               // for a long stop's copy on a short phone. The swipe-to-step
               // listener is bound to the desk above, so it never eats this
               // scroll.
-              // The scrim does most of the work, but the copy still sits on a
-              // lit 3D scene rather than a flat panel, and the camera moves
-              // under it at every stop — the shadow is the margin of safety for
-              // the frames where something bright lands behind a thin glyph.
-              className="[text-shadow:0_1px_14px_rgba(5,7,11,0.9)] max-sm:min-h-0 max-sm:flex-1 max-sm:overflow-y-auto max-sm:overscroll-contain max-sm:px-5 max-sm:pt-4"
+              // The copy sits on a lit 3D scene rather than a flat panel, and
+              // the camera moves under it at every stop. This used to be a
+              // single soft 14px halo — a margin of safety behind the scrim.
+              // Now that the scrim is much lighter it is doing real work, so it
+              // gained a TIGHT 2px core: a wide blur spreads its alpha over
+              // hundreds of px² and barely darkens the pixel next to a 10px
+              // glyph, which is exactly where the contrast has to come from.
+              // The two together read as one shadow and cost the scene nothing
+              // outside the type itself.
+              className="[text-shadow:0_1px_2px_rgba(5,7,11,0.95),0_1px_16px_rgba(5,7,11,0.9)] max-sm:min-h-0 max-sm:flex-1 max-sm:overflow-y-auto max-sm:overscroll-contain max-sm:px-5 max-sm:pt-4"
             >
               {isContact ? (
                 <>
