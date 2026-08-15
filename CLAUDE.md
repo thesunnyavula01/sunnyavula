@@ -156,6 +156,54 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 
 ## Build phases
 
+> **Status (2026-08-15, latest+18): the contact stop was never actually solved — 85% of its
+> frame was bare wood.** Sunny reported the phone as off-centre and surrounded by dead space.
+> The latest+15 pass fitted stops 1..4 to the safe rect but exempted this one at **0.48 fill**
+> on the grounds that it "already read at a good size". Measured, that is 0.48 of the rect's
+> WIDTH and therefore **14.8% of its AREA** — the phone is the smallest object on the desk, so
+> the exemption cost far more here than anywhere else.
+> **(1) Distance was only half of it. The AZIMUTH was pointing down the phone's long axis.**
+> The slab is turned `ry 0.35`; the old camera sat at azimuth 27.5°, i.e. **7.7° off that axis**,
+> so it looked at the phone end-on — the screen foreshortened to nearly a square and the
+> silhouette was as small as that object can possibly project. `KEYS[5]` is now solved at
+> **elevation 38° / azimuth 22°**, which lays the phone diagonally across the frame. Chosen from
+> an elevation × azimuth sweep scoring the **projected area of the phone's own top face**, not
+> the bbox: `14.8% → 33.9%` of the safe rect. Do not "tidy" the azimuth back toward the object's
+> own rotation — that is the degenerate view.
+> **(2) Fill is capped at 0.70, not the 0.88 the other stops take, and the reason is the BOB.**
+> `FloatGroup`'s idle motion is a fixed WORLD offset (±0.05, plus ±0.014 from the two rocking
+> rotations at the phone's radius), so what it costs on screen scales with 1/distance: **±58px
+> here against ±18px at the gavel**. At 0.88 the subject would leave the safe rect on every
+> breath. Same reasoning caps how tight this stop can ever go.
+> **(3) Pointer parallax is now scaled by the shot's distance** (`PAR_REF = 4.0`, just inside the
+> closest of the other five stops, so **all five scale by exactly 1.0 and are byte-for-byte
+> unchanged**). It is a fixed ±0.35 world offset added to the camera, which is a gentle drift at
+> 4.2 units and a **±15° heave at 1.4** — enough to carry the phone out of frame. Scaling makes
+> it a constant *screen* nudge. Verified worst case over the parallax box AND the bob:
+> `723,122 → 1213,641`, inside the safe rect.
+> **(4) All three compact entries were re-derived, and `COMPACT_LIFT[5]` FLIPPED SIGN.** The
+> phone layout had the same defect worse — the phone was **22% of the canvas width, 2.3% of its
+> area**. `COMPACT_ZOOM[5]` is no longer the documented "old zoom ÷ pull-back" arithmetic (that
+> preserves a framing which was itself the bug); it is solved for the stage: `0.99 → 0.64`, giving
+> `0.51 × 0.40` at 375×812 and `0.51 × 0.60` at 375×667. `COMPACT_PAN[5]` `0.43 → 0.30` (the
+> target moved). `COMPACT_LIFT[5]` `−0.19 → +0.03`: the old value lifted the subject 0.23 ABOVE
+> centre, sized for a phone occupying a sixth of the stage — **centre it against the part of the
+> stage that is not under the masthead**, which is 86px of 420.
+> **Verified by eye on a running dev server** at 1280×800 and 375×812 (canvas render + POST, per
+> the trick below), with the safe rect and every copy/chrome rect stroked over the capture: no
+> collision with the copy block (its widest run ends at x 690, the phone starts at 755) and none
+> with the credit line or index strip. Also re-checked numerically: the camera path never dips
+> below **y = 0.83** and never enters the desk footprint. `KEYS[0]` is untouched, so
+> `public/desk-poster.webp` still matches. Build + lint pass; `/` First Load JS unchanged at
+> 422 kB.
+> **Two rafshim notes.** `st.advance(ts)` must be called in a loop to converge the camera — the
+> shimmed rAF alone does not drive R3F's loop far enough between tool calls, and the copy card's
+> `AnimatePresence` swap still does not complete in the pane (the capture shows stop 0's card
+> against stop 5's camera, which is a *conservative* collision check since that card is wider).
+> And a synthetic `keydown` dispatched on `window` throws in `DeskScene`'s handler (`e.target` is
+> `window`, which has no `.closest`) — dispatch on an element, or drive `goTo` off
+> `__reactProps$*`. Not a page bug; a real keydown always targets an element.
+>
 > **Status (2026-08-11, latest+17): BOTH DECK SCRIMS ARE GONE — and the honest cost is that
 > 10px meta type over the lit scene cannot be fully rescued.** Sunny asked for the gradient
 > removed outright: it distracted from the scene the landing page exists to show. The radial wash

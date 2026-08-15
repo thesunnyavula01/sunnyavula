@@ -24,12 +24,12 @@ import * as THREE from "three";
 //     x 666..1235   y 108..652
 //
 // with each object's projected silhouette filling ~0.88 of it (0.78 papers,
-// 0.48 phone — those two already read at a good size and only needed re-aiming)
-// and centred in it. Each stop KEEPS its original viewing direction, so the
-// tour's swing around the island is unchanged; only the distance and the aim
-// moved, and three of the five distances barely moved at all — the defect was
-// mostly aim, not zoom. Worst case over the pointer-parallax box (±0.35, ±0.18)
-// and the island's ±0.05 idle bob still fits.
+// 0.70 phone — see below) and centred in it. Stops 1..4 KEEP their original
+// viewing direction, so the tour's swing around the island is unchanged; only
+// the distance and the aim moved, and three of the five distances barely moved
+// at all — the defect was mostly aim, not zoom. Worst case over the
+// pointer-parallax box (±0.35, ±0.18) and the island's ±0.05 idle bob still
+// fits: the contact stop's swept union is 723,122 -> 1213,641.
 //
 // Fit against the SILHOUETTE (every mesh's own box, projected), not one AABB
 // around the whole object: the gavel stop is a mic at one end and a gavel at
@@ -40,6 +40,25 @@ import * as THREE from "three";
 // Consequence worth stating: the targets no longer sit a flat ~0.75 left of
 // their object — the offset is whatever centres the subject in that rect, which
 // is why COMPACT_PAN below had to be re-derived rather than kept.
+//
+// THE CONTACT STOP was left out of that solve at 0.48 fill, on the grounds that
+// it "already read at a good size". It did not: the phone is the smallest object
+// on the desk, so 0.48 of the rect's WIDTH is 15% of its AREA — the frame was
+// 85% bare wood. It is now fitted like the rest, and two things beyond distance
+// were wrong with it:
+//
+//   * the old azimuth (27.5°) looked almost straight down the phone's long axis
+//     — the slab is turned `ry 0.35`, i.e. 7.7° off that view — so the screen
+//     was foreshortened to nearly a square and the silhouette was as small as it
+//     could possibly be. Swinging to 22° and lifting to 38° lays the phone
+//     DIAGONALLY across the frame, which is both readable and the shape that
+//     fills a near-square rect. Measured over an elevation x azimuth sweep, the
+//     phone's own projected top face goes from 14.8% of the safe rect to 33.9%.
+//   * fill is capped at 0.70, not the 0.88 the other stops take, because the
+//     island's idle bob (±0.05, plus ±0.014 from the two rocking rotations at
+//     the phone's radius) is a FIXED WORLD offset: it projects to ±58px here
+//     against ±18px at the gavel's distance. 0.88 would have the subject leaving
+//     the safe rect on every breath.
 type Key = { pos: [number, number, number]; target: [number, number, number] };
 
 export const KEYS: Key[] = [
@@ -50,7 +69,7 @@ export const KEYS: Key[] = [
   { pos: [-0.48, 2.92, 5.07], target: [-2.07, 0.3, 0.51] }, // laptop, from the front
   { pos: [2.85, 2.7, 2.71], target: [0.66, 0.67, -1.04] }, // monitor, front-right
   { pos: [4.9, 2.33, 4.04], target: [2.58, 0.28, 1.24] }, // gavel + mic, right end
-  { pos: [3.01, 0.99, 3.13], target: [2.27, -0.04, 1.71] }, // phone, near corner — contact
+  { pos: [2.8, 0.83, 2.67], target: [2.38, -0.04, 1.63] }, // phone, near corner — contact
 ];
 
 export const STOP_COUNT = KEYS.length;
@@ -93,12 +112,16 @@ const MAX_HALF_FOV = THREE.MathUtils.degToRad(MAX_FOV / 2);
 //
 // These are NOT one constant any more, and the spread is not a style choice:
 // the framing solve moved the desktop camera by a different factor at every
-// stop (papers 1.00x, laptop 1.38x, monitor 1.07x, gavel 1.08x, phone 0.71x),
-// and the compact shot dollies off that same distance. Each entry is the old
-// zoom divided by its stop's pull-back, so the PHONE framing — which was
-// verified by eye at 375x812 and 375x667 — comes out where it already was.
-// Re-derive them the same way if a key moves again.
-const COMPACT_ZOOM = [0.92, 0.92, 0.67, 0.86, 0.85, 0.99];
+// stop (papers 1.00x, laptop 1.38x, monitor 1.07x, gavel 1.08x), and the compact
+// shot dollies off that same distance. Each entry is the old zoom divided by its
+// stop's pull-back. Re-derive them the same way if a key moves again.
+//
+// The contact entry is NOT that arithmetic. Carrying it forward preserved a
+// framing that was itself the defect: on a 375x420 desk stage the phone was
+// 22% of the canvas WIDTH — 2.3% of its area. It is now solved for the stage
+// the same way the desktop key is solved for the safe rect, and lands at
+// 0.51x0.40 on a 375x812 phone and 0.51x0.60 on a 375x667 one.
+const COMPACT_ZOOM = [0.92, 0.92, 0.67, 0.86, 0.85, 0.64];
 
 // How far to pan each stop right (world units along the camera's own right
 // vector) to undo the copy-card offset — which is what centres the subject on a
@@ -107,7 +130,7 @@ const COMPACT_ZOOM = [0.92, 0.92, 0.67, 0.86, 0.85, 0.99];
 // different fraction of the screen at each one. These are that projection —
 // (object − target) · right, with the object positions from POSITIONS in
 // DeskCanvas.
-const COMPACT_PAN = [0.75, 1.04, 1.16, 1.05, 1.06, 0.43];
+const COMPACT_PAN = [0.75, 1.04, 1.16, 1.05, 1.06, 0.3];
 
 // Vertical trim, same units, along the camera's up vector. Positive pushes the
 // subject DOWN in frame. Portrait sees far more vertically than the wide
@@ -116,10 +139,23 @@ const COMPACT_PAN = [0.75, 1.04, 1.16, 1.05, 1.06, 0.43];
 //
 // Stops 0..4 take none: (object − target) · up is now +0.12..−0.59, i.e. the
 // solved desktop keys already leave each subject near the centre line, which is
-// where the portrait shot wants it. Stop 5 keeps its subject ~0.23 ABOVE
-// centre, as before — but the value that buys it changed with the key (it was
-// −0.5 against an offset of −0.27; the offset is now +0.04).
-const COMPACT_LIFT = [0, 0, 0, 0, 0, -0.19];
+// where the portrait shot wants it.
+//
+// Stop 5's SIGN FLIPPED. It used to be −0.19, lifting the subject ~0.23 above
+// centre — which was sized for a phone occupying a sixth of the stage. Now that
+// it fills half of it, the thing to centre it against is not the stage but the
+// part of the stage that is not under the masthead: that gradient is 86px of a
+// 420px desk stage, i.e. a fifth of it, so dead centre puts the slab's top edge
+// (121px, and 94 at the bottom of the island's bob) almost against it. +0.03
+// pushes the subject down into the clear band. Measured at 375x812; on a 375x667
+// the stage is only 275px tall and the top corner does pass under the fade —
+// unavoidable at any size worth showing, and it is a scrim, not a bar.
+const COMPACT_LIFT = [0, 0, 0, 0, 0, 0.03];
+
+// Distance at which the pointer parallax runs at full amplitude; closer shots
+// scale it down. 4.0 is just inside the closest of stops 0..4 (the gavel, at
+// 4.17), so those five are untouched — see the note at the parallax below.
+const PAR_REF = 4.0;
 
 const lerpAt = (table: number[], u: number) => {
   const x = THREE.MathUtils.clamp(u, 0, 1) * (table.length - 1);
@@ -231,7 +267,18 @@ export function CameraRig({
 
     // Pointer parallax is a mouse affordance. On a phone the only pointer is
     // the swiping finger, so it would just make the desk lurch mid-gesture.
-    const amp = reduced || compact ? 0 : 1;
+    //
+    // It is a fixed WORLD offset, so what it costs in screen terms depends
+    // entirely on how close the shot is: the same ±0.35 is a gentle drift at the
+    // gavel (4.2 units out) and a ±15° heave at the contact stop (1.4 units), far
+    // enough to carry the phone out of frame. Scaling by the shot's own distance
+    // makes it a constant SCREEN nudge instead. PAR_REF sits just under the
+    // closest of the other five stops, so every one of them still scales by
+    // exactly 1 and only the contact close-up is damped.
+    const amp =
+      reduced || compact
+        ? 0
+        : Math.min(1, off.current.length() / PAR_REF);
     tmp.current.set(pointer.x * 0.35 * amp, pointer.y * 0.18 * amp, 0);
     par.current.lerp(tmp.current, 1 - Math.exp(-4 * dt));
 
