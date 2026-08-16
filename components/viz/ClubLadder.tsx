@@ -70,7 +70,7 @@ export function ClubLadder() {
             CEE Personal Finance Challenge
           </dt>
           <dd className="mt-0.5 text-sm font-semibold text-neutral-200">
-            State Champion → National Semifinalist
+            State Champion / National Semifinalist
           </dd>
         </div>
       </dl>
