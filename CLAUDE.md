@@ -156,6 +156,19 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 
 ## Build phases
 
+> **Status (2026-08-16, latest+20): both blank sheets are off the desk.** Sunny asked for the
+> two loose white sheets to go — explicitly NOT the printed page on the manila folder, which is
+> the Research hotspot's own artwork and lives in `objects.tsx`, not here. `LooseSheets` is
+> deleted outright (it was only those two planes: `[-2.15, ·, -1.35]` and `[-2.95, ·, 1.15]`).
+> **Worth knowing before anything is added back into that space:** sheet 2's position was
+> hand-solved twice — latest+5 moved it off the blotter's left edge, latest+14 threaded it
+> between the papers folder (z ends 0.41), the books (x ends -3.60) and the mat (x starts -2.40).
+> That constraint is gone with the mesh, and the comment recording it went with it, so the strip
+> of bare wood left of the blotter is now genuinely free.
+> Overview frame **135 → 133 draw calls**. `public/desk-poster.webp` recaptured (58 kB) and its
+> inlined blur URI regenerated. Verified by eye at the overview and the laptop stop. Build + lint
+> pass; `/` First Load JS unchanged at 423 kB.
+>
 > **Status (2026-08-16, latest+19): the books were two painted bricks — rebuilt with real
 > book anatomy.** Sunny cropped the stack and asked for detail. It was two `SoftBox`es, and at
 > the papers stop it sits in the NEAR FOREGROUND (2.85 units from the camera against 4.36 to the

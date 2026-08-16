@@ -777,26 +777,6 @@ function Bin() {
   );
 }
 
-function LooseSheets() {
-  return (
-    <>
-      <mesh receiveShadow position={[-2.15, 0.002, -1.35]} rotation={[-Math.PI / 2, 0, 0.5]}>
-        <planeGeometry args={[0.72, 0.95]} />
-        <meshStandardMaterial color={P.paper} roughness={0.95} />
-      </mesh>
-      {/* Was [-2.45, …, 0.75]: it straddled the blotter's left edge, so ~40% of
-          the sheet lay INSIDE the mat (sheet y 0.003 vs mat top 0.05), and its
-          far corner also z-fought the papers folder. Moved into the clear wood
-          between the papers (z ends 0.41), the books (x ends -3.60) and the mat
-          (x starts -2.40). */}
-      <mesh receiveShadow position={[-2.95, 0.003, 1.15]} rotation={[-Math.PI / 2, 0, -0.25]}>
-        <planeGeometry args={[0.68, 0.9]} />
-        <meshStandardMaterial color="#f3efe4" roughness={0.95} />
-      </mesh>
-    </>
-  );
-}
-
 /* --------------------------------- island ---------------------------------- */
 
 export function Desk() {
@@ -828,7 +808,6 @@ export function Desk() {
           comment put at ~0.007 — the mat is 0.05 tall, so it was hovering. */}
       <MiniKeyboard position={[1.42, BLOTTER_TOP, 0.35]} />
       <Mouse position={[2.4, 0, 0.45]} />
-      <LooseSheets />
       {/* Was [-2.0, 0, 1.55]: the saucer (y 0..0.03) sat below the mat's top and
           straddled its front edge, so it was half-swallowed by the mat. Now it
           stands ON the mat, pulled back inside the front edge (1.7) and kept
