@@ -89,9 +89,9 @@ const stopTarget = (i: number) =>
 // A 24px-wide encode of the hero image, inlined so a desk-shaped blur is
 // present in the server-rendered HTML itself — zero requests, so on a slow link
 // the fallback hero is never a flat empty gradient while desk-poster.webp
-// (43 kB) is still in flight.
+// (58 kB) is still in flight.
 const POSTER_BLUR =
-  "data:image/webp;base64,UklGRhgBAABXRUJQVlA4WAoAAAAQAAAAFwAACQAAQUxQSHEAAAABcBoAAJpsuDb3vIxEkrucQIPuH5A4wOEAIge4wxUOyZ25fRARZJM2ZmwvAdjHZcrRHRSTvtSpTSPqPMDErtOOhUrrBVP1N5NxCjB1CQ4JdKZRFhCJ+jCNlZwAVJS62z+ltwkk7BItZA+mq901+RrnAQBWUDgggAAAAFAEAJ0BKhgACgA+wVChSqekoyGwCADwGAljAL84IWv9yduH3wneSoFeTAAA/vKhErA13Xe3HXesGqnNZPE3ufpEQx4OrcNGsaLNgnETQ6AV6AqmgIveRXamQ1iMLVMZTFBbSqBU8x8dYkuZSmA4g8CDfKDFEgcPEe8tn6zVAAAA";
+  "data:image/webp;base64,UklGRgQBAABXRUJQVlA4WAoAAAAQAAAAFwAACQAAQUxQSHIAAAABcBoBAKL8P27NPX9GIsldRqBB1xF8AI7EAES6u0zhkNx5tw0igmzSxoztJQD3eGw5u4Niyp8+tRjEXAeE3HXattJpvhC6/hYqqIDQl4Qo4DODupBM3EcYrBQkoLLW3fxpvU0gaZfqYEcw0+isqdcEHwBWUDggbAAAABAEAJ0BKhgACgA+7WaqTamlpCIwCAEwHYljAABany94PUy5Nes/3/wAAP7r3iY/RBSKdWWCkUnt5Xv9KSKDVUYmn82gA07gtY5pxiUtvsy8ja3Rd1EFuRP2BQk9a4Ndr7wF/NwsthO0sAAAAA==";
 
 // A real capture of the WebGL scene, used only by the no-WebGL fallback hero
 // below. The live deck renders the 3D desk directly.

@@ -156,6 +156,63 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 
 ## Build phases
 
+> **Status (2026-08-16, latest+19): the books were two painted bricks — rebuilt with real
+> book anatomy.** Sunny cropped the stack and asked for detail. It was two `SoftBox`es, and at
+> the papers stop it sits in the NEAR FOREGROUND (2.85 units from the camera against 4.36 to the
+> subject), so it was a large object on screen carrying no information at all.
+> **(1) What makes a slab read as a book is three pieces of silhouette, not surface.** The cover
+> boards showing their thickness at the fore-edge; the leaves sitting a few mm inside the cover on
+> three sides (the "square"); and the hinge groove beside the spine. All three are now geometry.
+> **(2) The case is ONE extruded profile, not a box per board.** The profile is a C — bottom
+> board, rounded spine, top board — whose cavity opens toward the fore-edge, so boards + spine +
+> groove come out of a single shape and a single draw call. The payoff is the extrusion's END CAP:
+> it shows the book's cross-section (board / recess / leaves / board), and that cap is the
+> head/tail face, which is **exactly the face this camera sees** — the group's +z axis points at
+> the papers-stop camera with dot 0.97 while the fore-edge faces away (dot −0.24). Aim the detail
+> at the face that is actually visible.
+> **(3) `bevelEnabled: false`, deliberately.** `bevelSize` insets the profile in x-y, and the
+> board is 0.016 thick with a groove cut into it — a bevel large enough to see would pinch that
+> region into self-intersecting geometry. Do not "soften" these like the `SoftBox` props.
+> **(4) One texture does all three page edges, because of how box UVs work.** The leaves are a
+> box whose four SIDE faces are all page edges, and `BoxGeometry` puts **v = local y** on every
+> one of them (px/nx: u=z, py of the block is hidden). So a texture that varies only with v is
+> correct on the fore-edge, the head and the tail at once — one map, one material, no per-face
+> split. Line spacing is loose on purpose: the block is ~20px tall on screen, so a realistic leaf
+> count would put 60 rules in 20px and moire on every camera move. Per-book warmth is the material
+> `color` multiplying that map, so the texture itself stays near-white.
+> **(5) `round: 0.55`, and this was caught by eye, twice.** The first cut used 0.9 — a
+> near-half-cylinder — and the spine read as a **bolster strapped to the book**. 0.55 leaves a
+> flat spine face between two corner rolls, which is both what a cased book looks like and what
+> the groove needs to sit beside. The groove was invisible at the first depth too; note that
+> `quadraticCurveTo` reaches only **HALF** the control point's offset, so the `groove` field is
+> 2x the depth actually cut.
+> **(6) FOOTPRINT IS FIXED BY THE DESK, and it is tight.** The stack stands on bare wood at
+> x −4.1 turned −0.25, which puts the bottom book's far corner at world **x −4.603** against a
+> desk edge at **−4.7** and the floor plant's widest leaf at **−4.88** — 0.097 of clearance. The
+> two upper books are smaller and their own rotations were checked against it (measured after:
+> book 2 −4.469, book 3 −4.494, max x −3.597, so `LooseSheets`' "books end at −3.60" still holds).
+> Nothing here may grow.
+> **(7) The bookmark sits INSIDE the leaves (y 0.03), not on the cover.** It leaves through the
+> gap between the boards — the cap is empty for |y| < 0.0485 — and its buried end is occluded by
+> the page block, which is what stops it reading as a stray stick lying on the book. That is the
+> exact failure the printed-figure trend line had on the papers (latest+14).
+> **(8) Only the top book gets cover art**, because it is the only cover on the desk not under
+> another book; it is also the only paperback (boards a fifth as thick, near-flat spine, no
+> groove, leaves trimmed almost flush), so the stack reads as three different books rather than
+> three sizes of one. The art is a transparent decal over the lit case, same as the printed sheet.
+> **Cost: 2 meshes → 8, 918 triangles for the whole stack**, and the overview frame goes
+> **129 → 135 draw calls / 21,458 triangles**. `public/desk-poster.webp` recaptured (59 kB) and
+> its inlined 24px blur URI regenerated with it.
+> **Verified by eye on a running dev server** at a close-up, the papers stop and the overview,
+> via the console-only rafshim + render-and-POST trick below (the pane still cannot composite);
+> world AABBs for all eight meshes were also read back out of the live scene rather than trusted
+> from the arithmetic. Lint passes. `/` First Load JS **422 → 423 kB**.
+> **Two build notes.** `npm run build` (the OpenNext wrapper) fails **locally** on a missing
+> `@ast-grep/napi` native binary — an install artefact of the unapproved-scripts situation, not
+> this change and not a CI problem; `npm run build:next` is what was run. And the **"subpages at
+> 176 kB" figure repeated in the notes below is stale**: measured against a stashed baseline they
+> were already **177 kB** before this pass.
+>
 > **Status (2026-08-15, latest+18): the contact stop was never actually solved — 85% of its
 > frame was bare wood.** Sunny reported the phone as off-centre and surrounded by dead space.
 > The latest+15 pass fitted stops 1..4 to the safe rect but exempted this one at **0.48 fill**

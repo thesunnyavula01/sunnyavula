@@ -1,11 +1,16 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, type ReactNode } from "react";
 import { Instance, Instances } from "@react-three/drei";
 import * as THREE from "three";
 import { PALETTE as P } from "./palette";
 import { SoftBox } from "./SoftBox";
-import { PHONE_SCREEN, phoneScreenTexture } from "./screens";
+import {
+  PHONE_SCREEN,
+  bookCoverTexture,
+  pageEdgeTexture,
+  phoneScreenTexture,
+} from "./screens";
 
 // The desk ISLAND — a floating chunk of study, sarastotey-style: a rounded
 // floor slab carrying a legged desk, a chair, a rug, a floor plant, a lamp and
@@ -465,21 +470,235 @@ function Succulent({ position }: { position: [number, number, number] }) {
   );
 }
 
+/* ----------------------------------- books ---------------------------------- */
+
+// A book is not a coloured slab. It is a CASE — two boards joined by a spine —
+// wrapped round a block of leaves that sits a few millimetres inside it on
+// three sides. That inset (the "square"), the board thickness showing at the
+// fore-edge, and the hinge groove beside the spine are most of what tells the
+// eye "book" rather than "brick", and all three are silhouette, so they survive
+// at the size these are seen at. The stack was two plain rounded boxes before,
+// which from the papers stop — where it sits in the near foreground, closer to
+// the camera than the subject — read as two painted bricks.
+//
+// THE CASE IS ONE EXTRUDED PROFILE, not a box per board. The profile is a C
+// (bottom board, rounded spine, top board) whose cavity opens toward the
+// fore-edge, so boards + spine + groove come out of a single shape and a single
+// draw call, and the extrusion's end cap shows the book's CROSS-SECTION: board,
+// recess, leaves, board. That cap is the head/tail face, which is exactly the
+// face the papers-stop camera is looking at — the group's +z axis points almost
+// straight at it (dot 0.97), while the fore-edge faces away.
+//
+// No bevel on the extrude, deliberately: `bevelSize` insets the profile in x-y,
+// and the board is 0.014 thick with a groove cut into it, so a bevel big enough
+// to see would pinch that region into self-intersecting geometry. A board this
+// thin wants a sharp edge anyway.
+type BookSpec = {
+  w: number; // spine to fore-edge
+  d: number; // head to tail
+  t: number; // total thickness, boards included
+  board: number; // cover board thickness
+  square: number; // how far the cover overhangs the leaves on three sides
+  /**
+   * Spine radius as a fraction of half the thickness. 1 is a half-cylinder,
+   * which at these thicknesses reads as a bolster strapped to the book rather
+   * than as a spine — 0.55 leaves a flat face between two corner rolls, which
+   * is both what a cased book looks like and what the groove needs to sit
+   * beside. A perfect-bound paperback is flatter still.
+   */
+  round: number;
+  /** Hinge groove: the quadratic reaches HALF this, so it is 2x the depth cut. */
+  groove: number;
+  cover: string;
+  pages: string;
+  roughness: number;
+  /** Print a front cover. Only the top book's is ever seen. */
+  art?: boolean;
+};
+
+const spineR = (b: BookSpec) =>
+  Math.min(b.t / 2, Math.max(0.004, (b.t / 2) * b.round));
+/** x of the cavity's back wall — where the leaves start, just clear of the spine. */
+const cavityX = (b: BookSpec) => -b.w / 2 + spineR(b) + b.board;
+
+function caseGeometry(b: BookSpec) {
+  const w2 = b.w / 2;
+  const t2 = b.t / 2;
+  const r = spineR(b);
+  const cav = cavityX(b);
+  const gw = Math.min(b.w * 0.12, b.t * 0.45);
+
+  const s = new THREE.Shape();
+  s.moveTo(w2, -t2);
+  if (b.groove > 0) {
+    s.lineTo(cav + gw, -t2);
+    s.quadraticCurveTo(cav + gw / 2, -t2 + b.groove, cav, -t2);
+  }
+  s.lineTo(-w2 + r, -t2);
+  s.absarc(-w2 + r, -t2 + r, r, -Math.PI / 2, Math.PI, true);
+  s.lineTo(-w2, t2 - r);
+  s.absarc(-w2 + r, t2 - r, r, Math.PI, Math.PI / 2, true);
+  if (b.groove > 0) {
+    s.lineTo(cav, t2);
+    s.quadraticCurveTo(cav + gw / 2, t2 - b.groove, cav + gw, t2);
+  }
+  s.lineTo(w2, t2);
+  // back down the fore-edge and round the cavity the leaves sit in
+  s.lineTo(w2, t2 - b.board);
+  s.lineTo(cav, t2 - b.board);
+  s.lineTo(cav, -t2 + b.board);
+  s.lineTo(w2, -t2 + b.board);
+  s.closePath();
+
+  const g = new THREE.ExtrudeGeometry(s, {
+    depth: b.d,
+    bevelEnabled: false,
+    curveSegments: 12,
+  });
+  g.translate(0, 0, -b.d / 2);
+  return g;
+}
+
+function Book({
+  spec,
+  y,
+  rot,
+  offset,
+  children,
+}: {
+  spec: BookSpec;
+  y: number;
+  rot: number;
+  offset: [number, number];
+  children?: ReactNode;
+}) {
+  const geo = useMemo(() => caseGeometry(spec), [spec]);
+  const x0 = cavityX(spec);
+  const x1 = spec.w / 2 - spec.square;
+  return (
+    <group position={[offset[0], y, offset[1]]} rotation={[0, rot, 0]}>
+      <mesh castShadow receiveShadow geometry={geo}>
+        <meshStandardMaterial color={spec.cover} roughness={spec.roughness} />
+      </mesh>
+      {/* The leaves. 0.004 shy of the boards so the two cannot z-fight along
+          the cavity, which is a seam the head-on camera looks straight down. */}
+      <mesh position={[(x0 + x1) / 2, 0, 0]}>
+        <boxGeometry
+          args={[
+            x1 - x0,
+            spec.t - 2 * spec.board - 0.004,
+            spec.d - 2 * spec.square,
+          ]}
+        />
+        <meshStandardMaterial
+          map={pageEdgeTexture()}
+          color={spec.pages}
+          roughness={0.95}
+        />
+      </mesh>
+      {spec.art && (
+        <mesh position={[0, spec.t / 2 + 0.0015, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[spec.w - 0.014, spec.d - 0.012]} />
+          <meshStandardMaterial map={bookCoverTexture()} transparent roughness={0.5} />
+        </mesh>
+      )}
+      {children}
+    </group>
+  );
+}
+
+// Bottom two are cloth-cased hardbacks; the top one is a slim perfect-bound
+// paperback — boards a fifth as thick, a near-flat spine, no groove, and the
+// leaves trimmed almost flush. Building it from the same profile with different
+// numbers is what makes the stack read as three different books rather than
+// three sizes of one.
+//
+// FOOTPRINT IS FIXED BY THE DESK, not by taste. The stack stands on bare wood
+// at x -4.1 with the group turned -0.25, which puts the bottom book's far
+// corner at world x -4.60 against a desk edge at -4.7 and the floor plant's
+// widest leaf at -4.88. Nothing here may project further left than that: the
+// two upper books are smaller and their own rotations are checked against it
+// (book 2 reaches -4.57, book 3 -4.52).
+const BOOK_STACK: { spec: BookSpec; rot: number; offset: [number, number] }[] = [
+  {
+    spec: {
+      w: 0.88,
+      d: 0.62,
+      t: 0.125,
+      board: 0.016,
+      square: 0.018,
+      round: 0.55,
+      groove: 0.02,
+      cover: P.indigo,
+      pages: "#eadfc4", // the one aged block on the desk
+      roughness: 0.85,
+    },
+    rot: 0,
+    offset: [0, 0],
+  },
+  {
+    spec: {
+      w: 0.76,
+      d: 0.53,
+      t: 0.105,
+      board: 0.015,
+      square: 0.016,
+      round: 0.55,
+      groove: 0.018,
+      cover: P.marigold,
+      pages: "#fbf7ec",
+      roughness: 0.82,
+    },
+    rot: 0.2,
+    offset: [0.02, -0.015],
+  },
+  {
+    spec: {
+      w: 0.6,
+      d: 0.42,
+      t: 0.055,
+      board: 0.003,
+      square: 0.003,
+      round: 0.4,
+      groove: 0,
+      cover: P.brand,
+      pages: "#fbf7ec",
+      roughness: 0.5, // laminated stock, so it takes a little of the lamp
+      art: true,
+    },
+    rot: -0.15,
+    offset: [-0.03, 0.03],
+  },
+];
+
+// Each book rests on the one below, so the heights are derived rather than
+// written down — a thickness change cannot leave a book floating.
+let stackBase = 0;
+const BOOK_Y = BOOK_STACK.map((b) => {
+  const y = stackBase + b.spec.t / 2;
+  stackBase += b.spec.t;
+  return y;
+});
+
 function Books({ position }: { position: [number, number, number] }) {
   return (
     <group position={position} rotation={[0, -0.25, 0]}>
-      <SoftBox castShadow args={[0.88, 0.13, 0.62]} radius={0.03} position={[0, 0.065, 0]}>
-        <meshStandardMaterial color={P.indigo} roughness={0.8} />
-      </SoftBox>
-      <SoftBox
-        castShadow
-        args={[0.78, 0.11, 0.54]}
-        radius={0.03}
-        position={[0.03, 0.185, -0.02]}
-        rotation={[0, 0.22, 0]}
-      >
-        <meshStandardMaterial color={P.marigold} roughness={0.8} />
-      </SoftBox>
+      {BOOK_STACK.map((b, i) => (
+        <Book key={i} spec={b.spec} y={BOOK_Y[i]} rot={b.rot} offset={b.offset}>
+          {/* Bookmark in the bottom book. It sits at y 0.03 — inside the LEAVES,
+              not on the cover — so it leaves through the gap between the boards
+              (the cap is empty for |y| < 0.0485) and its buried end is occluded
+              by the page block. That is what keeps it from reading as a stray
+              stick lying on the book, which is how the old printed-figure trend
+              line failed on the papers. */}
+          {i === 0 && (
+            <mesh castShadow position={[0.12, 0.03, 0.34]} rotation={[0, 0.18, 0]}>
+              <boxGeometry args={[0.09, 0.0035, 0.16]} />
+              <meshStandardMaterial color={P.terracotta} roughness={0.85} />
+            </mesh>
+          )}
+        </Book>
+      ))}
     </group>
   );
 }

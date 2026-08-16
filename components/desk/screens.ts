@@ -390,3 +390,90 @@ export const paperPrintTexture = once(() => {
 
   return p.finish();
 });
+
+/* ------------------------------ clutter: books ------------------------------ */
+
+// Two things about a book are flat art rather than shape, so both are painted
+// here: the leaf lines on the page block, and the paperback's front cover.
+// Everything with real depth — the boards, the rounded spine, the hinge groove,
+// the square the cover overhangs the leaves by — is geometry (Desk.tsx: Book).
+
+// Leaf lines for a page block. The block is a box, and ALL FOUR of its side
+// faces are page edges: fore-edge, head and tail all show the same stack of
+// leaves seen end-on, and the top and bottom are under the boards and never
+// seen. A box's UVs put v = local y on every one of those four faces, so a
+// texture that varies only with v reads correctly on all of them at once —
+// one map, one material, no per-face split.
+//
+// Line spacing is deliberately loose. The block is ~20px tall on screen at the
+// papers stop, so painting a realistic leaf count would land 60 rules inside
+// 20px and moire on every camera move; a dozen irregular lines mip down to a
+// fine paper tone instead. Per-book warmth comes from the material `color`,
+// which multiplies this map, so the texture itself stays near-white.
+export const pageEdgeTexture = once(() => {
+  const W = 8;
+  const H = 64;
+  const c = document.createElement("canvas");
+  c.width = W;
+  c.height = H;
+  const ctx = c.getContext("2d")!;
+
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, "#fbf6ea");
+  g.addColorStop(0.45, "#f1e8d5");
+  g.addColorStop(1, "#ddd1b6"); // the leaves compress and darken toward the tail
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H);
+
+  // irregular, so the block does not read as a printed rule pattern
+  for (let y = 2; y < H - 1; y += 3.4 + Math.random() * 2.6) {
+    ctx.fillStyle = `rgba(126,109,80,${(0.05 + Math.random() * 0.14).toFixed(3)})`;
+    ctx.fillRect(0, y, W, 0.9);
+  }
+  // a few heavier breaks where the signatures meet
+  for (let i = 0; i < 4; i++) {
+    ctx.fillStyle = "rgba(102,86,60,0.28)";
+    ctx.fillRect(0, 8 + Math.random() * (H - 20), W, 1.3);
+  }
+
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 8;
+  return t;
+});
+
+// Front of the slim paperback on top of the stack. Transparent, like the
+// printed research sheet: only the ink is drawn, so the lit case underneath
+// still supplies the cover colour and its shading. No real type — the cover is
+// ~90px across at its closest, which is greeked-bar territory, same as the
+// laptop mock and the printed page.
+export const bookCoverTexture = once(() => {
+  const W = 256;
+  const H = 180;
+  const p = painter(W, H, -0.5, 0.5, -0.5, 0.5);
+  const X = (x: number) => (x + 0.5) * W;
+  const Y = (y: number) => (0.5 - y) * H;
+
+  // art panel over the top half — a wash that DARKENS the case colour rather
+  // than replacing it, so the cover still reads as one printed object
+  p.rect(0, 0.245, 1, 0.51, "rgba(6,26,33,0.62)");
+  p.circle(0.13, 0.255, 0.145, "rgba(232,160,76,0.92)");
+  p.ctx.strokeStyle = "rgba(250,247,240,0.5)";
+  p.ctx.lineWidth = 0.014 * H;
+  p.ctx.beginPath();
+  p.ctx.ellipse(X(-0.05), Y(0.235), 0.2 * W, 0.2 * H, 0, -Math.PI * 0.35, Math.PI * 0.55);
+  p.ctx.stroke();
+
+  // brass rule closing the panel, then title / rule / author
+  p.rect(0, -0.022, 1, 0.014, "rgba(212,169,78,0.95)");
+  p.rect(-0.045, -0.115, 0.68, 0.056, "rgba(250,247,240,0.94)");
+  p.rect(-0.165, -0.2, 0.44, 0.046, "rgba(250,247,240,0.94)");
+  p.rect(-0.29, -0.295, 0.19, 0.008, "rgba(212,169,78,0.8)");
+  p.rect(-0.235, -0.355, 0.3, 0.03, "rgba(250,247,240,0.6)");
+
+  // publisher colophon, bottom right
+  p.circle(0.4, -0.4, 0.042, "rgba(250,247,240,0.32)");
+  p.rect(0.4, -0.4, 0.03, 0.03, "rgba(250,247,240,0.55)");
+
+  return p.finish();
+});
