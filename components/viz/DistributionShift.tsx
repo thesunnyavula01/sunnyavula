@@ -16,7 +16,28 @@ const X0 = 7, X1 = 26;
 
 const px = (v: number) => PAD.l + ((v - X0) / (X1 - X0)) * (W - PAD.l - PAD.r);
 const YMAX = 0.4;
-const py = (d: number) => PAD.t + (1 - d / YMAX) * (H - PAD.t - PAD.b);
+
+// py ROUNDS, and that is a correctness fix rather than tidiness.
+//
+// Everything py is given comes through `pdf`, i.e. through Math.exp — and
+// Math.exp is only required to be *approximately* correct, so its last bit is
+// implementation-defined. This chart is server-rendered, so those bits end up
+// in the `points` attribute of the SSR'd HTML, and the client recomputes them
+// in a different engine: Node's V8 and Chrome's V8 already disagree here (the
+// pre-ERTA curve serialises to 6297 characters in one and 6294 in the other),
+// and a Firefox or Safari client, on a different math library entirely, will
+// disagree by more. React sees two different `points` strings, reports "a tree
+// hydrated but some attributes of the server rendered HTML didn't match", and
+// declines to patch the attribute up.
+//
+// Rounding to 3dp is far finer than a pixel at any width this renders at (the
+// whole viewBox is 640 units), so it changes nothing visible — it just makes
+// the serialisation engine-independent. It also cuts about a quarter of the
+// bytes out of each curve, since the unrounded form prints all 17 digits.
+// px needs no such treatment: it is pure +-*/ on the sample index, which IEEE
+// 754 pins to the same bits everywhere.
+const py = (d: number) =>
+  Math.round((PAD.t + (1 - d / YMAX) * (H - PAD.t - PAD.b)) * 1000) / 1000;
 
 const pdf = (x: number, m: number, s: number) =>
   Math.exp(-0.5 * ((x - m) / s) ** 2) / (s * Math.sqrt(2 * Math.PI));

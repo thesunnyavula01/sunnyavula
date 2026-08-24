@@ -19,9 +19,22 @@ import { makeStudioEnv } from "./env";
 import { shadowsDirty } from "./shadowBus";
 import { Papers, Laptop, Ticker, GavelMic } from "./objects";
 
-// IMPORTANT: core-three shadow features only (PCFSoft + ContactShadows).
+// IMPORTANT: core-three shadow features only (PCF + ContactShadows).
 // drei's <SoftShadows/> (PCSS) patches global shader chunks and broke EVERY
 // meshStandardMaterial with three 0.185 — the whole desk rendered invisible.
+//
+// `shadows` is the STRING "percentage", not the boolean. R3F maps a bare
+// `shadows` to PCFSoftShadowMap, which three 0.185 has deprecated: on the first
+// shadow render it logs "PCFSoftShadowMap has been deprecated. Using
+// PCFShadowMap instead." and rewrites the type itself. Two consequences beyond
+// the console noise, and the second one is the reason this matters:
+//   * R3F re-runs its shadow config on state changes (the dpr bump below is
+//     one), sets the type back to PCFSoft each time, and its own
+//     `oldType !== newType` check therefore fires `shadowMap.needsUpdate` —
+//     forcing a full depth pass that ShadowScheduler exists to avoid.
+//   * the warning repeats on every one of those passes.
+// "percentage" names PCFShadowMap outright, which is what three renders either
+// way, so this is identical output with none of that.
 //
 // Also gone on purpose, both for time-to-first-frame:
 //   * drei <Environment>/<Lightformer> — replaced by makeStudioEnv() (see
@@ -144,7 +157,7 @@ export default function DeskCanvas({
   const [dpr, setDpr] = useState(1);
   return (
     <Canvas
-      shadows
+      shadows="percentage"
       dpr={dpr}
       frameloop={paused ? "never" : "always"}
       gl={{ alpha: true, antialias: true, powerPreference: "high-performance" }}

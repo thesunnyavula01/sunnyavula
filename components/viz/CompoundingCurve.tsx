@@ -15,7 +15,14 @@ const PAD = { l: 46, r: 16, t: 16, b: 34 };
 const YMAX = 100000;
 
 const px = (t: number) => PAD.l + (t / V.years) * (W - PAD.l - PAD.r);
-const py = (v: number) => PAD.t + (1 - v / YMAX) * (H - PAD.t - PAD.b);
+// Rounded for the same reason DistributionShift's py is — see the note there.
+// Every value reaching py here has been through Math.pow, whose last bit is
+// implementation-defined, and this curve is server-rendered, so an unrounded
+// `points` string is a hydration mismatch waiting on a client whose math
+// library differs from the server's. V8-to-V8 happens to agree on these
+// particular exponents; SpiderMonkey and JavaScriptCore are not promised to.
+const py = (v: number) =>
+  Math.round((PAD.t + (1 - v / YMAX) * (H - PAD.t - PAD.b)) * 1000) / 1000;
 
 const at = (t: number, rate: number) => V.start * Math.pow(1 + rate, t);
 const path = (rate: number) => {
