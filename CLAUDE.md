@@ -156,6 +156,112 @@ live in `wrangler.jsonc`, not here. Mirror active keys into `.env.example` (no v
 
 ## Build phases
 
+> **Status (2026-08-24, latest+22): the Worker was re-rendering all five prerendered pages on
+> EVERY request.** `defineCloudflareConfig({})` defaults `incrementalCache` to the string
+> **`"dummy"` — a cache that always misses**, which is exactly what `x-nextjs-cache: MISS` on every
+> live response was reporting. Nothing was ever read from a cache, so each pageview re-rendered the
+> React tree for a page that is prerendered at build time and cannot change between deploys.
+> Measured on sunnyavula.com: `cfWorker;dur=430` cold, ~69 ms warm — and at scale cold is not rare,
+> because every Cloudflare colo warms its own isolate.
+> **(1) `staticAssetsIncrementalCache` + `enableCacheInterception: true`.** The adapter's own
+> description of that cache is "should only be used for applications that do NOT want revalidation
+> and ONLY want to serve prerendered data" — verified against `.next/prerender-manifest.json`:
+> **all 13 entries are `initialRevalidateSeconds: false`, zero dynamic routes.** It reads through
+> the ASSETS binding, so there is no KV/R2/D1 to provision. Interception is where the CPU saving
+> comes from: it answers from the routing layer, before the Next server handler is entered.
+> **(2) `opennextjs-cloudflare build` does NOT populate the cache — this is the trap.** Population
+> is a separate `populateCache` command which `opennextjs-cloudflare deploy`/`preview` call for
+> you, **but CI uses neither**: Workers Builds runs `npm run build` then a raw `npx wrangler
+> deploy`. Without a populate step the Worker would look up an assets directory that was never
+> uploaded, miss every time, and silently be no better than before. Hence
+> `scripts/populate-static-cache.mjs`, wired into `npm run build`. It is a plain `fs.cpSync`
+> (`.open-next/cache` → `.open-next/assets/cdn-cgi/_next_cache`) rather than a shell-out, because
+> the real command boots a Wrangler platform proxy — workerd in CI — to do the same one copy.
+> Running both is harmless; the copy is idempotent. `preview`/`deploy` now go through
+> `npm run build` so there is one definition of a build.
+> **(3) Every failure mode degrades to today's behaviour, checked by reading the adapter, not
+> assumed.** `cacheInterceptor` returns the event unchanged on: a cache miss, an unknown cache
+> type (`default:`), a server action, preview cookies, a malformed path, and **any thrown error**
+> (`catch { return event }`). So the downside of this change is "no speedup", never "broken page".
+> Also confirmed: the interceptor is RSC-aware (`html` for documents, `rsc`/`segmentData` when
+> `RSC: 1`) — which matters because latest+21 drives a lot of RSC traffic; route-type prerenders
+> (`/icon.png`, `/robots.txt`, `/sitemap.xml`, `/opengraph-image`) have their own `case` with
+> binary handling, so `generateResult`'s "only app and page" throw is unreachable; and interception
+> is gated on `!isInternalResult(...)` **after** middleware, so the workers.dev → sunnyavula.com
+> 301 still short-circuits ahead of it. PPR is not used (its one documented incompatibility).
+> **(4) Intercepted responses gain an `ETag`** and `s-maxage=31536000, stale-while-revalidate=
+> 2592000`, so repeat visitors can revalidate to a 304 instead of refetching the body.
+> **`x-opennext-cache: HIT` is the signal that all of this is working** — that header only exists
+> on an intercepted response. `curl -sI https://sunnyavula.com/ | grep x-opennext-cache`.
+> **STILL NOT DONE — and it needs a CUSTOM CACHE KEY, so do not shortcut it.** The HTML is still
+> not stored in Cloudflare's CDN cache; the Worker is still invoked per request, just far more
+> cheaply. Finishing it needs a zone-level Cache Rule, and a naive "Cache Everything" rule would be
+> **actively dangerous here**: the response varies on `RSC` + three other Next router headers, and
+> Cloudflare's cache honours no `Vary` except `Accept-Encoding` — so it would cheerfully serve an
+> RSC flight payload to a browser asking for the document. Dashboard change, not a repo one.
+> **Verification honesty: the OpenNext build could not be run on this machine.** `@ast-grep/napi`
+> dlopens against the MSVC runtime and **`VCRUNTIME140.dll`/`MSVCP140.dll` are absent from
+> System32** — that is the real cause of the failure the older notes blamed on "unapproved install
+> scripts"; the `.node` binary is present and fine, and CI is Linux and unaffected. So this pass
+> was verified by (a) reading the adapter source for every branch above, (b) confirming the config
+> import resolves and yields `cf-static-assets-incremental-cache`, the exact name `populateCache`
+> switches on, (c) exercising both branches of the populate script against a synthetic tree —
+> nested paths and the build-id directory land correctly — and (d) the live header check after the
+> push. `tsc`, `lint` (now warning-free) and `next build` all pass.
+>
+> **Status (2026-08-24, latest+21): predictive route loading — `components/perf/prefetch.ts`.**
+> Navigation was already fast (every route is `○ Static`, and `router.prefetch` warms one
+> COMPLETELY: measured on the live site, `/research` = 6.1 kB of RSC flight data + a 19 kB chunk,
+> ~25 kB, after which the click is a client render with no network). The defect was **when** those
+> bytes were spent.
+> **(1) The landing page was prefetching INTO its own critical path.** `/` ships 431 kB across 13
+> chunks and Next emits every one as `<script async>`, which Chrome fetches at **LOW** priority.
+> Next's viewport prefetching fires as soon as a `<Link>` paints — also low priority — so the four
+> nav links put ~100 kB on exactly the same contended pipe as the desk the visitor is waiting for.
+> Nav links are now `prefetch={false}` **on `/` only**; the deck re-warms all four from its own
+> signals afterwards, so coverage is identical and only the timing moves. Subpages keep Next's
+> default — they carry no WebGL, so a sibling prefetch there competes with nothing.
+> **(2) The deck knows something no `<Link>` can: which section is being LOOKED at.** Parking the
+> camera on a stop is deliberate (wheel, swipe, strip click) and that stop's card ends in
+> "Explore X →". Arrival at stops 1..4 warms that section — the strongest passive signal on the
+> site. The index strip and the legend rows are `<button>`s and had **zero** prefetch coverage
+> before this; they now carry hover/focus/pointerdown intent handlers. `onFocus` is new
+> everywhere — `<Link>` never covered keyboard tabbing, so that path had no prediction at all.
+> **(3) Everything speculative is gated behind `warmReady`** (the canvas's first frame, or the
+> no-WebGL hero, or a 5 s floor for a context that never paints). Verified on the built bundle:
+> desk chunks finish at 527 ms with **0 speculative requests before that mark**.
+> **(4) `requestIdleCallback` does NOT space its callbacks out — do not assume it does.** rIC only
+> promises "not while the main thread is busy", and after the desk paints the thread is extremely
+> quiet, which is exactly when this sweep runs. Chaining each warm off the previous one's rIC fired
+> all four routes **inside 14 ms** — the four-way burst the sequential design exists to prevent.
+> rIC also knows nothing about the NETWORK, which is the resource actually being rationed. So
+> idleness and spacing are two separate mechanisms: `onIdle` waits for a quiet thread,
+> `IDLE_GAP_MS` (300) waits for a quiet pipe.
+> **(5) `/` is intent-only from EVERYWHERE** — the Nav wordmark and both `BackToDesk` links. Home
+> is 424 kB against a subpage's 178 kB, and `BackToDesk` renders twice per page, so Next's default
+> was viewport-prefetching the entire desk bundle for every visitor who landed on `/research` from
+> search and never went to the desk. Anyone who arrived FROM the desk already holds those chunks.
+> **(6) Save-Data and 2G are never overridden; the idle tier additionally requires 4g and a
+> visible tab**, and parks/resumes on `visibilitychange` (a link opened in a background tab would
+> otherwise never warm). Dedupe is module-scoped so it survives the copy card's per-stop remount,
+> with a 5-minute reset matching Next's own `x-nextjs-stale-time: 300`.
+> **Verified against a production `next start` build**, driving React props directly: 0 prefetches
+> in the critical window; hover on one strip column warms that route alone; three repeat signals
+> produce 0 extra requests; camera arrival warms its section; the idle sweep fills in exactly the
+> routes the other signals missed. Clean console, no UI change (the diff touches no className,
+> markup or style — only handlers, one prop, and hooks). Build + lint + `tsc` pass.
+> `/` 423 → **424 kB**, subpages 177 → **178 kB** — ~1 kB to take ~100 kB off the critical path.
+> **Two pane gotchas worth keeping.** `delete window.requestIdleCallback` does NOT shim it away —
+> it lives on `Window.prototype`, so a "fallback path" test can silently measure real rIC instead
+> (this produced one wrong conclusion before it was caught). And the MCP tab is `visibilityState:
+> "hidden"` except during a screenshot, which means **IntersectionObserver never fires** — "zero
+> prefetches on load" reads as a defect and is not one. Patch `Document.prototype.visibilityState`
+> and dispatch `visibilitychange` to exercise the real resume path; background throttling then
+> stretches the 300 ms gap to ~3 s (setTimeout's 1 s floor + rIC's 2 s timeout), which still proves
+> serialization, just not the constant.
+> **Left open at the time, now addressed in latest+22 below:** the `x-nextjs-cache: MISS` on every
+> live response, and the Worker execution behind it.
+>
 > **Status (2026-08-16, latest+20): both blank sheets are off the desk.** Sunny asked for the
 > two loose white sheets to go — explicitly NOT the printed page on the manila folder, which is
 > the Research hotspot's own artwork and lives in `objects.tsx`, not here. `LooseSheets` is
