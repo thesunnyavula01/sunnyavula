@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useFrame } from "@react-three/fiber";
 import { Html, useCursor } from "@react-three/drei";
 import * as THREE from "three";
+import { useRouteWarmer } from "@/components/perf/prefetch";
 import { pokeShadows } from "./shadowBus";
 
 // Wraps a desk object: hover lifts + scales it, fades in an accent ring and a
@@ -28,6 +29,10 @@ export function Hotspot({
   children: (hovered: boolean) => ReactNode;
 }) {
   const router = useRouter();
+  // Shared with the nav, the index strip and the legend, so an object the
+  // visitor has already toured past is not re-prefetched every time the pointer
+  // crosses it — a raycast hover fires far more often than a real hover does.
+  const warm = useRouteWarmer();
   const inner = useRef<THREE.Group>(null);
   const ringMat = useRef<THREE.MeshBasicMaterial>(null);
   const [hovered, setHovered] = useState(false);
@@ -66,7 +71,7 @@ export function Hotspot({
         e.stopPropagation();
         setHovered(true);
         pokeShadows(); // the lift moves geometry — un-freeze the shadow map
-        router.prefetch(href);
+        warm(href);
       }}
       onPointerOut={() => {
         setHovered(false);
@@ -74,6 +79,11 @@ export function Hotspot({
       }}
       onPointerDown={(e) => {
         downAt.current = { x: e.clientX, y: e.clientY };
+        // Touch has no hover, so pointerover either never fires or fires in the
+        // same breath as the tap. This is the only head start a phone gets on
+        // the hotspots — the interval between finger-down and the click that
+        // fires on lift. Dedupe upstream makes the desktop case a no-op.
+        warm(href);
       }}
       onClick={(e) => {
         e.stopPropagation();

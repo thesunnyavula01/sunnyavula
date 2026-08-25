@@ -5,6 +5,7 @@ import { MotionConfig, motion, type Variants } from "framer-motion";
 import { sections, type Section } from "@/content/sections";
 import { ACCENTS } from "@/components/desk/palette";
 import { Visual } from "@/components/viz";
+import { intentProps, useRouteWarmer } from "@/components/perf/prefetch";
 import { SectionHero } from "./SectionHero";
 import { StatBlock } from "./StatBlock";
 
@@ -22,10 +23,18 @@ const rise: Variants = {
 
 const inView = { once: true, margin: "-60px" } as const;
 
+// Intent-only, for the reason spelled out on the wordmark in Nav.tsx: `/` is
+// the heaviest route on the site, this link renders TWICE per subpage, and
+// Next's default would viewport-prefetch the whole desk bundle for every
+// visitor who arrives from search and never clicks it. Hover, keyboard focus
+// and finger-down all still warm it before the click lands.
 function BackToDesk({ className = "" }: { className?: string }) {
+  const warm = useRouteWarmer();
   return (
     <Link
       href="/"
+      prefetch={false}
+      {...intentProps(warm, "/")}
       className={`text-sm text-neutral-500 transition hover:text-neutral-200 ${className}`}
     >
       ← Back to the desk

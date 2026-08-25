@@ -5,6 +5,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, MotionConfig, motion } from "framer-motion";
 import { DESK_INTRO, sections, SITE } from "@/content/sections";
+import {
+  intentProps,
+  useIdleRouteWarm,
+  useRouteWarmer,
+  type Warm,
+} from "@/components/perf/prefetch";
 import { ACCENTS, PALETTE } from "./palette";
 import type { OrbitState } from "./CameraRig";
 import DeskCanvas from "./DeskCanvas";
@@ -85,6 +91,14 @@ const stopTarget = (i: number) =>
     : i === CONTACT
       ? "contact details"
       : sections[i - 1].nav;
+// The route a stop eventually leads to, or null for the two that lead nowhere
+// (the overview and the closing contact slide). Used only to decide what to
+// warm — the strip itself still just moves the camera.
+const stopHref = (i: number) =>
+  i === 0 || i === CONTACT ? null : `/${sections[i - 1].slug}`;
+// Module scope so the idle sweep's dependency key is stable without allocating
+// a throwaway array on every render — the deck re-renders on every stop.
+const SECTION_HREFS = sections.map((s) => `/${s.slug}`);
 
 // A 24px-wide encode of the hero image, inlined so a desk-shaped blur is
 // present in the server-rendered HTML itself — zero requests, so on a slow link
@@ -118,9 +132,13 @@ const PHONE_MQ = "(max-width: 639.98px)";
 // so it omits it and the same rows render as static text captioning the poster.
 function DeskLegend({
   onSelect,
+  warm,
   className = "",
 }: {
   onSelect?: (i: number) => void;
+  // Optional for the same reason `onSelect` is: the no-WebGL hero renders these
+  // rows as static text, where there is no camera to move and nothing to guess.
+  warm?: Warm;
   className?: string;
 }) {
   return (
@@ -159,6 +177,7 @@ function DeskLegend({
               <button
                 type="button"
                 onClick={() => onSelect(i)}
+                {...(warm ? intentProps(warm, `/${sections[i].slug}`) : {})}
                 // Reads as one sentence: what the object is, then where it goes.
                 aria-label={`${row.object} — ${row.line}. Go to ${sections[i].nav}.`}
                 className={`pointer-events-auto -mx-2 px-2 py-1 transition-colors hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/50 ${rowClass}`}
@@ -293,7 +312,19 @@ function FallbackHero() {
 // build as the copy block, and for the same reason: these are the smallest
 // glyphs on the page and they sit over whatever the camera has parked at the
 // bottom edge, which at the gavel and contact stops is bright lit wood.
-function IndexStrip({ stop, goTo }: { stop: number; goTo: (n: number) => void }) {
+function IndexStrip({
+  stop,
+  goTo,
+  warm,
+}: {
+  stop: number;
+  goTo: (n: number) => void;
+  // Hovering, tabbing to, or pressing a column is the clearest statement of
+  // where this visitor is going next. The column only moves the camera, but the
+  // section stop it lands on ends in an "Explore →" link, so warming the route
+  // here buys the whole gesture-plus-read interval as head start.
+  warm: Warm;
+}) {
   return (
     <nav
       aria-label="Tour stops"
@@ -307,6 +338,7 @@ function IndexStrip({ stop, goTo }: { stop: number; goTo: (n: number) => void })
             key={label}
             type="button"
             onClick={() => goTo(i)}
+            {...intentProps(warm, stopHref(i))}
             aria-label={`Stop ${pad(i)} — go to ${stopTarget(i)}`}
             aria-current={active ? "true" : undefined}
             // The shadow has to live on the BUTTON, not on the <nav> above it:
@@ -380,6 +412,20 @@ export function DeskScene() {
   // something only desktop visitors ever saw; they got a flat screenshot of it.
   const fallback = !webgl;
 
+  /* ------------------------- predictive route loading ------------------------- */
+  //
+  // The deck knows something no <Link> can: which section the visitor is
+  // LOOKING at. Parking the camera on a stop is a deliberate act — a wheel
+  // step, a swipe, an index-strip click — and the stop's copy card ends in
+  // "Explore <section> →". That makes arrival the strongest passive signal on
+  // the site, and it is what stop 1..4 warm on below.
+  //
+  // Everything speculative is gated behind `warmReady` so it can never compete
+  // with the 431 kB the desk itself is downloading. See
+  // components/perf/prefetch.ts for why that contention was worth removing.
+  const warm = useRouteWarmer();
+  const [warmReady, setWarmReady] = useState(false);
+
   const goTo = useCallback((next: number) => {
     const n = clamp(next, 0, STOPS - 1);
     if (n === stopRef.current) return;
@@ -391,6 +437,40 @@ export function DeskScene() {
     (dir: number) => goTo(Math.round(stopRef.current) + dir),
     [goTo]
   );
+
+  // Opens the speculative window once the thing the visitor is actually waiting
+  // for has finished. `live` is the canvas's first frame; `fallback` is the
+  // no-WebGL hero, which has nothing heavy to protect.
+  useEffect(() => {
+    if (live || fallback) {
+      setWarmReady(true);
+      return;
+    }
+    // WebGL can be present and still never paint — a lost context, a driver on
+    // the blocklist, a tab throttled while backgrounded. Without a floor those
+    // visitors would be stuck on intent-only warming forever, so the window
+    // opens on a timer regardless. Five seconds is past the measured
+    // last-script-lands mark (~900 ms on a warm connection) by enough margin
+    // that a merely slow link still finishes the desk first.
+    const t = window.setTimeout(() => setWarmReady(true), 5000);
+    return () => window.clearTimeout(t);
+  }, [live, fallback]);
+
+  // Arrival. Stops 1..4 are the four sections; stop 0 is the legend and
+  // CONTACT is the closing slide, and neither routes anywhere — hence the
+  // undefined-safe index rather than a range check.
+  useEffect(() => {
+    if (!warmReady) return;
+    const href = SECTION_HREFS[stop - 1];
+    // "intent" tier, not "idle": a visitor stepping through the tour has
+    // declared interest as clearly as a hover, and this should still work on
+    // the 3g connections the idle sweep deliberately sits out.
+    if (href) warm(href, "intent");
+  }, [stop, warmReady, warm]);
+
+  // Everything arrival and hover have not covered, one route per idle window,
+  // so a visitor who jumps straight from the legend to the nav never waits.
+  useIdleRouteWarm(SECTION_HREFS, warmReady);
 
   // Capability + preference detection.
   useEffect(() => {
@@ -770,6 +850,7 @@ export function DeskScene() {
                   </p>
                   <DeskLegend
                     onSelect={(i) => goTo(i + 1)}
+                    warm={warm}
                     className="mt-6 max-sm:mt-3"
                   />
                   {/* Tracking is 0.14em, not the 0.2em the other labels use:
@@ -866,7 +947,7 @@ export function DeskScene() {
           </span>
         </div>
 
-        <IndexStrip stop={stop} goTo={goTo} />
+        <IndexStrip stop={stop} goTo={goTo} warm={warm} />
       </MotionConfig>
     </section>
   );

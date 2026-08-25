@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { sections, SITE } from "@/content/sections";
 import { ACCENTS, PALETTE } from "@/components/desk/palette";
+import { intentProps, useRouteWarmer } from "@/components/perf/prefetch";
 
 const items = sections.map((s, i) => ({
   href: `/${s.slug}`,
@@ -31,6 +32,24 @@ export function Nav() {
 
   const home = pathname === "/";
   const current = items.find((it) => isActive(it.href, pathname));
+
+  const warm = useRouteWarmer();
+
+  // On the landing page these four links are the ones that would otherwise
+  // viewport-prefetch ~100 kB straight into the desk's 431 kB download — see
+  // components/perf/prefetch.ts. `prefetch={false}` turns that off; the deck
+  // re-warms all four from its own signals (camera arrival, then idle) once the
+  // canvas has actually painted, so coverage is unchanged and only the timing
+  // moves. Subpages keep Next's default: they carry no WebGL, so a sibling
+  // prefetch there competes with nothing worth protecting.
+  //
+  // NOTE: in the App Router `prefetch={false}` suppresses hover and touch
+  // prefetching too, not just viewport (verified in
+  // next/dist/client/app-dir/link.js — both handlers return early on
+  // `!prefetchEnabled`). `intentProps` is what puts intent-driven warming back,
+  // and it adds onFocus, which <Link> never covered on its own — so keyboard
+  // and screen-reader users get prediction here for the first time.
+  const linkPrefetch = home ? false : undefined;
 
   // Close on navigation — the bar stays mounted across route changes.
   useEffect(() => {
@@ -61,8 +80,17 @@ export function Nav() {
       className="pointer-events-none fixed inset-x-0 top-0 z-50 bg-gradient-to-b from-[#0a0c12]/85 via-[#0a0c12]/45 to-transparent pb-7 pt-5"
     >
       <div className="mx-auto flex max-w-[104rem] items-center justify-between gap-4 px-5 sm:px-9">
+        {/* `/` is intent-only from everywhere, and it is the one link on the
+            site where that matters most: home is 423 kB First Load against a
+            subpage's 177 kB, so viewport-prefetching it from every subpage was
+            the single largest speculative spend here — paid in full by anyone
+            who landed on /research from search and never went to the desk.
+            Visitors who arrived FROM the desk already hold those chunks in the
+            HTTP cache, so intent-driven warming costs them nothing either. */}
         <Link
           href="/"
+          prefetch={false}
+          {...intentProps(warm, home ? null : "/")}
           aria-current={home ? "page" : undefined}
           className="pointer-events-auto group flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.26em] text-neutral-200 transition-colors hover:text-white"
         >
@@ -84,6 +112,8 @@ export function Nav() {
               <li key={it.href}>
                 <Link
                   href={it.href}
+                  prefetch={linkPrefetch}
+                  {...intentProps(warm, active ? null : it.href)}
                   aria-current={active ? "page" : undefined}
                   className="block border-b pb-1 font-mono text-[11px] uppercase tracking-[0.2em] transition-colors"
                   style={{
@@ -146,6 +176,8 @@ export function Nav() {
                     <li key={it.href} className="border-b border-white/5 last:border-b-0">
                       <Link
                         href={it.href}
+                        prefetch={it.href === "/" ? false : linkPrefetch}
+                        {...intentProps(warm, active ? null : it.href)}
                         aria-current={active ? "page" : undefined}
                         onClick={() => setOpen(false)}
                         className="flex items-center gap-3 px-4 py-3 font-mono text-[11px] uppercase tracking-[0.2em] text-neutral-300 active:bg-white/5"
