@@ -76,7 +76,7 @@ export function PlaceboRange() {
     <Figure
       accent={VIZ.s1}
       title="Six countries that never cut their top rate broke in 1981 too"
-      takeaway="If ERTA caused the break, countries that passed no such tax cut should show nothing in 1981. All six show one — and the US result lands inside their range rather than beyond it. That rules out the simple story, and it is the reason the paper argues the narrower one."
+      takeaway="If ERTA caused the break, countries that passed no such tax cut should show nothing in 1981. All six show one, and the US result lands inside their range rather than beyond it. That rules out the simple story, and it is the reason the paper argues the narrower one."
       subtitle="The same Chow test applied at 1981 to OECD economies with no comparable 1979–83 top-rate reduction. Each bar is that test's F-statistic: the longer it runs, the more sharply the country's trend snapped in 1981. New Zealand, which cut nothing, scores 97.1. The United States scores 96.2."
       source={`F-statistics at 1981. Published values exist for ${known
         .map((k) => k.name)
@@ -84,7 +84,7 @@ export function PlaceboRange() {
         .map((u) => u.name)
         .join(
           ", "
-        )} are reported as significant without a figure, so they are counted in the tally but not plotted. An F-statistic here measures how much better the years before and after 1981 fit as two separate trends than as one — ${
+        )} are reported as significant without a figure, so they are counted in the tally but not plotted. An F-statistic here measures how much better the years before and after 1981 fit as two separate trends than as one, ${
         known[known.length - 1].name
       }'s ${known[known.length - 1].f.toFixed(
         1
@@ -102,7 +102,7 @@ export function PlaceboRange() {
             known[known.length - 1].name
           } scores ${known[known.length - 1].f}. The United States, which enacted ERTA, scores ${
             P.us
-          } — inside the placebo range of ${P.range[0]} to ${
+          }, inside the placebo range of ${P.range[0]} to ${
             P.range[1]
           }, not beyond it. ${unknown.length} further countries broke significantly without a published figure.`}
         >
@@ -293,7 +293,7 @@ export function PlaceboRange() {
               fontSize={9.5}
               fill={VIZ.ink}
             >
-              Chow F-statistic at 1981 — bigger means a sharper break
+              Chow F-statistic at 1981, bigger means a sharper break
             </text>
           </g>
         </svg>

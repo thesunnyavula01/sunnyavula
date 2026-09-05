@@ -97,9 +97,9 @@ export function DistributionShift() {
     <Figure
       accent={VIZ.s1}
       title="Two different worlds, not one world drifting"
-      takeaway="Line the two eras up side by side and they barely overlap. The post-1981 curve sits well to the right — a bigger share — and is also much flatter, which means top incomes swung far harder from year to year than they used to."
-      subtitle={`The top 1% share averaged ${D.pre.mean}% across ${D.pre.n} pre-ERTA years and ${D.post.mean}% across ${D.post.n} post-ERTA years — a ${D.meanShift}pp shift that a Welch two-sample t-test rejects as chance at t = −10.10, p < 0.001. The spread more than doubled too, from σ 1.09 to σ 2.77.`}
-      source="Normal approximations drawn from the mean and standard deviation reported in Table 1 of the paper (pre: 11.60 ± 1.09; post: 16.45 ± 2.77). The real series is not necessarily normal — this shows the location and spread the test compares, not the empirical histogram. Year counts under the slider are that same approximation applied to each period's length, so they are estimates rather than a tally of observations."
+      takeaway="Line the two eras up side by side and they barely overlap. The post-1981 curve sits well to the right, a bigger share, and is also much flatter, which means top incomes swung far harder from year to year than they used to."
+      subtitle={`The top 1% share averaged ${D.pre.mean}% across ${D.pre.n} pre-ERTA years and ${D.post.mean}% across ${D.post.n} post-ERTA years, a ${D.meanShift}pp shift that a Welch two-sample t-test rejects as chance at t = −10.10, p < 0.001. The spread more than doubled too, from σ 1.09 to σ 2.77.`}
+      source="Normal approximations drawn from the mean and standard deviation reported in Table 1 of the paper (pre: 11.60 ± 1.09; post: 16.45 ± 2.77). The real series is not necessarily normal, this shows the location and spread the test compares, not the empirical histogram. Year counts under the slider are that same approximation applied to each period's length, so they are estimates rather than a tally of observations."
       legend={
         <Legend
           items={[
@@ -301,7 +301,7 @@ export function DistributionShift() {
               <div className="min-w-0">
                 <dt className="text-[11px] text-neutral-500">
                   {r.label} {r.years}
-                  <span className="sr-only"> — years above the threshold</span>
+                  <span className="sr-only">, years above the threshold</span>
                 </dt>
                 <dd
                   className="text-base font-bold leading-tight text-neutral-100"

@@ -1,0 +1,65 @@
+.agency { --paper: #f1f0ea; --bright: #f8f7f2; --ink: #080808; --purple: #8a4dff; --accent: #a475ff; --pad: clamp(20px, 5vw, 80px); background: var(--bright); color: var(--ink); font-family: Arial, Helvetica, sans-serif; }
+.agency a:focus-visible, .agency video:focus-visible { outline: 3px solid var(--purple); outline-offset: 6px; }
+.agency a { text-underline-offset: 6px; }
+.agency a:hover { text-decoration: underline; }
+.agency h2 { font-size: clamp(36px, 5.3vw, 76px); line-height: 1; letter-spacing: -.055em; font-weight: 600; }
+.agency h3 { font-size: clamp(22px, 2.1vw, 30px); letter-spacing: -.035em; font-weight: 500; }
+.agency section { scroll-margin-top: 80px; }
+.hero { background: var(--ink); color: var(--bright); padding: 100px var(--pad) 48px; }
+.topline { display: flex; align-items: center; justify-content: space-between; color: var(--accent); margin-bottom: 58px; font-size: 14px; }
+.topline > a:last-child { font-size: 28px; font-weight: 700; letter-spacing: -.08em; }
+.agency sup { font-family: Georgia, serif; font-style: italic; font-size: .5em; top: -.7em; }
+.kicker { font-size: 14px; color: var(--accent); margin-bottom: 24px; }
+.hero h1 { font-size: clamp(80px, 16vw, 230px); line-height: .87; letter-spacing: -.085em; font-weight: 650; }
+.hero h1 span { display: block; color: var(--purple); margin-left: .28em; }
+.heroBottom { display: flex; justify-content: space-between; align-items: flex-end; gap: 48px; margin-top: 70px; }
+.heroBottom > a, .heroBottom p { font-size: 14px; color: var(--accent); }
+.heroBottom > div { width: min(100%, 410px); }
+.heroBottom ul { margin-top: 16px; }
+.heroBottom li { border-top: 1px solid #ffffff33; padding: 10px 0; font-size: 18px; }
+.intro { padding: 90px var(--pad); border-bottom: 1px solid #08080833; }
+.intro > p { max-width: 1150px; font: 400 clamp(28px, 3.6vw, 52px)/1.13 Georgia, serif; letter-spacing: -.035em; }
+.intro .motto { margin-top: 28px; color: #7035d6; font-style: italic; }
+.work { padding: 80px var(--pad) 110px; }
+.sectionHeading { display: flex; align-items: flex-end; justify-content: space-between; gap: 30px; padding-bottom: 24px; border-bottom: 1px solid var(--purple); }
+.sectionHeading > p { color: #7035d6; flex-shrink: 0; }
+.sectionHeading h2 { max-width: 700px; text-align: right; }
+.campaign { margin-top: 40px; }
+.campaignStage { position: relative; display: grid; place-items: center; padding: 48px 20px; background: #dedbd5; overflow: hidden; }
+.campaignStage > span { position: absolute; font-size: clamp(65px, 16vw, 220px); font-weight: 700; letter-spacing: -.07em; color: #b4afa7; }
+.campaign video { position: relative; width: min(100%, 310px); max-height: 550px; background: var(--ink); }
+.campaign figcaption, .caption { display: flex; justify-content: space-between; gap: 16px; align-items: baseline; padding-top: 16px; }
+.caption p, .campaign figcaption p { color: #5e5d58; }
+.projects { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 48px 30px; margin-top: 70px; }
+.projects > a:last-child { grid-column: 1 / -1; }
+.projects img { width: 100%; height: auto; aspect-ratio: 8 / 5; object-fit: cover; }
+.services, .studio, .contact { display: grid; grid-template-columns: 1fr 1fr; gap: 70px; padding: 100px var(--pad); }
+.services, .contact { background: var(--ink); color: var(--bright); }
+.services li { border-top: 1px solid #ffffff33; padding: 25px 0; }
+.services li p { margin-top: 12px; color: #b6b3ad; max-width: 36ch; }
+.studio { background: var(--paper); align-items: center; }
+.studio .kicker { color: #7035d6; }
+.monogram { font-size: clamp(120px, 22vw, 300px); letter-spacing: -.09em; font-weight: 700; }
+.monogram sup { color: var(--purple); }
+.studio ul { margin-top: 38px; }
+.studio li { border-top: 1px solid #08080833; padding: 18px 0; }
+.studio li p { margin-top: 6px; color: #5e5d58; }
+.contact > div:last-child { align-self: end; }
+.cta { display: inline-block; border-bottom: 1px solid var(--accent); padding: 16px 0; color: var(--accent); font-size: 20px; }
+.contact > div > p:last-child:not(.kicker) { margin-top: 32px; color: #b6b3ad; }
+@media (max-width: 700px) {
+  .hero { padding-top: 92px; }
+  .topline { margin-bottom: 45px; }
+  .hero h1 { font-size: clamp(70px, 22vw, 150px); }
+  .hero h1 span { margin-left: 0; }
+  .heroBottom { flex-direction: column-reverse; align-items: flex-start; gap: 32px; margin-top: 48px; }
+  .heroBottom > div { width: 100%; }
+  .intro, .work { padding-block: 64px; }
+  .sectionHeading { display: block; }
+  .sectionHeading h2 { text-align: left; margin-top: 20px; }
+  .projects, .services, .studio, .contact { grid-template-columns: 1fr; gap: 40px; }
+  .services, .studio, .contact { padding-block: 64px; }
+  .campaign figcaption, .caption { display: block; }
+  .caption p, .campaign figcaption p { margin-top: 5px; }
+  .monogram { font-size: 44vw; }
+}

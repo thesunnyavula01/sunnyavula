@@ -18,7 +18,7 @@ const OG_IMAGE = {
   url: "/opengraph-image",
   width: 1200,
   height: 630,
-  alt: `${SITE.fullName} — research, ATT Agency, markets, and leadership`,
+  alt: `${SITE.fullName}, research, ATT Agency, markets, and leadership`,
   type: "image/png",
 };
 
@@ -75,7 +75,7 @@ export function pageMetadata({
 export function sectionMetadata(section: Section): Metadata {
   return pageMetadata({
     title: section.nav,
-    ogTitle: `${section.nav} — ${SITE.fullName}`,
+    ogTitle: `${section.nav}, ${SITE.fullName}`,
     description: section.metaDescription,
     path: `/${section.slug}`,
   });

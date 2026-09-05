@@ -84,7 +84,7 @@ export const ERTA_SPECS: Spec[] = [
     name: "Welch two-sample t-test",
     question: "Did the top 1%'s share of income actually change after 1981?",
     answer:
-      "Yes. The average went from 11.6% to 16.5% of all US income — a jump of 4.85 points.",
+      "Yes. The average went from 11.6% to 16.5% of all US income, a jump of 4.85 points.",
     stat: "t = −10.10, p < 0.001",
     plainStat:
       "If nothing had really changed, a gap this large would turn up less than once in a thousand tries.",
@@ -99,28 +99,28 @@ export const ERTA_SPECS: Spec[] = [
     name: "Chow structural-break test",
     question: "Is 1981 a real break, or just one long trend bending?",
     answer:
-      "A real break. The line does not bend — it turns around and heads the other way.",
+      "A real break. The line does not bend. It turns around and heads the other way.",
     stat: "F(2, 61) = 86.03, p < 0.001",
     plainStat:
       "The years before and after 1981 fit far better as two separate lines than as one. Again, less than a one-in-a-thousand fluke.",
     verdict: "signal",
     finding:
-      "The break at 1981 is statistically overwhelming, and the trend does not merely steepen — it reverses. The pre-1981 slope is −0.156pp/year; the post-1981 slope is +0.206pp/year.",
+      "The break at 1981 is statistically overwhelming, and the trend does not merely steepen; it reverses. The pre-1981 slope is −0.156pp/year; the post-1981 slope is +0.206pp/year.",
     caveat:
-      "A Chow test has to be told where to look. Handing it 1981 and getting a break at 1981 is weaker evidence than finding 1981 without being told — which is what the next test is for.",
+      "A Chow test has to be told where to look. Handing it 1981 and getting a break at 1981 is weaker evidence than finding 1981 without being told, which is what the next test is for.",
   },
   {
     id: "quandt",
     name: "Quandt-Andrews supremum test",
     question: "If you don't tell the test where to look, which year does it pick?",
     answer:
-      "1977 — four years before ERTA was signed. 1981 comes second.",
+      "1977, four years before ERTA was signed. 1981 comes second.",
     stat: "max F = 107.8 at 1977 · 1981 F = 96.2",
     plainStat:
       "Every candidate year in the series was scored as a possible break point. 1977 scored highest at 107.8; 1981 scored 96.2.",
     verdict: "signal",
     finding:
-      "Searching every candidate year with 15% trimming, the maximum break statistic lands on 1977 — four years before ERTA was enacted. 1981 comes second.",
+      "Searching every candidate year with 15% trimming, the maximum break statistic lands on 1977, four years before ERTA was enacted. 1981 comes second.",
     caveat:
       "This complicates a strict 'ERTA was the trigger' timeline. Trucking and airline deregulation began in 1978–79, the Volcker tightening in October 1979, and private-sector unionization was already falling. It supports the weaker, defensible claim: ERTA accelerated and locked in a shift that had started.",
   },
@@ -129,7 +129,7 @@ export const ERTA_SPECS: Spec[] = [
     name: "OECD placebo test",
     question: "Did countries that never cut their top rate break in 1981 too?",
     answer:
-      "Yes — all six of them. This is the result that damages the simple story.",
+      "Yes, all six of them. This is the result that damages the simple story.",
     stat: "6 of 6 significant · F 5.0 → 97.1",
     plainStat:
       "Six comparison countries, six significant 1981 breaks. The US score of 96.2 lands inside their range, not beyond it.",
@@ -144,7 +144,7 @@ export const ERTA_SPECS: Spec[] = [
     name: "Two-way fixed-effects panel",
     question: "Across 17 rich economies, does cutting the top rate raise the top share?",
     answer:
-      "No measurable effect. A 10-point cut moves the top share about a tenth of a point — indistinguishable from zero.",
+      "No measurable effect. A 10-point cut moves the top share about a tenth of a point, indistinguishable from zero.",
     stat: "β = −0.0097, clustered SE 0.0286, p = 0.738",
     plainStat:
       "A result at least this large would turn up about three times in four even if rate cuts did nothing at all.",
@@ -165,7 +165,7 @@ export const ERTA_SPECS: Spec[] = [
       "Every year from the cut through five years later is indistinguishable from no change, and the estimates lean slightly negative.",
     verdict: "null",
     finding:
-      "Across 42 events of 5pp or more — ERTA (−19pp), Thatcher (−15pp), Sweden (−24pp), New Zealand (−18pp) — every estimated coefficient is indistinguishable from zero. Point estimates run slightly negative: −0.04 at k=0, −0.15 at k=5.",
+      "Across 42 events of 5pp or more, including ERTA (−19pp), Thatcher (−15pp), Sweden (−24pp), and New Zealand (−18pp), every estimated coefficient is indistinguishable from zero. Point estimates run slightly negative: −0.04 at k=0, −0.15 at k=5.",
     caveat:
       "Pooling heterogeneous reforms dilutes the signal; the Nordic 1990–91 restructurings paired cuts with base-broadening. The confidence intervals are wide enough to contain economically meaningful effects in both directions.",
   },
@@ -256,7 +256,7 @@ export const VSD_STAGES = [
     label: "Screen",
     title: "Find the bottleneck, not the trend",
     body:
-      "Everyone can see the trend. The formula looks one layer beneath it, for the input that physically cannot scale as fast as the demand pulling on it — the constraint that turns a story into pricing power.",
+      "Everyone can see the trend. The formula looks one layer beneath it, for the input that physically cannot scale as fast as the demand pulling on it, the constraint that turns a story into pricing power.",
     example:
       "AI data centers need baseload power faster than baseload power can be built. The trend is AI; the bottleneck is generation.",
   },

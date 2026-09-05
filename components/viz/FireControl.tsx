@@ -43,9 +43,9 @@ export function FireControl() {
     <Figure
       accent={VIZ.s1}
       title="One missing control was hiding the whole effect"
-      takeaway="Measured on its own, the top tax rate looks unrelated to what the top 1% take home. Add one thing the model was missing — how large finance, insurance and real estate had grown as a share of the economy — and the relationship appears, pointing the expected way. Finance had been absorbing the effect."
+      takeaway="Measured on its own, the top tax rate looks unrelated to what the top 1% take home. Add one thing the model was missing, how large finance, insurance and real estate had grown as a share of the economy, and the relationship appears, pointing the expected way. Finance had been absorbing the effect."
       subtitle={`The coefficient on the top marginal rate in a single-country US regression, before and after adding the FIRE sector's share of GDP as a control. It moves from +${a} (p = ${F.rateBefore.p}, ${F.rateBefore.label}) to ${b} (p = ${F.rateAfter.p}, ${F.rateAfter.label}).`}
-      source={`FIRE share enters with β = ${F.fire.beta} (SE ${F.fire.se}, p ${F.fire.p}). HAC p-values throughout. From the paper's single-country specification. A coefficient here is how much the top 1% share moves for each one-point change in the top marginal rate; left of zero means cutting the rate raises the share. A p-value is how often a result this large would turn up by luck if the true effect were zero — so 0.778 is "routinely", and 0.015 is "about three times in two hundred".`}
+      source={`FIRE share enters with β = ${F.fire.beta} (SE ${F.fire.se}, p ${F.fire.p}). HAC p-values throughout. From the paper's single-country specification. A coefficient here is how much the top 1% share moves for each one-point change in the top marginal rate; left of zero means cutting the rate raises the share. A p-value is how often a result this large would turn up by luck if the true effect were zero, so 0.778 is "routinely", and 0.015 is "about three times in two hundred".`}
     >
       <ChartScroll>
         <svg

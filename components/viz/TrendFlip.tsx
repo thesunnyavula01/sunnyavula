@@ -56,9 +56,9 @@ export function TrendFlip() {
     <Figure
       accent={VIZ.s1}
       title="Before 1981 the top 1% share was shrinking. After 1981 it grew."
-      takeaway="For two decades the richest 1% were taking a slowly shrinking slice of American income. Around 1981 that reversed, and it has been climbing ever since. The line does not just get steeper — it changes direction."
-      subtitle="Fitted least-squares trend in the US top 1% pre-tax income share, before and after the break. A Chow test puts the break at 1981 with F(2, 61) = 86.03, p < 0.001 — less than a one-in-a-thousand chance of a split this clean if the two eras really followed one trend."
-      source="Fitted lines only. Each is drawn from the period mean and slope reported in the paper (pre: 11.60% and −0.156pp/yr; post: 16.45% and +0.206pp/yr) — the underlying year-by-year WID.world series is not reproduced here. Shaded bands are each period's observed min–max. A percentage point (pp) is one point of the national income pie, so +0.206pp/yr means the top 1% gained about a fifth of a point of all US income every year after 1981."
+      takeaway="For two decades the richest 1% were taking a slowly shrinking slice of American income. Around 1981 that reversed, and it has been climbing ever since. The line does not just get steeper. It changes direction."
+      subtitle="Fitted least-squares trend in the US top 1% pre-tax income share, before and after the break. A Chow test puts the break at 1981 with F(2, 61) = 86.03, p < 0.001, less than a one-in-a-thousand chance of a split this clean if the two eras really followed one trend."
+      source="Fitted lines only. Each is drawn from the period mean and slope reported in the paper (pre: 11.60% and −0.156pp/yr; post: 16.45% and +0.206pp/yr), the underlying year-by-year WID.world series is not reproduced here. Shaded bands are each period's observed min–max. A percentage point (pp) is one point of the national income pie, so +0.206pp/yr means the top 1% gained about a fifth of a point of all US income every year after 1981."
       legend={
         <Legend
           items={[

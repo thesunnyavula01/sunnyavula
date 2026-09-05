@@ -39,17 +39,17 @@ export default function Home() {
           ))}
           <li>
             <a href={`mailto:${SITE.email}`}>
-              Contact — email {SITE.fullName} at {SITE.email}
+              Contact, email {SITE.fullName} at {SITE.email}
             </a>
           </li>
           <li>
             <a href={SITE.phoneHref}>
-              Contact — call {SITE.fullName} at {SITE.phone}
+              Contact, call {SITE.fullName} at {SITE.phone}
             </a>
           </li>
           <li>
             <a href={SITE.attAgency} rel="noopener noreferrer">
-              ATT Agency — attagency.co, the Boulder growth studio co-founded by{" "}
+              ATT Agency, attagency.co, the Boulder marketing team co-founded by{" "}
               {SITE.fullName}
             </a>
           </li>

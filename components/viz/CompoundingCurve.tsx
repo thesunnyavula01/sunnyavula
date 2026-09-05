@@ -64,9 +64,9 @@ export function CompoundingCurve() {
     <Figure
       accent={VIZ.s3}
       title="What ~27% a year does to $35,000"
-      takeaway={`$35,000 became $91,000. Money growing at a normal long-run market return of about 10% a year would have reached roughly ${money(END_BASE)} over the same stretch. Most of that gap opens up in the last two years — that is what compounding does, and it is the argument for a repeatable method over one good call.`}
-      subtitle={`The formula compounded at roughly ${(V.cagr * 100).toFixed(1)}% and took the portfolio from $35k to $91k — about ${V.years} years at that rate — against a ${(V.baselineCagr * 100).toFixed(0)}% long-run reference.`}
-      source="$35k to $91k at ~27% CAGR — the compounding path implied by the endpoints, not a record of actual positions. Intermediate points are arithmetic, not marks; the axis is deliberately undated. The reference line is a flat 10%/yr, not a dated S&P return over the same window. CAGR means compound annual growth rate: the single yearly rate that turns the starting figure into the ending one."
+      takeaway={`$35,000 became $91,000. Money growing at a normal long-run market return of about 10% a year would have reached roughly ${money(END_BASE)} over the same stretch. Most of that gap opens up in the last two years, that is what compounding does, and it is the argument for a repeatable method over one good call.`}
+      subtitle={`The formula compounded at roughly ${(V.cagr * 100).toFixed(1)}% and took the portfolio from $35k to $91k, about ${V.years} years at that rate, against a ${(V.baselineCagr * 100).toFixed(0)}% long-run reference.`}
+      source="$35k to $91k at ~27% CAGR, the compounding path implied by the endpoints, not a record of actual positions. Intermediate points are arithmetic, not marks; the axis is deliberately undated. The reference line is a flat 10%/yr, not a dated S&P return over the same window. CAGR means compound annual growth rate: the single yearly rate that turns the starting figure into the ending one."
       legend={
         <Legend
           items={[

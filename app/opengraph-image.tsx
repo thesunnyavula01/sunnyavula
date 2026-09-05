@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 import { SITE, sections } from "@/content/sections";
 
-export const alt = `${SITE.name} — research, ATT Agency, markets, and leadership`;
+export const alt = `${SITE.name}, research, ATT Agency, markets, and leadership`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -39,7 +39,7 @@ export default function OpengraphImage() {
             {SITE.name}
           </div>
           <div style={{ fontSize: 34, marginTop: 20, color: "#4a453c" }}>
-            Research, a dev agency, markets, and leadership — all on one desk.
+            Research, marketing, markets, and leadership. All on one desk.
           </div>
         </div>
 

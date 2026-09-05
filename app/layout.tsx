@@ -41,7 +41,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: {
     default: SITE.metaTitle,
-    template: `%s — ${SITE.fullName}`,
+    template: `%s, ${SITE.fullName}`,
   },
   description: SITE.metaDescription,
   // "./" resolves against metadataBase *per route*, so any route that does not

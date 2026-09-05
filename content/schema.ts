@@ -60,11 +60,10 @@ export const agencySchema = {
   name: "ATT Agency",
   url: SITE.attAgency,
   description:
-    "A Boulder, Colorado creative growth studio helping small businesses hurt by the digital divide modernize their digital infrastructure — brand, website, ad creative, and analytics from one team.",
-  slogan: "Growth, designed on purpose.",
+    "A full service marketing team in Boulder, Colorado for growing businesses, covering advertising, social media management, website development, and SEO & AEO.",
+  slogan: "Ideas are easy. Execution is everything.",
   founder: { "@id": PERSON_ID },
   numberOfEmployees: 3,
-  priceRange: "From $99",
   address: {
     "@type": "PostalAddress",
     addressLocality: "Boulder",
@@ -77,13 +76,10 @@ export const agencySchema = {
     { "@type": "Country", name: "United States" },
   ],
   serviceType: [
-    "Web design and development",
-    "Branding and logo design",
-    "Website deployment",
-    "Paid advertising campaigns",
-    "Ad creative and video production",
-    "Analytics and reporting",
-    "Product design",
+    "Advertising",
+    "Social media management",
+    "Website development",
+    "SEO & AEO",
   ],
 };
 

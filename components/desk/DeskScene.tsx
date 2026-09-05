@@ -179,7 +179,7 @@ function DeskLegend({
                 onClick={() => onSelect(i)}
                 {...(warm ? intentProps(warm, `/${sections[i].slug}`) : {})}
                 // Reads as one sentence: what the object is, then where it goes.
-                aria-label={`${row.object} — ${row.line}. Go to ${sections[i].nav}.`}
+                aria-label={`${row.object}, ${row.line}. Go to ${sections[i].nav}.`}
                 className={`pointer-events-auto -mx-2 px-2 py-1 transition-colors hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/50 ${rowClass}`}
               >
                 {dot}
@@ -339,7 +339,7 @@ function IndexStrip({
             type="button"
             onClick={() => goTo(i)}
             {...intentProps(warm, stopHref(i))}
-            aria-label={`Stop ${pad(i)} — go to ${stopTarget(i)}`}
+            aria-label={`Stop ${pad(i)}, go to ${stopTarget(i)}`}
             aria-current={active ? "true" : undefined}
             // The shadow has to live on the BUTTON, not on the <nav> above it:
             // text-shadow is an inherited property, but the UA stylesheet
@@ -650,7 +650,7 @@ export function DeskScene() {
       ref={deckRef}
       role="region"
       aria-roledescription="carousel"
-      aria-label="Portfolio tour — scroll, use arrow keys, or the index strip to move between stops"
+      aria-label="Portfolio tour, scroll, use arrow keys, or the index strip to move between stops"
       className="relative h-[100svh] select-none overflow-hidden overscroll-none bg-[radial-gradient(120%_120%_at_50%_0%,#1a1f2e_0%,#10131c_55%,#0a0c12_100%)] max-sm:flex max-sm:flex-col"
       style={{ touchAction: phone ? undefined : "none" }}
     >
@@ -659,7 +659,7 @@ export function DeskScene() {
         className={`absolute inset-0 max-sm:relative max-sm:inset-auto max-sm:min-h-0 max-sm:flex-1 ${grabbing ? "cursor-grabbing" : "cursor-grab"}`}
         style={{ touchAction: phone ? "none" : undefined }}
         role="img"
-        aria-label="Interactive 3D desk in a study corner — each object opens a section: papers for Research, laptop for ATT Agency, trading monitor for Markets, gavel and microphone for Leadership, and the phone closes the tour on contact details. Drag to look around."
+        aria-label="Interactive 3D desk in a study corner, each object opens a section: papers for Research, laptop for ATT Agency, trading monitor for Markets, gavel and microphone for Leadership, and the phone closes the tour on contact details. Drag to look around."
         onPointerDown={(e) => {
           if (e.pointerType === "touch") return;
           dragLast.current = { x: e.clientX, y: e.clientY };

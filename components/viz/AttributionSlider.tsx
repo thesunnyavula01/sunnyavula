@@ -43,7 +43,7 @@ export function AttributionSlider() {
         Cut the top tax rate by one point and the top 1%&rsquo;s share of income
         rises about five hundredths of a point that year ({A.beta}). ERTA cut it
         by {A.ertaCut} points. Run that forward and it accounts for roughly an
-        eighth of the {A.observedRise}-point rise since 1980 — not the whole
+        eighth of the {A.observedRise}-point rise since 1980, not the whole
         story, which is the paper&rsquo;s actual claim.
       </p>
       <p className="mt-3 text-xs leading-relaxed text-neutral-400">
@@ -161,7 +161,7 @@ export function AttributionSlider() {
             <span className="font-semibold text-neutral-300">
               At ERTA&rsquo;s actual {A.ertaCut}-point cut
             </span>{" "}
-            the estimate attributes about 1.0 point — roughly 12% of the observed
+            the estimate attributes about 1.0 point, roughly 12% of the observed
             rise. The other 88% is what the complementary policies amplified: the
             10b-18 buyback regime, OBRA welfare contraction, the PAC explosion,
             and antitrust retrenchment.

@@ -144,7 +144,7 @@ export function Nav() {
             className="flex items-center gap-2 border-b border-white/20 pb-1 font-mono text-[11px] uppercase tracking-[0.2em] text-neutral-200"
           >
             {current ? current.label : "Index"}
-            <span className="sr-only">— open menu</span>
+            <span className="sr-only"> Open menu</span>
             <svg
               aria-hidden="true"
               viewBox="0 0 12 8"
