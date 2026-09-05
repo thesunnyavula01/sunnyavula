@@ -228,7 +228,23 @@ export const sections: Section[] = [
       { value: "4", label: "marketing capabilities" },
       { value: "Boulder", label: "Colorado" },
     ],
-    narrative: [],
+    narrative: [
+      {
+        heading: "One team. The full picture.",
+        body: "Our work covers advertising strategy and campaigns, social content and channel management, websites built around business goals, and SEO & AEO. I handle strategy, accounts, and reporting alongside Saras Totey on web, technology, and search, and Ryder Thomas on creative, advertising, and video.",
+      },
+      {
+        kicker: "Featured work",
+        heading: "Websites and campaigns",
+        body: "The work featured on our agency site includes BAIR's musician portfolio, Kodama's product launch, Shital Tayde's artist portfolio, and a paid social campaign for Thriftly.",
+        links: [
+          { label: "BAIR", href: "https://bair.netlify.app/" },
+          { label: "Kodama", href: "https://askkodama.com/" },
+          { label: "Shital Tayde", href: "https://shital-tayde-art.pages.dev/" },
+          { label: "Thriftly campaign", href: "https://attagency.co/#work" },
+        ],
+      },
+    ],
     links: [{ label: "Visit ATT Agency", href: "https://attagency.co/" }],
   },
   {
