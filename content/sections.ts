@@ -4,6 +4,14 @@
 export type Stat = { value: string; label: string };
 export type OutboundLink = { label: string; href: string };
 
+export type ProjectInsight = {
+  name: string;
+  category: string;
+  summary: string;
+  insight: string;
+  link: OutboundLink;
+};
+
 /**
  * Figures a narrative block can attach. The vocabulary lives here rather than
  * in components/viz so the dependency points the right way: content names the
@@ -29,6 +37,7 @@ export type NarrativeBlock = {
   bullets?: string[];
   links?: OutboundLink[]; // outbound buttons rendered under this block
   visual?: VisualKey; // figure rendered after the bullets, before the links
+  projects?: ProjectInsight[];
 };
 
 export type Section = {
@@ -236,12 +245,36 @@ export const sections: Section[] = [
       {
         kicker: "Featured work",
         heading: "Websites and campaigns",
-        body: "The work featured on our agency site includes BAIR's musician portfolio, Kodama's product launch, Shital Tayde's artist portfolio, and a paid social campaign for Thriftly.",
-        links: [
-          { label: "BAIR", href: "https://bair.netlify.app/" },
-          { label: "Kodama", href: "https://askkodama.com/" },
-          { label: "Shital Tayde", href: "https://shital-tayde-art.pages.dev/" },
-          { label: "Thriftly campaign", href: "https://attagency.co/#work" },
+        body: "Selected work from ATT Agency. Open a project for a closer look at what it does and how it is presented.",
+        projects: [
+          {
+            name: "BAIR",
+            category: "Musician website",
+            summary: "A home for Boulder musician Benjamin Arons, his releases, and his artist identity.",
+            insight: "Desktop-style windows organize songs, photos, and an artist introduction. Listeners can explore releases like luvly and MIDNIGHT., move straight to streaming platforms, or find a booking contact.",
+            link: { label: "Visit BAIR", href: "https://bair.netlify.app/" },
+          },
+          {
+            name: "Kodama",
+            category: "Product launch",
+            summary: "An introduction to an AI historian for Discord communities.",
+            insight: "The product centers on server lore and memory: helping a community revisit its shared history. The launch site gives that idea a dedicated home and introduces Kodama to prospective users.",
+            link: { label: "Visit Kodama", href: "https://askkodama.com/" },
+          },
+          {
+            name: "Shital Tayde",
+            category: "Artist portfolio",
+            summary: "A gallery for a Boulder painter working across wildlife, landscapes, and portraits.",
+            insight: "Featured paintings lead into a full gallery and an artist biography. Clear titles and categories help visitors explore the collection, with a direct inquiry route for anyone interested in a painting.",
+            link: { label: "Visit Shital Tayde", href: "https://shital-tayde-art.pages.dev/" },
+          },
+          {
+            name: "Thriftly",
+            category: "Paid social campaign",
+            summary: "Video creative featured in ATT Agency's advertising work.",
+            insight: "The agency's work page presents the campaign as a playable video, giving prospective clients a direct look at the creative alongside the studio's website projects.",
+            link: { label: "View Thriftly campaign", href: "https://attagency.co/#work" },
+          },
         ],
       },
     ],

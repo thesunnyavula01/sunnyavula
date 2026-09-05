@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { MotionConfig, motion, type Variants } from "framer-motion";
 import { sections, type Section } from "@/content/sections";
-import { ACCENTS } from "@/components/desk/palette";
+import { ACCENTS, PALETTE } from "@/components/desk/palette";
 import { Visual } from "@/components/viz";
 import { intentProps, useRouteWarmer } from "@/components/perf/prefetch";
 import { SectionHero } from "./SectionHero";
 import { StatBlock } from "./StatBlock";
+import { ProjectInsights } from "./ProjectInsights";
 
 // Shared entrance. The curve is the same decelerating one the figures use
 // (EASE_OUT in components/viz/motion.ts) so a block and the chart inside it
@@ -98,6 +99,7 @@ export function SectionPage({ section }: { section: Section }) {
                 </ul>
               )}
               {block.visual && <Visual name={block.visual} />}
+              {block.projects && <ProjectInsights projects={block.projects} accent={accent} />}
               {block.links && block.links.length > 0 && (
                 <div className="mt-5 flex flex-wrap gap-3">
                   {block.links.map((l) => (
@@ -106,8 +108,8 @@ export function SectionPage({ section }: { section: Section }) {
                       href={l.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="rounded-full px-5 py-2 text-sm font-semibold text-white shadow-md transition hover:scale-[1.03] hover:opacity-95 active:scale-100"
-                      style={{ backgroundColor: accent }}
+                      className="inline-flex min-h-11 items-center rounded-full px-5 py-2 text-sm font-semibold shadow-md transition hover:opacity-95 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+                      style={{ backgroundColor: accent, color: PALETTE.bg }}
                     >
                       {l.label} ↗
                     </a>
@@ -156,8 +158,8 @@ export function SectionPage({ section }: { section: Section }) {
                 href={l.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-full px-5 py-2 text-sm font-semibold text-white shadow-md transition hover:scale-[1.03] hover:opacity-95 active:scale-100"
-                style={{ backgroundColor: accent }}
+                className="inline-flex min-h-11 items-center rounded-full px-5 py-2 text-sm font-semibold shadow-md transition hover:opacity-95 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+                style={{ backgroundColor: accent, color: PALETTE.bg }}
               >
                 {l.label} ↗
               </a>
